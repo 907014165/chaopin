@@ -2,6 +2,8 @@ import axios from 'axios'
 
 export function getSlideImages() {
     const url = '/api/getSlideImages'
+    //const url = 'api/getImg'
+    //const url = 'api/admins/getDo/getImg'
     let params = {}
     return axios.get(url, {
         params

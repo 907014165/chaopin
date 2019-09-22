@@ -13,21 +13,15 @@
         <scroll class="slider-wrapper" ref="slide">
           <van-sidebar v-model="activeKey" @change="changeSlideItem">
             <van-sidebar-item
-              v-for="(item,index) in 50"
+              v-for="(item,index) in sliderList"
               :key="index"
-              :title="'标签名'+item"
+              :title="item.className"
               ref="slidelist"
             />
           </van-sidebar>
         </scroll>
         <div class="content-right">
           <van-grid :border="false" :column-num="3">
-            <van-grid-item>
-              <div class="item-content">
-                <van-image src="https://img.yzcdn.cn/vant/apple-3.jpg"/>
-                <span class="text">我很烦</span>
-              </div>
-            </van-grid-item>
             <van-grid-item>
               <div class="item-content">
                 <van-image src="https://img.yzcdn.cn/vant/apple-3.jpg"/>
@@ -67,7 +61,7 @@
 <script>
 import { Sidebar, SidebarItem, Grid, GridItem, Image,Search } from "vant";
 import Scroll from "base/Scroll/Scroll";
-
+import { getCategoryList,getBrands } from 'api/category.js'
 export default {
   data() {
     return {
@@ -76,6 +70,10 @@ export default {
       sliderList: [],
       slideMid: 5
     };
+  },
+  created() {
+    this._getCategoryList()
+    this._getBrands()
   },
   mounted() {
     this.timer = setTimeout(() => {
@@ -108,6 +106,21 @@ export default {
       } else {
         this.$refs.slide.scrollTo(0, 0, 1000);
       }
+    },
+    _getCategoryList(){
+      getCategoryList().then((res)=>{
+        if(res.code === 0){
+          this.sliderList = res.data
+        }
+      })
+    },
+    _getBrands(){
+      let params = {
+        brands:[1,2,3]
+      }
+      getBrands(params).then((res)=>{
+        console.log(res)
+      })
     }
   },
   components: {

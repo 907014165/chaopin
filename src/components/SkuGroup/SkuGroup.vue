@@ -1,11 +1,17 @@
 <template>
-  <div class="sku-gorup" @click="test">
+  <div class="sku-gorup">
     <div class="order_head">
       <div class="order_seller">
+        <van-checkbox
+          v-model="selectAllShow"
+          v-if="seller.skuList.length"
+          @click="toggleSelectAll"
+          checked-color="#ee0a24"
+        ></van-checkbox>
         <span class="seller-icon" v-if="isSeller">
           <van-icon name="shop-o"></van-icon>
         </span>
-        <span class="seller-name">{{ seller }}</span>
+        <span class="seller-name">{{ seller.name }}</span>
         <span class="seller-icon" v-if="isSeller">
           <van-icon name="arrow"></van-icon>
         </span>
@@ -17,6 +23,16 @@
     </div>
     <div class="order_content">
       <slot></slot>
+      <van-checkbox-group v-model="result" @change="changeSelectSku">
+        <van-checkbox
+          v-for="(item,index) in seller.skuList"
+          :key="index"
+          :name="item"
+          checked-color="#ee0a24"
+        >
+          <sku-item :is-show-stepper="isShowStepper" :sku="item"></sku-item>
+        </van-checkbox>
+      </van-checkbox-group>
     </div>
     <div class="order_footer van-hairline--top" v-if="hasFooter">
       <div class="btn-wrapper">
@@ -33,8 +49,9 @@
   </div>
 </template>
 <script>
-import { Icon, Button } from "vant";
-
+import { Icon, Button, Checkbox, CheckboxGroup } from "vant";
+import SkuItem from "components/SkuItem/SkuItem";
+import { mapMutations } from "vuex";
 export default {
   data() {
     return {
@@ -75,18 +92,34 @@ export default {
             type: "danger",
             text: "再次购买"
           }
-        ]
-      }
+        ],
+        5: []
+      },
+      result: [],
+      isSelectAll: this.SelectAll,
+      selectAllShow: false //负责全选按钮的样式
     };
   },
   props: {
     seller: {
-      type: String,
-      default: "潮品商城"
+      type: Object,
+      default() {
+        return {
+          sellerId:78,
+          name: "潮品商城",
+          skuList:[],
+        };
+      }
     },
     isSeller: {
       type: Boolean,
       default: true
+    },
+    skuList: {
+      type: Array,
+      default() {
+        return [];
+      }
     },
     orderState: {
       type: Number,
@@ -95,10 +128,25 @@ export default {
     hasFooter: {
       type: Boolean,
       default: true
+    },
+    isShowStepper: {
+      type: Boolean,
+      default: false
+    },
+    SelectAll: {
+      type: Boolean,
+      default: false
     }
   },
   created() {
-    this.stateMap = { 1: "代付款", 2: "卖家已发货", 3: "已完成", 4: "已取消" };
+    this.stateMap = {
+      1: "代付款",
+      2: "卖家已发货",
+      3: "已完成",
+      4: "已取消",
+      5: ""
+    };
+    this.init();
   },
   computed: {
     currentState() {
@@ -115,13 +163,99 @@ export default {
     deleteSku() {
       this.$emit("del");
     },
-    test(){
-      console.log('test' + '--' + this.orderState)
+    test() {
+      console.log("test" + "--" + this.orderState);
+    },
+    toggleSelectAll() {
+      this.isSelectAll = !this.isSelectAll;
+    },
+    init() {
+      console.log("初始化");
+      if (this.isSelectAll) {
+        console.log("全选");
+        this.selectAllShow = true
+        this.result.splice(0);
+        this.seller.skuList.forEach((item, index) => {
+          this.result.push(item.skuId);
+        });
+      } else {
+        console.log("取消全选");
+        this.result.splice(0);
+        this.selectAllShow = false
+      }
+
+      if (this.result.length === this.seller.skuList.length) {
+        //并且高亮为true
+        this.selectAllShow = true;
+      } else {
+        //否则高亮为false
+        this.selectAllShow = false;
+      }
+
+      if (this.selectAllShow && !this.isSelectAll) {
+        this.toggleSelectAll();
+      }
+    },
+    changeSelectSku() {
+      console.log("change");
+      let params = {
+        sellerId: this.seller.sellerId,
+        isSelectAll: this.selectAllShow,
+        skuList: this.result
+      };
+      this.setShopCart(params);
+    },
+    ...mapMutations({
+      setShopCart: "SET_SHOP_CART"
+    })
+  },
+  watch: {
+    //全选
+    isSelectAll(newval, oldval) {
+      if (newval) {
+        console.log("全选");
+        this.result.splice(0);
+        this.selectAllShow = true
+        this.seller.skuList.forEach((item, index) => {
+          this.result.push(item);
+        });
+      } else {
+        console.log("取消全选");
+        this.result.splice(0);
+        this.selectAllShow = false
+      }
+    },
+    selectAllShow(newval, oldval) {
+      console.log('fff')
+      //如果全选高亮 并且此时 全选状态为false
+      if (newval && !this.isSelectAll) {
+        this.toggleSelectAll();
+      }else{
+
+      }
+    },
+    //如果列表全选 让全选按钮高亮
+    result() {
+      if (this.result.length === this.seller.skuList.length) {
+        /* //满足条件让全选置为true
+        this.isSelectAll = true; */
+        //并且高亮为true
+        this.selectAllShow = true;
+      } else {
+        //否则高亮为false
+        this.selectAllShow = false;
+      }
+    },
+    SelectAll(newval) {
+      this.isSelectAll = newval;
     }
   },
   components: {
     [Icon.name]: Icon,
-    [Button.name]: Button
+    [Button.name]: Button,
+    [Checkbox.name]: Checkbox,
+    [CheckboxGroup.name]: CheckboxGroup,
+    SkuItem
   }
 };
 </script>
@@ -141,6 +275,8 @@ export default {
     .order_seller {
       font-size: 14px;
       line-height: 24px;
+      display: flex;
+      align-items: center;
 
       .seller-icon {
         vertical-align: middle;

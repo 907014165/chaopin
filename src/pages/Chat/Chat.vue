@@ -262,11 +262,13 @@ export default {
         ]
       ],
       showEmji: "",
-      isFocus: false
+      isFocus: false,
+      socket: null,
     };
   },
   created() {
     this.getMsgList()
+    this._connect()
   },
   methods: {
     back() {
@@ -286,10 +288,11 @@ export default {
     },
     //当屏幕滚动时的回调函数
     onScroll(pos) {
+      this.showEmji = ""
       //console.log(pos)
-      if (this.isFocus) {
+      /* if (this.isFocus) {
         this.inputFoucs();
-      }
+      } */
     },
     //相机拍照
     captureImage() {
@@ -387,6 +390,7 @@ export default {
         return;
       }
       this.isFocus = false;
+      this.showEmji = ""
     },
     //滚动到底部
     scrollEnd() {
@@ -421,6 +425,7 @@ export default {
     //接受消息(筛选处理)
     screenMsg(msg) {
       //从长连接处转发给这个方法，进行筛选处理
+      console.log(msg)
       switch (msg.type) {
         case "text":
           this.addTextMsg(msg);
@@ -444,7 +449,15 @@ export default {
       if (!this.textMsg) {
         return;
       }
-
+      //构造消息
+      let msg11 = {
+        "type":"private",
+        "uid":'chat-kefu-admin',
+        "content":this.textMsg,
+        "from_uid":"251525",
+        "chat_type":"text"
+      }
+      this.socket.emit("message",msg11)
       let content = this.replaceEmoji(this.textMsg);
       let msg = { content: content };
       this.sendMsg(msg, "text");
@@ -466,7 +479,8 @@ export default {
               //在线表情路径，图文混排必须使用网络路径
               //let onlinePath = "https://s2.ax1x.com/2019/04/12/";
               console.log(EM);
-              let imgstr = `<img src="${EM.url}">`;
+              //let imgstr = `<img src="${EM.url}">`;
+              let imgstr = `<img src="http://192.168.1.50:9010/emoji/dist/img/qq/39.gif">`;
               console.log("imgstr: " + imgstr);
               return imgstr;
             }
@@ -660,6 +674,35 @@ export default {
 						this.msgImgList.push(list[i].msg.url);
 				}
       }
+    },
+    _connect(){
+      console.log('test')
+
+      this.socket = require("socket.io-client")('http://192.168.1.50:9010',{
+        "transports":['websocket', 'polling']
+      });
+      let msg = {
+        "uid":'251525',
+      }
+      //客户端上线
+      this.socket.emit('login',msg)
+
+      //服务端连接
+      this.socket.on('message',msg => {
+        console.log(msg)
+        let msg1 = {
+          id: 6,
+          uid: 1,
+          username: "大黑哥",
+          face: "/static/img/face.jpg",
+          time:'',
+          type: msg.chat_type,
+          msg: {
+            content:msg.content
+          }
+        }
+        this.screenMsg(msg1)
+      })
     }
   },
   components: {

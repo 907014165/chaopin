@@ -25,7 +25,7 @@
           <h1 class="title">
             <h1 class="text">搜索历史</h1>
             <span class="clear" v-show="deleteShow" @click="toggleDelete">
-              <i class="icon-clear"></i>
+              <i class="iconfont-icon-del"></i>
             </span>
             <transition name="van-slide-right">
               <div class="delete" v-show="!deleteShow">
@@ -105,7 +105,7 @@ export default {
       isPullUpLoad: false,//上拉时 是否正在加载数据
       deleteShow: true,//删除图标显示
       isSearchIng: false,//是否正在搜素
-      pullUpText: "上拉加载更过...",
+      pullUpText: "上拉加载更多...",
       goodsFilters: [
         {
           title: "类别",

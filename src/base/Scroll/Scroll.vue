@@ -6,12 +6,14 @@
 <script>
 import BScroll from "@better-scroll/core";
 import Pullup from "@better-scroll/pull-up";
+import PullDown from "@better-scroll/pull-down";
 import ObserveDom from "@better-scroll/observe-dom";
-BScroll.use(Pullup).use(ObserveDom);
+BScroll.use(Pullup)
+  .use(PullDown)
+  .use(ObserveDom);
 export default {
   data() {
-    return {
-    };
+    return {};
   },
   props: {
     probeType: {
@@ -38,6 +40,10 @@ export default {
       type: Boolean,
       default: false
     },
+    pullDown: {
+      type: Boolean,
+      default: false
+    },
     pullTop: {
       type: Boolean,
       default: false
@@ -51,6 +57,7 @@ export default {
       if (!this.$refs.wrapper) {
         return;
       }
+      //初始化betterScroll
       this.scroll = new BScroll(this.$refs.wrapper, {
         probeType: this.probeType,
         click: this.click,
@@ -63,6 +70,7 @@ export default {
           right: true
         }
       });
+      //监听滚动事件
       if (this.listenScroll) {
         //let me = this;
         //console.log('test')
@@ -71,9 +79,17 @@ export default {
           this.$emit("scroll", pos);
         });
       }
+      //上拉刷新
       if (this.pullUp) {
         this.scroll.on("pullingUp", () => {
-          this.$emit("load");     
+          this.$emit("load");
+        });
+      }
+
+      //下拉刷新
+      if (this.pullDown) {
+        this.scroll.on("pullingDown", () => {
+          this.$emit("pull-down-handler")
         });
       }
     },
@@ -83,18 +99,23 @@ export default {
     enable() {
       this.scroll && this.scroll.enable();
     },
+    //刷新
     refresh() {
       this.scroll && this.scroll.refresh();
     },
+    //结束上拉刷新
     finishPullUp() {
       this.scroll && this.scroll.finishPullUp();
     },
+    //滚动到指定位置
     scrollTo() {
       this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments);
     },
+    //滚动到底部
     scrollEnd() {
       this.scroll && this.scroll.scrollEnd();
     },
+    //滚动到指定的dom对象
     scrollToElement() {
       this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments);
     }

@@ -3,7 +3,8 @@ const state = {
     addressList: [],
     currentAddressIndex: 0,
     searchHistory: loadSearch(),
-    token: getToken()
+    token: getToken(),
+    shopCart:[]
 }
 
 export default state

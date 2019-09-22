@@ -50,18 +50,28 @@ module.exports = {
                     console.log(e)
                 })
             })
-            app.get('/api/getHotKey',function(req,res){
+            app.get('/api/getHotKey', function (req, res) {
                 res.json({
-                    code:0,
-                    data:hotKeys
+                    code: 0,
+                    data: hotKeys
                 })
             })
-            app.get('/api/getGoodsListByKeyWords',function(req,res){
+            app.get('/api/getGoodsListByKeyWords', function (req, res) {
                 res.json({
-                    code:0,
-                    data:recommendList
+                    code: 0,
+                    data: recommendList
                 })
             })
+        },
+        proxy: {
+            '/api': {
+                target: 'http://192.168.1.53:9090/', //对应自己的接口
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/api': ''
+                }
+            }
         }
     },
     css: {

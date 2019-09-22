@@ -46,6 +46,38 @@ const mutations = {
     [types.REMOVE_TOKEN](state) {
         state.token = null
         removeToken()
+    },
+    //设置购物车内容
+    [types.SET_SHOP_CART](state,params){
+        console.log(params)
+        let index = state.shopCart.findIndex((item)=>{  
+            console.log(item)
+            return item.sellerId === params.sellerId
+        })
+        if(index>=0){
+            //如果 这个存在 但是里面的skulist为空 那么就删除它
+            if(params.skuList.length>0){
+                state.shopCart.splice(index,1,params)
+            }else{
+                state.shopCart.splice(index,1)
+            }
+        }else{
+            state.shopCart.push(params)
+        }
+    },
+    //删除被选的商城购物车商品
+    [types.DEL_SLECT_SHOP_CART_ITEM](state){
+        //console.log('delete')
+        state.shopCart.splice(0)
+        /* state.shopCart.forEach((item,index)=>{
+            //state.shopCart.splice(index,1)
+            if(item.isSelectAll){
+                state.shopCart.splice(index,1)
+            }else{
+                item.skuList.splice(0)
+            }
+        }) */
+        
     }
 }
 

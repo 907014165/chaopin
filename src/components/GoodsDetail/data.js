@@ -5,7 +5,7 @@ export default {
         tree: [
             {
                 k: '颜色',
-                k_id: '1',
+               /*  k_id: '1', */
                 v: [
                     {
                         id: '30349',
@@ -25,7 +25,7 @@ export default {
             },
             {
                 k: '尺寸',
-                k_id: '2',
+                /* k_id: '2', */
                 v: [
                     {
                         id: '1193',
