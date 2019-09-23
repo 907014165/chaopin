@@ -241,8 +241,9 @@ export default {
     delSku() {
       let _this = this
       //提示 删除 弹出框
+      let delText = this.getShopCart.length==0?'请选择商品':'确认要删除该商品吗？'
       Dialog.confirm({
-        title: "确认要删除该商品吗？"
+        title: delText
         /* message: "" */
       })
         .then(() => {

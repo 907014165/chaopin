@@ -25,7 +25,7 @@
           <h1 class="title">
             <h1 class="text">搜索历史</h1>
             <span class="clear" v-show="deleteShow" @click="toggleDelete">
-              <i class="iconfont-icon-del"></i>
+              <van-icon class-prefix="iconfont" name="icon-del"/>
             </span>
             <transition name="van-slide-right">
               <div class="delete" v-show="!deleteShow">

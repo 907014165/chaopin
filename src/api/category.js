@@ -19,9 +19,7 @@ export function getBrands(params) {
     return axios({
         method: 'post',
         url: 'api/member/brand/listByIds',
-        data: {
-            brands:params.brands
-        }
+        data: params.brands
     }).then((res) => {
         return Promise.resolve(res.data)
     })

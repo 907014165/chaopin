@@ -46,30 +46,37 @@ let routes = [
     children: [
       {
         path: 'coupon',
+        name:'userCoupon',
         component: () => import('components/Coupon/Coupon.vue')
       },
       {
         path: 'address',
+        name:'userAddress',
         component: () => import('pages/User/UserAddress/UserAddressList.vue')
       },
       {
         path: 'addAddress',
+        name:'userAddAddress',
         component: () => import('pages/User/UserAddress/UserAddressEdit.vue')
       },
       {
         path: 'aftersale',
+        name:'userAfterSale',
         component: () => import('pages/User/UserAfterSale/UserAfterSale.vue')
       },
       {
         path: 'favorite',
+        name:'userFavorite',
         component: () => import('pages/User/UserFavorite/UserFavorite.vue')
       },
       {
         path: 'userinfo',
+        name:'userinfo',
         component: () => import('pages/User/UserInfo/UserInfo.vue')
       },
       {
         path: 'order/:id',
+        name:'userorder',
         component: () => import('pages/User/UserOrder/UserOrder.vue')
       }
     ]

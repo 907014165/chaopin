@@ -1,0 +1,44 @@
+{
+  "id": "1397326",
+  "name": "chaopin",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1963733",
+      "name": "qq",
+      "font_class": "qq",
+      "unicode": "e628",
+      "unicode_decimal": 58920
+    },
+    {
+      "icon_id": "2051025",
+      "name": "砍价",
+      "font_class": "kanjia",
+      "unicode": "e67a",
+      "unicode_decimal": 59002
+    },
+    {
+      "icon_id": "7819256",
+      "name": "删 除",
+      "font_class": "del",
+      "unicode": "e9e1",
+      "unicode_decimal": 59873
+    },
+    {
+      "icon_id": "8557273",
+      "name": "list",
+      "font_class": "list3",
+      "unicode": "e6df",
+      "unicode_decimal": 59103
+    },
+    {
+      "icon_id": "9183883",
+      "name": "apps",
+      "font_class": "apps",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    }
+  ]
+}

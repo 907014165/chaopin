@@ -83,13 +83,13 @@
         <van-row class="user-links">
           <router-link to="/user/coupon" @click="showList=true">
             <van-col span="6">
-              <van-icon name="coupon"/>
+              <van-icon name="chat-o"/>
               <div>我的评价</div>
             </van-col>
           </router-link>
           <router-link to="/user/favorite">
             <van-col span="6">
-              <van-icon name="like-o"/>
+              <van-icon class-prefix="iconfont" name="icon-kanjia"/>
               <div>我的砍价</div>
             </van-col>
           </router-link>
@@ -168,6 +168,10 @@ export default {
 
   .slide-leave-to {
     transform: translate3d(-100%, 0, 0);
+  }
+
+  .iconfont-icon-kanjia {
+    font-size: 24px;
   }
 
   &-profile {

@@ -7,8 +7,6 @@
         v-model="chosenAddressId"
         :list="getAddressList"
         :class="isSelect?'':'hideselect'"
-        :disabled-list="disabledList"
-        disabled-text="以下地址超出配送范围"
         @edit="onEdit"
         ref="addrList"
       ></van-address-list>
@@ -51,14 +49,14 @@ export default {
         }
       ], */
       list: myAreaList,
-      disabledList: [
+      /* disabledList: [
         {
           id: "3",
           name: "王五",
           tel: "1320000000",
           address: "浙江省杭州市滨江区江南大道 15 号"
         }
-      ]
+      ] */
     };
   },
   created() {

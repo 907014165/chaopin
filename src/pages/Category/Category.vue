@@ -1,6 +1,6 @@
 <template>
   <div class="category">
-    <div class="search-wrapper">
+    <div class="search-wrapper van-hairline--top-bottom">
       <van-search
         placeholder="请输入搜索关键词"
         show-action
@@ -15,14 +15,23 @@
             <van-sidebar-item
               v-for="(item,index) in sliderList"
               :key="index"
-              :title="item.className"
+              :title="item.goodsClass.className"
               ref="slidelist"
             />
           </van-sidebar>
         </scroll>
         <div class="content-right">
-          <van-grid :border="false" :column-num="3">
-            <van-grid-item>
+          <banner v-if="currentCategory">
+            <img :src="`http://192.168.1.53:9090/${currentCategory.goodsClass.posterImage}`" alt="">
+          </banner>
+          <van-grid :border="false" :column-num="3" v-if="currentCategory">
+            <van-grid-item v-for="category in currentCategory.brands" :key="category.brandId">
+              <div class="item-content">
+                <van-image :src="`http://192.168.1.53:9090/${category.image}`"/>
+                <span class="text">{{ category.brandName }}</span>
+              </div>
+            </van-grid-item>
+            <!-- <van-grid-item>
               <div class="item-content">
                 <van-image src="https://img.yzcdn.cn/vant/apple-3.jpg"/>
                 <span class="text">我很烦</span>
@@ -45,13 +54,7 @@
                 <van-image src="https://img.yzcdn.cn/vant/apple-3.jpg"/>
                 <span class="text">我很烦</span>
               </div>
-            </van-grid-item>
-            <van-grid-item>
-              <div class="item-content">
-                <van-image src="https://img.yzcdn.cn/vant/apple-3.jpg"/>
-                <span class="text">我很烦</span>
-              </div>
-            </van-grid-item>
+            </van-grid-item> -->
           </van-grid>
         </div>
       </div>
@@ -61,14 +64,16 @@
 <script>
 import { Sidebar, SidebarItem, Grid, GridItem, Image,Search } from "vant";
 import Scroll from "base/Scroll/Scroll";
+import Banner from 'base/Banner/Banner'
 import { getCategoryList,getBrands } from 'api/category.js'
 export default {
   data() {
     return {
       activeKey: 0,
       keywords: "",
-      sliderList: [],
-      slideMid: 5
+      sliderList: [],//分类的数组
+      slideMid: 5,//
+      currentIndex:0 //当前分类的下标
     };
   },
   created() {
@@ -86,6 +91,11 @@ export default {
   },
   beforeDestroy() {
     clearTimeout(this.timer);
+  },
+  computed: {
+    currentCategory(){
+      return this.sliderList[this.currentIndex]
+    }
   },
   methods: {
     search() {
@@ -106,6 +116,8 @@ export default {
       } else {
         this.$refs.slide.scrollTo(0, 0, 1000);
       }
+      //改变当前 选中的下标
+      this.currentIndex = index
     },
     _getCategoryList(){
       getCategoryList().then((res)=>{
@@ -126,11 +138,12 @@ export default {
   components: {
     [Sidebar.name]: Sidebar,
     [SidebarItem.name]: SidebarItem,
-    Scroll,
     [Grid.name]: Grid,
     [GridItem.name]: GridItem,
     [Image.name]: Image,
-    [Search.name]:Search
+    [Search.name]:Search,
+    Scroll,
+    Banner
   }
 };
 </script>
