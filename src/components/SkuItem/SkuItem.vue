@@ -8,7 +8,7 @@
       :thumb="sku.thumb"
     >
       <div slot="num" v-if="isShowStepper" @click.stop>
-        <van-stepper v-model="value" button-size="20px"/>
+        <van-stepper v-model="num" button-size="20px" @change="changeNum"/>
       </div>
     </van-card>
   </div>
@@ -18,7 +18,8 @@ import { Card, Stepper } from "vant";
 export default {
   data() {
     return {
-      value: 0
+      value: 0,
+      num:this.sku.num
     };
   },
   props: {
@@ -41,6 +42,16 @@ export default {
       }
     }
   },
+  methods: {
+    changeNum(num){
+      //console.log(params)
+      let params = {
+        skuId:this.sku.skuId,
+        num
+      }
+      this.$emit('change-num',params)
+    }
+  },
   components: {
     [Card.name]: Card,
     [Stepper.name]: Stepper
@@ -53,6 +64,21 @@ export default {
 .sku-item {
   .van-card {
     background: $color-background-w;
+
+    .van-card__header {
+      .van-card__content {
+        .van-card__title {
+          font-size 14px
+          margin 3px 0
+        }
+        .van-card__bottom {
+          margin 4px 0
+          .van-card__price {
+            font-size 16px
+          }
+        }
+      }
+    }
   }
 
   .van-image__img {

@@ -46,39 +46,45 @@ let routes = [
     children: [
       {
         path: 'coupon',
-        name:'userCoupon',
+        name: 'userCoupon',
         component: () => import('components/Coupon/Coupon.vue')
       },
       {
         path: 'address',
-        name:'userAddress',
+        name: 'userAddress',
         component: () => import('pages/User/UserAddress/UserAddressList.vue')
       },
       {
         path: 'addAddress',
-        name:'userAddAddress',
+        name: 'userAddAddress',
         component: () => import('pages/User/UserAddress/UserAddressEdit.vue')
       },
       {
         path: 'aftersale',
-        name:'userAfterSale',
+        name: 'userAfterSale',
         component: () => import('pages/User/UserAfterSale/UserAfterSale.vue')
       },
       {
         path: 'favorite',
-        name:'userFavorite',
+        name: 'userFavorite',
         component: () => import('pages/User/UserFavorite/UserFavorite.vue')
       },
       {
         path: 'userinfo',
-        name:'userinfo',
+        name: 'userinfo',
         component: () => import('pages/User/UserInfo/UserInfo.vue')
       },
       {
+        path: 'userInfoEdit',
+        name: 'userInfoEdit',
+        component: () => import('pages/User/UserInfo/UserInfoEdit.vue')
+      },
+      {
         path: 'order/:id',
-        name:'userorder',
+        name: 'userorder',
         component: () => import('pages/User/UserOrder/UserOrder.vue')
-      }
+      },
+
     ]
   },
   {
@@ -124,7 +130,24 @@ let routes = [
   {
     path: '/chat',
     name: 'chat',
-    component: ()=>import('pages/Chat/Chat.vue')
+    component: () => import('pages/Chat/Chat.vue')
+  },
+  {
+    path: '/searchCategory',
+    component: () => import('pages/SearchCategory/SearchCategory.vue'),
+    children: [
+      {
+        path: 'goodsDetail/:spuid',
+        name: 'searchCategoryGoodsDetail',
+        component: () => import('components/GoodsDetail/GoodsDetail.vue'),
+        children: [
+          {
+            path: 'confirmOrder/:skuid',
+            component: () => import('pages/ConfirmOrder/ConfirmOrder.vue')
+          }
+        ]
+      }
+    ]
   },
   {
     path: '/goodsDetail/:id',

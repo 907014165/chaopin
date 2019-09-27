@@ -1,16 +1,22 @@
 <template>
   <div class="goods-item-single" @click="selecItem">
     <div class="goods-photo">
-      <img v-lazy="goods.img" alt class="photo">
+      <img v-lazy="goods.img" alt class="photo" />
     </div>
     <div class="goods-info van-hairline--bottom">
       <div class="goods-info-title">{{ goods.desc }}</div>
-      <div class="goods-info-price">￥{{ goods.price }}</div>
+      <div class="goods-info-content">
+        <span class="goods-info-price">￥{{ goods.price }}</span>
+        <div class="goods-add-cart" @click.stop="addShopCart">
+          <van-icon name="cart-circle-o" />
+        </div>
+      </div>
       <div class="goods-info-other"></div>
     </div>
   </div>
 </template>
 <script>
+import { Icon } from 'vant'
 export default {
   data() {
     return {};
@@ -32,7 +38,14 @@ export default {
   methods: {
     selecItem() {
       this.$emit("select", 12);
+    },
+    addShopCart(){
+      this.$emit('add-shop-cart')
+      //console.log('加入购物车')
     }
+  },
+  components:{
+    [Icon.name]:Icon
   }
 };
 </script>
@@ -73,14 +86,24 @@ export default {
       font-size: $font-size-medium;
     }
 
-    .goods-info-price {
-      margin-top: 9px;
-      margin-right: 2px;
-      display: inline-block;
-      height: 18px;
-      font-weight: 400;
-      font-size: 18px;
-      color: $color-text-red;
+    .goods-info-content {
+      margin-top 4px
+      height 28px
+      display flex
+      justify-content space-between
+      align-items center
+      .goods-info-price {
+        margin-right: 2px;
+        display: inline-block;
+        height: 18px;
+        font-weight: 400;
+        font-size: 18px;
+        color: $color-text-red;
+      }
+      .goods-add-cart {
+        padding-left 6px
+        
+      }
     }
   }
 }

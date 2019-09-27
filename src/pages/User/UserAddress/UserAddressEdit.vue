@@ -11,7 +11,6 @@
       :address-info="addressInfo"
       @save="onSave"
       @delete="onDelete"
-      @change-detail="onChangeDetail"
     />
   </div>
 </template>
@@ -20,6 +19,11 @@ import { AddressEdit } from "vant";
 import NavBar from "base/NavBar/NavBar";
 import areaList from "../../../../mock/area.js";
 import AddressInfo from "common/js/addressInfo";
+import {
+  addUserAddressList,
+  updataUserAddressList,
+  deleteUserAddressList
+} from "api/user.js";
 import { mapMutations } from "vuex";
 export default {
   data() {
@@ -41,7 +45,8 @@ export default {
     },
     onSave(item) {
       //Toast("save");
-      const address = new AddressInfo({ id: 12, ...item });
+      console.log(item)
+      const address = new AddressInfo({ ...item });
 
       console.log(this.$route.query.index);
 
@@ -51,19 +56,78 @@ export default {
           index: this.$route.query.index,
           address
         };
+        
+        let addrParams = {
+          memberAddressId:parseInt(address.id),
+          address: address.addressDetail,
+          areaId: address.areaCode,
+          cityId: address.areaCode.substring(0, 4) + "00",
+          consignee: address.name,
+          isDefault: address.isDefault,
+          memberId: 146000,
+          mobile: address.tel,
+          pcaInfo: address.province + " " + address.city + " " + address.county,
+          provinceId: address.areaCode.substring(0, 2) + "0000",
+          zipCode: address.postalCode
+        };
+
+        console.log(addrParams)
+        this._updataUserAddressList(addrParams);
         this.changeAddress(params);
-        this.$router.back();
+        //this.$router.back();
       } else {
         this.addAdress(address);
-        this.$router.back();
+        let params = {
+          
+          address: address.addressDetail,
+          areaId: address.areaCode,
+          cityId: address.areaCode.substring(0, 4) + "00",
+          consignee: address.name,
+          isDefault: address.isDefault,
+          memberId: 146000,
+          mobile: address.tel,
+          pcaInfo: address.province + " " + address.city + " " + address.county,
+          provinceId: address.areaCode.substring(0, 2) + "0000",
+          zipCode: address.postalCode
+        };
+        console.log(params);
+        this._addUserAddressList(params);
+        //this.$router.back();
       }
     },
-    onDelete() {
-      console.log("ff"+this.$route.query.index);
-      this.deleteAddress(this.$route.query.index);
-      this.$router.back()
+    onDelete(content) {
+      console.log(content);
+      //console.log("ff" + this.$route.query.index);
+      //this.deleteAddress(this.$route.query.index);
+      //this.$router.back();
+      let params = {
+        memberAddressId: content.id
+      };
+      this._deleteUserAddressList(params);
     },
-    onChangeDetail(val) {
+    _addUserAddressList(params) {
+      console.log(params);
+      addUserAddressList(params).then(res => {
+        if(res.data){
+          this.$router.back()
+        }
+      });
+    },
+    _updataUserAddressList(params) {
+      updataUserAddressList(params).then(res => {
+        if(res.data){
+          this.$router.back()
+        }
+      });
+    },
+    _deleteUserAddressList(params) {
+      deleteUserAddressList(params).then(res => {
+        if(res.data){
+          this.$router.back()
+        }
+      });
+    },
+    /* onChangeDetail(val) {
       if (val) {
         this.searchResult = [
           {
@@ -74,7 +138,7 @@ export default {
       } else {
         this.searchResult = [];
       }
-    },
+    }, */
     ...mapMutations({
       changeAddress: "CHANGE_ADDRESS",
       addAdress: "ADD_ADDRESS",

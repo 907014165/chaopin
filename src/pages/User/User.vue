@@ -2,6 +2,9 @@
   <div class="user">
     <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
       <div class="user-profile">
+        <div class="background">
+          <img src="http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100" alt="">
+        </div>
         <div class="user-profile-avatar">
           <router-link to="/user/userinfo">
             <img
@@ -22,7 +25,7 @@
           <router-link to="/user/order/1">
             <van-col span="6">
               <van-icon name="pending-payment">
-                <van-info :info="data.UnPayTotal"/>
+                <van-info :info="11"/>
               </van-icon>
               <div>待付款</div>
             </van-col>
@@ -30,15 +33,15 @@
           <router-link to="/user/order/2">
             <van-col span="6">
               <van-icon name="logistics">
-                <van-info :info="data.UnRecieveTotal"/>
+                <van-info :info="11"/>
               </van-icon>
               <div>待发货</div>
             </van-col>
           </router-link>
           <router-link to="/user/order/3">
             <van-col span="6">
-              <van-icon name="point-gift"></van-icon>
-              <div>已完成</div>
+              <van-icon name="chat-o" :info="55"></van-icon>
+              <div>待评价</div>
             </van-col>
           </router-link>
           <router-link to="/user/aftersale">
@@ -57,7 +60,7 @@
         <van-row class="user-links">
           <router-link to="/user/coupon" @click="showList=true">
             <van-col span="6">
-              <van-icon name="coupon"/>
+              <van-icon name="coupon-o"/>
               <div>我的优惠券</div>
             </van-col>
           </router-link>
@@ -69,7 +72,7 @@
           </router-link>
           <router-link to="/user/address">
             <van-col span="6">
-              <van-icon name="location"/>
+              <van-icon name="location-o"/>
               <div>收货地址</div>
             </van-col>
           </router-link>
@@ -107,6 +110,7 @@
 import { Cell, CellGroup, Icon, Row, Col, Info, PullRefresh } from "vant";
 
 export default {
+  name:'user',
   data() {
     return {
       data: {},
@@ -154,10 +158,24 @@ export default {
 };
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 @import '~common/stylus/variable.styl';
 
 .user {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 50px;
+
+  .van-pull-refresh {
+    height: 100%;
+
+    .van-pull-refresh__track {
+      height: 100% !important;
+    }
+  }
+
   .slide-enter-active, .slide-leave-active {
     transition: all 0.3s;
   }
@@ -179,16 +197,27 @@ export default {
     display: block;
     width: 100%;
     height: 141px;
-    background-color: #f1f5fa;
+    position relative
     background-repeat: no-repeat;
     background-size: 100% 100%;
+    overflow hidden
+
+    .background {
+      position absolute
+      left 0
+      right 0
+      bottom 0
+      top 0
+      z-index -1
+      filter: blur(20px);
+    }
 
     img {
       width: 100%;
     }
 
     &-avatar {
-      padding-top: 23px;
+      padding-top: 30px;
       padding-bottom: 5px;
 
       img {

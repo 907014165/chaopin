@@ -8,6 +8,7 @@
         :list="getAddressList"
         :class="isSelect?'':'hideselect'"
         @edit="onEdit"
+        @select="onSelect"
         ref="addrList"
       ></van-address-list>
 
@@ -20,6 +21,8 @@ import { AddressList, Button, Toast, Tag } from "vant";
 import NavBar from "base/NavBar/NavBar";
 import Scroll from "base/Scroll/Scroll";
 import myAreaList from "../../../../mock/myAreaList.js";
+import AddressInfo from "common/js/addressInfo.js";
+import { getUserAddressList } from "api/user";
 import { mapMutations, mapGetters } from "vuex";
 
 console.log(myAreaList);
@@ -27,7 +30,7 @@ export default {
   data() {
     return {
       chosenAddressId: "1",
-      isSelect: false,
+      isSelect: this.$route.query.isSelect ? true : false,
       /* list: [
         {
           id: "1",
@@ -49,6 +52,7 @@ export default {
         }
       ], */
       list: myAreaList,
+      addrList: []
       /* disabledList: [
         {
           id: "3",
@@ -60,12 +64,14 @@ export default {
     };
   },
   created() {
-    this.setAddressList(myAreaList);
-    console.log(myAreaList);
-    console.log(this.getAddressList);
+    //this.setAddressList(myAreaList);
+    //console.log(myAreaList);
+    //console.log(this.getAddressList);
+    this._getAddressList();
   },
   mounted() {
-    this.setDefaultAddr()
+    
+    
   },
   computed: {
     ...mapGetters({
@@ -93,6 +99,10 @@ export default {
         }
       });
     },
+    onSelect(item, index) {
+      this.setCurrentAddrIndex(index);
+      this.$router.back();
+    },
     setDefaultAddr() {
       let addrlistDom = this.$refs.addrList;
       let tmp = addrlistDom
@@ -103,9 +113,39 @@ export default {
       default_addr_dom.innerHTML = "默认";
       tmp.appendChild(default_addr_dom);
     },
-    _getAddressList() {},
+    _getAddressList() {
+      let params = {
+        memberId: 146000
+      };
+      getUserAddressList(params).then(res => {
+        console.log(res);
+        if (res.code === 0) {
+          res.data.list.forEach(addr => {
+            this.addrList.push(
+              new AddressInfo({
+                id: addr.memberAddressId,
+                name: addr.consignee,
+                tel: addr.mobile,
+                province: addr.province,
+                city: addr.city,
+                county: addr.area,
+                addressDetail: addr.address,
+                areaCode: addr.areaCode+'',
+                postalCode: addr.zipCode,
+                isDefault: addr.isDefault
+              })
+            );
+          });
+          this.setAddressList(this.addrList)
+        }
+        this.$nextTick(()=>{
+          this.setDefaultAddr();
+        })
+      });
+    },
     ...mapMutations({
-      setAddressList: "SET_ADDRESS_LIST"
+      setAddressList: "SET_ADDRESS_LIST",
+      setCurrentAddrIndex: "CHANGE_CURRENT_ADDRESS_INDEX"
     })
   },
   components: {

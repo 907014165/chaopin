@@ -47,7 +47,7 @@ const mutations = {
         state.token = null
         removeToken()
     },
-    //设置购物车内容
+    //设置选中的购物车内容
     [types.SET_SHOP_CART](state,params){
         console.log(params)
         let index = state.shopCart.findIndex((item)=>{  
@@ -62,13 +62,17 @@ const mutations = {
                 state.shopCart.splice(index,1)
             }
         }else{
-            state.shopCart.push(params)
+            if(params.skuList.length>0){
+                state.shopCart.push(params)
+            }
         }
     },
-    //删除被选的商城购物车商品
+    //删除被选中国的商城购物车商品
     [types.DEL_SLECT_SHOP_CART_ITEM](state){
         //console.log('delete')
         state.shopCart.splice(0)
+
+        console.log(state.shopCart)
         /* state.shopCart.forEach((item,index)=>{
             //state.shopCart.splice(index,1)
             if(item.isSelectAll){
@@ -78,6 +82,14 @@ const mutations = {
             }
         }) */
         
+    },
+    //设置购物车列表
+    [types.SET_SHOP_CART_LIST](state,list){
+        state.shopCartList = list
+    },
+    //设置是否 已经有添加购物车的动作
+    [types.SET_IS_SHOP_CART](state,status){
+        state.isAddShopCart = status
     }
 }
 

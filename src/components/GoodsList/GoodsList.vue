@@ -14,6 +14,7 @@
         :goods="goods"
         :key="index"
         @select="selectGoods"
+        @add-shop-cart="addShopCart"
       ></goods-item-single>
     </template>
   </div>
@@ -21,6 +22,7 @@
 <script>
 import GoodsItem from "base/GoodsItem/GoodsItem";
 import GoodsItemSingle from "base/GoodsItemSingle/GoodsItemSingle";
+import { addShopCartList } from 'api/shopcart.js'
 export default {
   name: "goodslist",
   data() {
@@ -43,8 +45,20 @@ export default {
     selectGoods(goodsId) {
       console.log(goodsId);
       this.$emit('selected',goodsId)
+    },
+    addShopCart(){
+      console.log('加入购物车')
+    },
+    _addShopCartList(goodsId){
+      let params = {
+        goodsId
+      }
+      addShopCartList().then(res=>{
+        console.log(res)
+      })
     }
   },
+
   components: {
     GoodsItem,
     GoodsItemSingle

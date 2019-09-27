@@ -1,9 +1,7 @@
 import axios from 'axios'
-export function getHotKey() {
-    const url = '/api/getHotKey'
-    const params = {
 
-    }
+export function getShopCartList(params) {
+    const url = "/api/member/cart/list"
     return axios.get(url, {
         params
     }).then(res => {
@@ -11,10 +9,17 @@ export function getHotKey() {
     })
 }
 
-export function getGoodsListByKeyWords(params) {
-    const url = '/api/member/search/page'
-    
-    console.log(params)
+export function addShopCartList(params) {
+    const url = ""
+    return axios.get(url, {
+        params
+    }).then(res => {
+        return Promise.resolve(res.data)
+    })
+}
+
+export function delShopCartList(params) {
+    const url = "/api/member/cart/delete"
     return axios({
         url: url,
         method: 'post',
@@ -23,9 +28,10 @@ export function getGoodsListByKeyWords(params) {
         return Promise.resolve(res.data)
     })
 }
-export function getSearchGoodsList(params){
+
+export function updataShopCartList(params){
     console.log(params)
-    const url = '/api/member/search/page'
+    const url = "/api/member/cart/update"
     return axios({
         url: url,
         method: 'post',

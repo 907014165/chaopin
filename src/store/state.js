@@ -4,7 +4,9 @@ const state = {
     currentAddressIndex: 0,
     searchHistory: loadSearch(),
     token: getToken(),
-    shopCart:[]
+    shopCart:[],
+    shopCartList:[],
+    isAddShopCart:false
 }
 
 export default state

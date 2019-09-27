@@ -1,7 +1,7 @@
 <template>
   <div class="goods-item" @click="selecItem">
     <div class="photo">
-      <img v-lazy="goods.img" alt width="100%">
+      <img v-lazy="`http://192.168.1.53:9090/${goods.img}`" alt width="100%">
     </div>
     <div class="text">{{ goods.desc }}</div>
     <div class="info">
@@ -28,7 +28,7 @@ export default {
   },
   methods: {
     selecItem() {
-      this.$emit("select", 12);
+      this.$emit("select", this.goods.goodsId);
     }
   },
   components: {

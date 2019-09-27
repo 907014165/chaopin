@@ -12,6 +12,11 @@
           <img src="./no-result.png" alt>
         </no-result>
       </van-tab>
+      <van-tab title="待发货">
+        <sku-group :order-state="active">
+          <sku-item></sku-item>
+        </sku-group>
+      </van-tab>
       <van-tab title="待收货">
         <sku-group :order-state="active">
           <sku-item></sku-item>
@@ -72,7 +77,7 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 20;
+  z-index: 9999;
   background: $color-background;
 }
 </style>

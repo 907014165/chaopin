@@ -1,7 +1,7 @@
 <template>
   <div class="fill-order">
     <nav-bar title="确认订单" @back="back"></nav-bar>
-    <address-cart id="14756" name="阮受涣" tel="180****5907" address="福建省三明市尤溪县台溪乡盖住村82号" @edit="edit"></address-cart>
+    <address-cart id="14756" name="阮受涣" tel="180****5907" address="福建省三明市尤溪县台溪乡盖住村82号" :addressData="getCurrentAddr" @edit="edit"></address-cart>
     <sku-group :has-footer="hasFooter" :is-seller="isSeller">
       <sku-item></sku-item>
     </sku-group>
@@ -55,6 +55,7 @@ import {
   SubmitBar,
   Toast
 } from "vant";
+import { mapGetters } from 'vuex';
 
 const coupon = {
   available: 1,
@@ -83,6 +84,23 @@ export default {
       radio: "1"
     };
   },
+  props: {
+    seller: {
+      type: Object,
+      default() {
+        return {
+          sellerId:78,
+          name: "潮品商城",
+          skuList:[],
+        };
+      }
+    },
+  },
+  computed: {
+    ...mapGetters({
+      getCurrentAddr:'getCurrentAddress'
+    })
+  },
   methods: {
     back() {
       this.$router.back();
@@ -102,6 +120,12 @@ export default {
     },
     edit(){
       console.log('hhh')
+      this.$router.push({
+        path:'/user/address',
+        query:{
+          isSelect:true
+        }
+      })
     },
     _getAddr(){
       

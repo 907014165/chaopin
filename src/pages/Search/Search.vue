@@ -25,7 +25,7 @@
           <h1 class="title">
             <h1 class="text">搜索历史</h1>
             <span class="clear" v-show="deleteShow" @click="toggleDelete">
-              <van-icon class-prefix="iconfont" name="icon-del"/>
+              <van-icon class-prefix="iconfont" name="icon-del" />
             </span>
             <transition name="van-slide-right">
               <div class="delete" v-show="!deleteShow">
@@ -43,14 +43,18 @@
             >
               <span>
                 {{ item }}
-                <van-icon name="close" v-show="!deleteShow" @click="deleteSearchHistory(item)"/>
+                <van-icon name="close" v-show="!deleteShow" @click="deleteSearchHistory(item)" />
               </span>
             </li>
           </ul>
         </div>
       </div>
 
-      <goods-filter v-show="!toggleShow&&!isSearchIng" @shapeChanged="shapeChanged"></goods-filter>
+      <goods-filter
+        v-show="!toggleShow&&!isSearchIng"
+        @shapeChanged="shapeChanged"
+        @sortChanged="sortChanged"
+      ></goods-filter>
       <Scroll
         class="scroll-wrapper"
         v-if="!toggleShow&&!isSearchIng"
@@ -90,37 +94,31 @@ import SearchBox from "base/SearchBox/SearchBox";
 import GoodsFilter from "base/GoodsFilter/GoodsFilter";
 import GoodsList from "components/GoodsList/GoodsList";
 import Scroll from "base/Scroll/Scroll";
-import { getHotKey, getGoodsListByKeyWords } from "api/search";
+import Goods from "common/js/goods.js";
+import {
+  getHotKey,
+  getGoodsListByKeyWords,
+  getSearchGoodsList
+} from "api/search";
 import { mapGetters, mapMutations } from "vuex";
 import { Icon, Loading } from "vant";
 export default {
   name: "search",
   data() {
     return {
-      value: "",//搜素关键词
-      hotKeys: [],//热词
-      showShape: true,//商品列表 排列方式 true为两列 false为单列
-      goodsList: [],//搜索结果列表
-      goodsShow: false,//true 为focus false为blur focus显示热词 有点恶心 后期想想怎么优化
-      isPullUpLoad: false,//上拉时 是否正在加载数据
-      deleteShow: true,//删除图标显示
-      isSearchIng: false,//是否正在搜素
-      pullUpText: "上拉加载更多...",
-      goodsFilters: [
-        {
-          title: "类别",
-          value: 0,
-          filterType: 2,
-          options: [
-            { name: "推荐", value: 0 },
-            { name: "凉菜", value: 1 },
-            { name: "酒水", value: 2 }
-          ]
-        },
-        { title: "距离", value: 2, filterType: 0 },
-        { title: "最新", value: 4, filterType: 1 },
-        { title: "价格", value: 5, filterType: 1, initAscState: true }
-      ]
+      value: "", //搜素关键词
+      hotKeys: [], //热词
+      showShape: true, //商品列表 排列方式 true为两列 false为单列
+      goodsList: [], //搜索结果列表
+      goodsShow: false, //true 为focus false为blur focus显示热词 有点恶心 后期想想怎么优化
+      isPullUpLoad: false, //上拉时 是否正在加载数据
+      hasMore: true,
+      sortIndex: 1,
+      sortOrder: 1, //1 降序
+      currentPage: 1,
+      deleteShow: true, //删除图标显示
+      isSearchIng: false, //是否正在搜素
+      pullUpText: "上拉加载更多..."
     };
   },
   computed: {
@@ -157,11 +155,18 @@ export default {
       //这个方法很恶心 日后再想怎么解决
       this.goodsList = this.goodsList.slice(0);
     },
+    sortChanged(data) {
+      this.sortIndex = data.sort;
+      this.sortOrder = data.order;
+      this.currentPage = 1;
+      this.goodsList.splice(0);
+      this._getGoodsListByKeyWords();
+    },
     selectGoods(goodsId) {
       this.$router.push({
         path: `/search/goodsDetail/${goodsId}`,
-        query:{
-          ParentPath:'search'
+        query: {
+          ParentPath: "search"
         }
       });
     },
@@ -174,7 +179,7 @@ export default {
       console.log(this.goodsShow);
     },
     loadMore() {
-      if (this.goodsList.length > 30) {
+      if (!this.hasMore) {
         this.pullUpText = "别拉啦,到底了...";
         return;
       }
@@ -206,26 +211,59 @@ export default {
       console.log("search");
       this.setSearchHistory(this.value);
       this.isSearchIng = true;
-      setTimeout(() => {
-        getGoodsListByKeyWords().then(res => {
-          if (res.code === 0) {
-            this.goodsList.push(...res.data);
-            this.isSearchIng = false;
-          }
-        });
-      }, 1000);
+      let params = {
+        keyWord: this.value,
+        current: this.currentPage
+      };
+      getGoodsListByKeyWords(params).then(res => {
+        if (res.code === 0) {
+          res.data.list.forEach(item => {
+            this.goodsList.push(
+              new Goods({
+                goodsId: item.goodsCommonId,
+                desc: item.body,
+                imgUrl: item.image,
+                price: item.sellPrice,
+                oldPrice: item.costPrice,
+                discount: item.discount
+              })
+            );
+          });
+          this.isSearchIng = false;
+        }
+      });
     },
     _getMoreGoodsList() {
-      setTimeout(() => {
-        getGoodsListByKeyWords().then(res => {
-          if (res.code === 0) {
-            this.goodsList.push(...res.data);
-            this.$refs.scroll.finishPullUp();
-            this.$refs.scroll.refresh();
-            this.isPullUpLoad = false;
+      this.currentPage++;
+      let params = {
+        keyWord: this.value,
+        current: this.currentPage
+      };
+      getGoodsListByKeyWords(params).then(res => {
+        if (res.code === 0) {
+          if (res.data.list.length) {
+            this.hasMore = false;
           }
-        });
-      }, 1000);
+          res.data.list.forEach(item => {
+            this.goodsList.push(
+              new Goods({
+                goodsId: item.goodsCommonId,
+                desc: item.body,
+                imgUrl: item.image,
+                price: item.sellPrice,
+                oldPrice: item.costPrice,
+                discount: item.discount
+              })
+            );
+          });
+          //结束上拉刷新动作
+          this.$refs.scroll.finishPullUp();
+          //让scroll 刷新 重新计算dom高度
+          this.$refs.scroll.refresh();
+          //结束上拉刷新（控制显示提示字段）
+          this.isPullUpLoad = false;
+        }
+      });
     },
     ...mapMutations({
       setSearchHistory: "SET_SEARCH_HISTORY",
@@ -256,10 +294,10 @@ export default {
   background: $color-background-w;
 
   .loading-wrapper {
-    position absolute
-    left 50%
-    top 50%
-    transform translate(-50%,-50%)
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .shortcutWrapper {
@@ -350,6 +388,11 @@ export default {
         }
       }
     }
+  }
+
+  .loading-wrapper {
+    text-align: center;
+    margin: auto;
   }
 }
 </style>

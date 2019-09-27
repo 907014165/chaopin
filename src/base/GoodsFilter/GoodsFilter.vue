@@ -41,25 +41,27 @@ export default {
       type: Array,
       default() {
         return [
-          { title: "默认", value: 2, filterType: 0 },
-          { title: "销量", value: 4, filterType: 1 },
-          { title: "价格", value: 4, filterType: 1 },
-          { title: "折扣", value: 5, filterType: 1, initAscState: true }
+          { title: "默认", value: 0, filterType: 0 },
+          { title: "销量", value: 1, filterType: 1 },
+          { title: "价格", value: 2, filterType: 1 },
+          { title: "折扣", value: 3, filterType: 1, initAscState: true }
         ];
       }
     }
   },
   methods: {
     changeSort(event, index) {
-      const curActiveItem = this.filters[index];
-      const filterType = curActiveItem.filterType || 0;
+      console.log(index)
+      let curActiveItem = this.filters[index];
+      console.log(curActiveItem.value)
+      let filterType = curActiveItem.filterType || 0;
 
       this.activeIndex = index;
 
       // 点击索引等于自身
       if (this.activeIndex == index) {
         //禁用升降序，则直接返回无需处理
-        if (filterType == 0) return;
+       /*  if (filterType == 0) return; */
       }
 
       // 升降序
@@ -73,7 +75,7 @@ export default {
       }
       let data = {
         sort: curActiveItem.value,
-        order: this.activeAscState ? 1 : -1
+        order: this.activeAscState ? 1 : 2
       };
       console.log(data);
       this.$emit("sortChanged", data);

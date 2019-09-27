@@ -1,12 +1,6 @@
 <template>
   <div class="home">
-    <scroll
-      class="scroll-wrapper"
-      :data="recommendList"
-      ref="scroll"
-      @load="loadMore"
-      :pull-up="true"
-    >
+    <scroll class="scroll-wrapper" :data="goodsList" ref="scroll" @load="loadMore" :pull-up="true">
       <div class="scroll-content">
         <div class="search-box-wrapper">
           <van-search
@@ -22,19 +16,21 @@
         <div class="slide-wrapper" v-if="slideImages.length">
           <slider ref="slide">
             <div v-for="(item,index) in slideImages" :key="index">
-              <img :src="item.imgUrl" alt>
+              <img :src="item.imgUrl" alt />
             </div>
           </slider>
         </div>
-        <van-grid>
+        <van-grid :column-num="5">
           <van-grid-item
-            v-for="value in 4"
-            :key="value"
-            icon="//m.360buyimg.com/mobilecms/s120x120_jfs/t1/20983/16/10753/6124/5c8a16aaE5d6b15d7/01e0e818a7505267.png"
-            text="文字"
+            v-for="item in classList"
+            :key="item.goodsClassId"
+            :icon="`http://192.168.1.53:9090/${item.posterImage}`"
+            :text="item.className"
+            :to="{path:'/searchCategory',query:{goodsClassId:item.goodsClassId}}"
           />
         </van-grid>
-        <goods-list :goods-list="recommendList" @selected="selectGoods"></goods-list>
+        <goods-list :goods-list="goodsList" @selected="selectGoods"></goods-list>
+        <!-- <goods-list :goods-list="recommendList" @selected="selectGoods"></goods-list> -->
         <div class="pullup-wrapper">
           <div v-if="!isPullUpLoad" class="before-trigger">
             <span class="pullup-txt">{{ pullUpText }}</span>
@@ -52,11 +48,14 @@
 </template>
 <script>
 import { ERR_OK } from "api/config";
+import Goods from "common/js/goods";
 import {
   getSlideImages,
   getRecommendList,
   getTest,
-  getTest1
+  getTest1,
+  getGoodsList,
+  getClassList
 } from "api/index.js";
 import Slider from "base/slider/slider";
 import Scroll from "base/Scroll/Scroll";
@@ -67,26 +66,38 @@ import GoodsList from "components/GoodsList/GoodsList";
 export default {
   data() {
     return {
-      slideImages: [],
+      slideImages: [], //轮播图列表
       recommendList: [],
-      value: "",
-      loading: false,
-      finished: false,
+      goodsList: [], //商品列表
+      classList: [], //分类列表
+      value: "",//
+      currentPage: 1,//查询的当前页数
+      loading: false,//
+      finished: false,//
+      hsaMore: true, //判断是否 还有更多的值
       immediateCheck: false,
-      isPullUpLoad: false,
+      isPullUpLoad: false,//是否上拉刷新
       pullUpText: "上拉加载更多..."
     };
   },
   created() {
+    //获得轮播图图片列表
     this._getSlideImages();
-    this._getRecommendList();
+    //this._getRecommendList();
+    //获取商品列表
+    this._getGoodsList();
+    //获取商品分类列表
+    this._getClassList();
     //this._getTest();
     //this._getTest1();
+  },
+  mounted() {
+    
   },
   methods: {
     _getSlideImages() {
       getSlideImages().then(res => {
-        console.log(res)
+        console.log(res);
         if (res.code === ERR_OK) {
           this.slideImages = res.data;
         }
@@ -94,9 +105,32 @@ export default {
     },
     _getRecommendList() {
       getRecommendList().then(res => {
-        
         if (res.code === ERR_OK) {
           this.recommendList.push(...res.data);
+        }
+      });
+    },
+    _getGoodsList() {
+      let params = {
+        byDefault: 1,
+        current: this.currentPage
+      };
+      console.log(params)
+      getGoodsList(params).then(res => {
+        if (res.code === 0) {
+          console.log(res);
+          res.data.list.forEach(item => {
+            this.goodsList.push(
+              new Goods({
+                goodsId: item.goodsCommonId,
+                desc: item.body,
+                imgUrl: item.image,
+                price: item.sellPrice,
+                oldPrice: item.costPrice,
+                discount: item.discount
+              })
+            );
+          });
         }
       });
     },
@@ -110,22 +144,46 @@ export default {
         console.log(res);
       });
     },
+    _getClassList() {
+      getClassList().then(res => {
+        if (res.code === 0) {
+          this.classList = res.data;
+        }
+      });
+    },
     loadMore() {
-      if (this.recommendList.length > 30) {
-        this.pullUpText = '别拉了！到底了...'
+      if (!this.hsaMore) {
+        this.pullUpText = "别拉了！到底了...";
         return;
       }
       this.isPullUpLoad = true;
-      setTimeout(() => {
-        getRecommendList().then(res => {
-          if (res.code === ERR_OK) {
-            this.recommendList.push(...res.data);
-            this.$refs.scroll.finishPullUp();
-            this.$refs.scroll.refresh();
-            this.isPullUpLoad = false;
+      this.currentPage++;
+      let params = {
+        byDefault: 1,
+        current: this.currentPage
+      };
+      getGoodsList(params).then(res => {
+        if (res.code === 0) {
+          if (res.data.list.length === 0) {
+            this.hsaMore = false;
           }
-        });
-      }, 1000);
+          res.data.list.forEach(item => {
+            this.goodsList.push(
+              new Goods({
+                goodsId: item.goodsCommonId,
+                desc: item.body,
+                imgUrl: item.image,
+                price: item.sellPrice,
+                oldPrice: item.costPrice,
+                discount: item.discount
+              })
+            );
+          });
+          this.$refs.scroll.finishPullUp();
+          this.$refs.scroll.refresh();
+          this.isPullUpLoad = false;
+        }
+      });
     },
     selectGoods(goodsId) {
       this.$router.push({
@@ -156,10 +214,10 @@ export default {
     }
   },
   components: {
-    [Search.name]:Search,
-    [Grid.name]:Grid,
+    [Search.name]: Search,
+    [Grid.name]: Grid,
     [List.name]: List,
-    [GridItem.name]:GridItem,
+    [GridItem.name]: GridItem,
     [Loading.name]: Loading,
     Slider,
     GoodsList,
@@ -168,7 +226,8 @@ export default {
 };
 </script>
 <style lang="stylus" scoped>
-@import '~common/stylus/variable.styl'
+@import '~common/stylus/variable.styl';
+
 .home {
   .scroll-wrapper {
     position: fixed;
@@ -176,13 +235,15 @@ export default {
     right: 0;
     bottom: 50px;
     left: 0;
+    overflow: hidden;
 
     .scroll-content {
       overflow: hidden;
 
       .pullup-wrapper {
         text-align: center;
-        line-height 24px
+        line-height: 24px;
+
         .before-trigger {
           text-align: center;
           font-size: $font-size-medium;

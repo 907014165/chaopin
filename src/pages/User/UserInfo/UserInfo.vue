@@ -1,7 +1,7 @@
 <template>
   <div class="user-info">
     <nav-bar title="账户设置" @back="back"></nav-bar>
-    <van-cell value="" is-link :center="true">
+    <van-cell value="" is-link :center="true" to="/user/userInfoEdit">
       <!-- 使用 title 插槽来自定义标题 -->
       <template slot="title">
         <div class="user">

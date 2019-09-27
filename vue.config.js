@@ -69,7 +69,15 @@ module.exports = {
                 changeOrigin: true,
                 ws: true,
                 pathRewrite: {
-                    '^/api': ''
+                    '^/api': '/'
+                }
+            },
+            '/rongbin': {
+                target: 'http://192.168.1.66:21002/', //对应自己的接口
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/rongbin': '/'
                 }
             }
         }

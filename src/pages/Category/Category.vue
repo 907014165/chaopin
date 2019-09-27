@@ -8,7 +8,7 @@
         @click="toSearch"
       />
     </div>
-    <div class="content-wrapper">
+    <div class="content-wrapper" v-if="sliderList.length">
       <div class="content">
         <scroll class="slider-wrapper" ref="slide">
           <van-sidebar v-model="activeKey" @change="changeSlideItem">
@@ -25,7 +25,9 @@
             <img :src="`http://192.168.1.53:9090/${currentCategory.goodsClass.posterImage}`" alt="">
           </banner>
           <van-grid :border="false" :column-num="3" v-if="currentCategory">
-            <van-grid-item v-for="category in currentCategory.brands" :key="category.brandId">
+            <van-grid-item v-for="category in currentCategory.brands"
+              :to="{path:'/searchCategory',query:{goodsClassId:currentCategory.goodsClass.goodsClassId,brandId:category.brandId}}"
+              :key="category.brandId">
               <div class="item-content">
                 <van-image :src="`http://192.168.1.53:9090/${category.image}`"/>
                 <span class="text">{{ category.brandName }}</span>
@@ -59,10 +61,13 @@
         </div>
       </div>
     </div>
+    <div class="loading-wrapper" v-if="!sliderList.length">
+      <van-loading size="24px" vertical>加载中...</van-loading>
+    </div>
   </div>
 </template>
 <script>
-import { Sidebar, SidebarItem, Grid, GridItem, Image,Search } from "vant";
+import { Sidebar, SidebarItem, Grid, GridItem, Image,Search,Loading } from "vant";
 import Scroll from "base/Scroll/Scroll";
 import Banner from 'base/Banner/Banner'
 import { getCategoryList,getBrands } from 'api/category.js'
@@ -142,6 +147,7 @@ export default {
     [GridItem.name]: GridItem,
     [Image.name]: Image,
     [Search.name]:Search,
+    [Loading.name]:Loading,
     Scroll,
     Banner
   }

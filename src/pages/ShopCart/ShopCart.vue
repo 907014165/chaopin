@@ -23,6 +23,7 @@
             :select-all="checkedAll"
             v-for="(seller) in shopCartList"
             :key="seller.sellerId"
+            @change-num="changeNum"
           ></sku-group>
           <div class="occupation"></div>
         </div>
@@ -39,14 +40,35 @@ import NoResult from "base/NoResult/NoResult";
 import SkuGroup from "components/SkuGroup/SkuGroup";
 import SkuItem from "components/SkuItem/SkuItem";
 import Scroll from "base/Scroll/Scroll";
-import DomSize from "wd-domsize-monitor";
+import {
+  getShopCartList,
+  delShopCartList,
+  updataShopCartList
+} from "api/shopcart.js";
+import { getTest1 } from "api/index.js";
 import { PullRefresh, NavBar, SubmitBar, Checkbox, Icon, Dialog } from "vant";
 import { mapGetters, mapMutations } from "vuex";
 
 let scrolldom = null;
 let shopcartdom = null;
 
+let vue_this = null
+
+/* window.onbeforeunload = onbeforeunload_handler;
+window.onunload = onunload_handler;
+function onbeforeunload_handler() {
+  var warning = "确认退出?";
+  return warning;
+}
+
+function onunload_handler() {
+  //alert('jjj')
+  console.log('jjj')
+  vue_this._updataShopCartList()
+} */
+
 export default {
+  name:'shopcart',
   data() {
     return {
       showStepper: true,
@@ -55,7 +77,7 @@ export default {
       checkedAll: false,
       scrollDom: null,
       shopCartDom: null,
-      shopCartList: [
+      shopCartList1: [
         {
           sellerId: 1,
           name: "潮品商城",
@@ -155,11 +177,21 @@ export default {
             }
           ]
         }
-      ]
+      ],
+      shopCartList: []
     };
   },
+  created() {
+    console.log("111");
+    this._getShopCartList();
+  },
   mounted() {
-    this.observeShopCartDOM();
+    //this.observeShopCartDOM();
+    vue_this = this
+  },
+  beforeDestroy() {
+    getTest1();
+    this._updataShopCartList();
   },
   destroyed() {
     clearInterval(timer);
@@ -175,62 +207,71 @@ export default {
       });
       return num;
     },
-    selectPrice(){
+    selectPrice() {
       let price = 0;
-      this.getShopCart.forEach((seller)=>{
-        seller.skuList.forEach((sku)=>{
-          price += sku.price
-        })
-      })
-      return price
+      this.getShopCart.forEach(seller => {
+        seller.skuList.forEach(sku => {
+          price += sku.price * sku.num;
+        });
+      });
+      return price;
     },
     ...mapGetters({
-      getShopCart: "shopCart"
+      getShopCart: "shopCart",
+      getIsAddShopCart: "isAddShopCart",
+      getVueShopCartList: "shopCartList"
     })
   },
   methods: {
     //下拉刷新执行的回调
     onRefresh() {
       console.log("下拉刷新");
-      setTimeout(() => {
+      this._updataShopCartList();
+      /* this.shopCartList.splice(0)
+      this._getShopCartList() */
+
+      /* setTimeout(() => {
         this.isLoading = false;
-      }, 500);
+      }, 500); */
+    },
+    changeNum(num) {
+      this.setShopCartList(this.shopCartList);
     },
     //提交
     onSubmit() {
-      console.log("提交");
+      console.log(this)
+      console.log(vue_this)
     },
     //切换全选按钮的 转态
     toggleSelect() {
       this.checkedAll = !this.checkedAll;
     },
-    //删除函数
+    //删除购物车的选中商品
     deleteShopCartItem() {
       //删除dom 要监听 它的高度 让shopcartdom 自适应
-      
+
       let _this = this;
-      this.getShopCart.forEach(item => {
+      this.getShopCart.forEach((item, itemIndex) => {
         let isSelectAll = item.isSelectAll;
         let index = this.shopCartList.findIndex(seller => {
           return item.sellerId == seller.sellerId;
         });
+        console.log(index);
         if (index >= 0) {
           if (isSelectAll) {
+            console.log("true");
             _this.shopCartList.splice(index, 1);
           } else {
-            let sku = _this.getShopCart[0].skuList.slice(0);
+            let sku = _this.getShopCart[itemIndex].skuList.slice(0);
             sku.forEach(item => {
-              console.log(item);
+              //console.log(item);
               let index1 = _this.shopCartList[index].skuList.findIndex(
                 item1 => {
                   return item1.skuId == item.skuId;
                 }
               );
               if (index1 >= 0) {
-                console.log(index1);
-                console.log(
-                  _this.shopCartList[index].skuList.splice(index1, 1)
-                );
+                _this.shopCartList[index].skuList.splice(index1, 1);
               }
             });
           }
@@ -239,9 +280,10 @@ export default {
     },
     //删除商品
     delSku() {
-      let _this = this
+      let _this = this;
       //提示 删除 弹出框
-      let delText = this.getShopCart.length==0?'请选择商品':'确认要删除该商品吗？'
+      let delText =
+        this.getShopCart.length == 0 ? "请选择商品" : "确认要删除该商品吗？";
       Dialog.confirm({
         title: delText
         /* message: "" */
@@ -249,10 +291,12 @@ export default {
         .then(() => {
           // on confirm
           this.deleteShopCartItem();
-          this.delShopCartItem();
-          _this.$nextTick(()=>{
-            this.observeShopCartDOM()
-          })
+          this._delShopCartList();
+          _this.$nextTick(() => {
+            //this.observeShopCartDOM();
+            this.delShopCartItem();
+            this.setShopCartList(this.shopCartList);
+          });
           console.log("确认删除");
         })
         .catch(() => {
@@ -267,14 +311,85 @@ export default {
       let scrolldomHeight = scrolldom.clientHeight;
       let shopcartdomHeight = shopcartdom.clientHeight;
       if (scrolldomHeight > shopcartdomHeight) {
-        console.log('wo de ma ya')
-        shopcartdom.style.height = scrolldomHeight + 'px';
+        console.log("wo de ma ya");
+        shopcartdom.style.height = scrolldomHeight + "px";
       }
       console.log(scrolldomHeight);
       console.log(shopcartdomHeight);
     },
+    _getShopCartList() {
+      getShopCartList().then(res => {
+        if (res.code === 0) {
+          console.log(res);
+          res.data.forEach(seller => {
+            let obj = {
+              sellerId: seller.storeId,
+              name: seller.storeName,
+              skuList: []
+            };
+            seller.cartList.forEach(sku => {
+              obj.skuList.push({
+                skuId: sku.goodsId,
+                title: sku.goodsName,
+                desc: sku.spec,
+                num: sku.buyNum,
+                price: sku.price,
+                thumb: sku.image,
+                storageNum: sku.storageNum,
+                cartId: sku.cartId
+              });
+            });
+            this.shopCartList.push(obj);
+          });
+        } else {
+          alert(res.message);
+        }
+        this.setShopCartList(this.shopCartList);
+      });
+    },
+    _delShopCartList() {
+      let params = [];
+      this.getShopCart.forEach(seller => {
+        seller.skuList.forEach(sku => {
+          params.push(sku.cartId);
+        });
+      });
+      console.log(params);
+      delShopCartList(params).then(res => {
+        if (res.code === 0) {
+          console.log(res);
+        }
+      });
+    },
+    _updataShopCartList() {
+      let params = [];
+      //console.log(this.getVueShopCartList)
+      this.getVueShopCartList.forEach(seller => {
+        console.log(seller);
+        seller.skuList.forEach(sku => {
+          params.push({
+            buyNum: sku.num,
+            cartId: sku.cartId
+          });
+        });
+      });
+      console.log(params);
+      updataShopCartList(params).then(res => {
+        if (res.code) {
+          if (res.data) {
+            console.log("刷新成功");
+          } else {
+            console.log("刷新失败");
+          }
+        } else {
+        }
+        this.isLoading = false;
+      });
+    },
     ...mapMutations({
-      delShopCartItem: "DEL_SLECT_SHOP_CART_ITEM"
+      delShopCartItem: "DEL_SLECT_SHOP_CART_ITEM",
+      setShopCartList: "SET_SHOP_CART_LIST",
+      setIsAddShopCart: "SET_IS_SHOP_CART"
     })
   },
   watch: {
@@ -284,6 +399,8 @@ export default {
       //触发 toggleSelect 函数
       if (newval && !this.checkedAll) {
         this.toggleSelect();
+      } else if (!newval) {
+        this.checkedAll = false;
       }
     },
     //监听选择状态的个数
@@ -292,14 +409,32 @@ export default {
       if (newval == this.shopCartList.length && newval != 0) {
         this.checked = true;
       } else {
-        console.log(newval);
+        //console.log(newval);
         this.checked = false;
       }
     },
+    //监听路由 如果路由发生变化 将购物车数据发给后端
+    $route(to, from) {
+      if (to.path === "/shopcart") {
+        console.log("进入购物车");
+        //进入购物车时 重新请求购物车数据
+        //this._getShopCartList()
+        if (this.getIsAddShopCart) {
+          this.isSelectAll = false;
+          this.checked = false;
+          this.delShopCartItem();
+          this.shopCartList.splice(0);
+          this._getShopCartList();
+          this.setIsAddShopCart(false);
+        }
+      } else {
+        console.log("离开购物车");
+        //离开购物车时 将购物车数据发给后端数据发给后端
+        this._updataShopCartList()
+      }
+      //console.log("route change");
+    },
     shopCartDom() {
-      /* if(this.shopCartDom.clientHeight<this.scrollDom.clientHeight){
-        console.log('mei cuo jiu shi ')
-      } */
       console.log(this.shopCartDom);
     }
   },
