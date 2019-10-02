@@ -1,6 +1,6 @@
 <template>
   <div class="nav-bar">
-    <van-nav-bar :title="title" left-arrow @click-left="back"/>
+    <van-nav-bar :title="title"  :right-text="rightText" :left-text="leftText" left-arrow @click-left="back" @click-right="onClickRight"/>
   </div>
 </template>
 <script>
@@ -39,6 +39,9 @@ export default {
   methods: {
     back() {
       this.$emit("back");
+    },
+    onClickRight(){
+      this.$emit('onClickRight')
     }
   },
   components: {

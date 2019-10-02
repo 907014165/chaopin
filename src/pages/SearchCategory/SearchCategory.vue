@@ -78,7 +78,8 @@ export default {
       bannerImg:null,
       pageY: 0,
       bannerDom: null,
-      currentPage: 1
+      currentPage: 1,
+      title:this.$route.query.title
     };
   },
   props: {
@@ -89,10 +90,6 @@ export default {
     isCategory: {
       type: Boolean,
       default: true
-    },
-    title: {
-      type: String,
-      default: "耐克"
     }
   },
   created() {

@@ -1,0 +1,92 @@
+<template>
+  <div class="logistics-detail">
+    <nav-bar title="物流详情" @back="back"></nav-bar>
+    <van-steps direction="vertical" :active="0">
+      <van-step v-for="(step,index) in stepList" :key="index">
+        <h3>{{ step.message }}</h3>
+        <p>{{ step.time }}</p>
+      </van-step>
+    </van-steps>
+  </div>
+</template>
+<script>
+import NavBar from "base/NavBar/NavBar";
+import { Step, Steps } from "vant";
+export default {
+  data() {
+    return {
+      active: 0,
+      transitList: [
+        {
+          action: "CONSIGN",
+          message: "等待揽收中",
+          time: "2019-09-23 09:50"
+        },
+        {
+          action: "TMS_ACCEPT",
+          message: "[广州市]番禺里仁洞的岁青攀[15890874729]已揽收",
+          time: "2019-09-23 10:13"
+        },
+        {
+          action: "TMS_STATION_OUT",
+          message: "[广州市]快件离开番禺里仁洞已发往三明中转",
+          time: "2019-09-24 03:47"
+        },
+        {
+          action: "TMS_STATION_IN",
+          message: "[广州市]快件已到达广州中心",
+          time: "2019-09-24 08:20"
+        },
+        {
+          action: "TMS_STATION_OUT",
+          message: "[广州市]快件离开广州中心已发往三明中转",
+          time: "2019-09-24 08:24"
+        },
+        {
+          action: "TMS_STATION_IN",
+          message: "[三明市]快件已到达三明中转",
+          time: "2019-09-25 02:49"
+        },
+        {
+          action: "TMS_STATION_OUT",
+          message: "[三明市]快件离开三明中转已发往三明三元",
+          time: "2019-09-25 04:03"
+        },
+        {
+          action: "TMS_STATION_IN",
+          message: "[三明市]快件已到达三明三元",
+          time: "2019-09-25 09:16"
+        },
+        {
+          action: "TMS_DELIVERING",
+          message:
+            "[三明市]三明三元的柯林江[13906552892]正在派件（95720为中通快递员外呼专属号码，请放心接听）",
+          time: "2019-09-25 09:21"
+        },
+        {
+          action: "TMS_SIGN",
+          message:
+            "[三明市]快件已在三明三元签收 签收人：本人,如有疑问请电联：13906552892 / 17750678039, 您的快递已经妥投。风里来雨里去, 只为客官您满意。上有老下有小, 赏个好评好不好？【请在评价快递员处帮忙点亮五颗星星哦~】",
+          time: "2019-09-25 11:28"
+        }
+      ]
+    };
+  },
+  computed: {
+    stepList() {
+      return this.transitList.slice(0).reverse();
+    }
+  },
+  methods: {
+    back() {
+      this.$router.back();
+    }
+  },
+  components: {
+    [Step.name]: Step,
+    [Steps.name]: Steps,
+    NavBar
+  }
+};
+</script>
+<style lang="stylus"></style>

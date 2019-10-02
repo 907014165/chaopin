@@ -8,6 +8,12 @@ const slideImages = require('./mock/slideImages.json')
 const recommendList = require('./mock/recommend.json')
 const hotKeys = require('./mock/hotKey.json')
 
+const pendingPayOder = require('./mock/userOrderPendingPay.json')
+const allOrder = require('./mock/userOrderAll.json')
+const cancelOrder = require('./mock/userOrderCancel.json')
+const completeOrder = require('./mock/userOrderComplete.json')
+const logisticsOrder = require('./mock/userOrderLogistics.json')
+const Ratings = require('./mock/ratings.json')
 
 function resolve(dir) {
     return path.join(__dirname, dir)
@@ -24,6 +30,36 @@ module.exports = {
     },
     devServer: {
         before(app) {
+            app.get('/api/getOderPendingPay', function (req, res) {
+                res.json({
+                    code: 0,
+                    data: pendingPayOder
+                })
+            })
+            app.get('/api/getOderCancel', function (req, res) {
+                res.json({
+                    code: 0,
+                    data: cancelOrder
+                })
+            })
+            app.get('/api/getOderComplete', function (req, res) {
+                res.json({
+                    code: 0,
+                    data: completeOrder
+                })
+            })
+            app.get('/api/getOderAll', function (req, res) {
+                res.json({
+                    code: 0,
+                    data: allOrder
+                })
+            })
+            app.get('/api/getOderLogistics', function (req, res) {
+                res.json({
+                    code: 0,
+                    data: logisticsOrder
+                })
+            })
             app.get('/api/getSlideImages', function (req, res) {
                 res.json({
                     code: 0,
@@ -62,10 +98,16 @@ module.exports = {
                     data: recommendList
                 })
             })
+            app.get('/api/getRatings', function (req, res) {
+                res.json({
+                    code: 0,
+                    data: Ratings
+                })
+            })
         },
         proxy: {
             '/api': {
-                target: 'http://192.168.1.53:9090/', //对应自己的接口
+                target: 'http://192.168.1.101:9090/', //对应自己的接口
                 changeOrigin: true,
                 ws: true,
                 pathRewrite: {
@@ -79,7 +121,24 @@ module.exports = {
                 pathRewrite: {
                     '^/rongbin': '/'
                 }
-            }
+            },
+            '/jiahao':{
+                target: 'http://192.168.1.101:18052/', //对应自己的接口
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/jiahao': '/'
+                }
+            },
+            '/coupon':{
+                target: 'http://192.168.1.53:9093/', //对应优惠券接口
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/coupon': '/'
+                }
+            },
+
         }
     },
     css: {

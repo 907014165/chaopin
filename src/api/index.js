@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 export function getSlideImages() {
-    const url = '/api/getSlideImages'
+    //const url = '/api/getSlideImages'
+    const url = '/jiahao/system/index/carousel'
     //const url = 'api/getImg'
     //const url = 'api/admins/getDo/getImg'
     let params = {}

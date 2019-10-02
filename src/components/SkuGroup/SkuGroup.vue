@@ -1,5 +1,5 @@
 <template>
-  <div class="sku-gorup">
+  <div class="sku-gorup" :class="isShopCart?'isShopCart':''">
     <div class="order_head">
       <div class="order_seller">
         <van-checkbox
@@ -23,16 +23,18 @@
     </div>
     <div class="order_content">
       <slot></slot>
-      <van-checkbox-group v-model="result" @change="changeSelectSku">
-        <van-checkbox
-          v-for="(item,index) in skuList"
-          :key="index"
-          :name="item"
-          checked-color="#ee0a24"
-        >
-          <sku-item :is-show-stepper="isShowStepper" :sku="item" @change-num="changeNum"></sku-item>
-        </van-checkbox>
-      </van-checkbox-group>
+      <template v-if="seller.skuList.length">
+        <van-checkbox-group v-model="result" @change="changeSelectSku">
+          <van-checkbox
+            v-for="(item,index) in skuList"
+            :key="index"
+            :name="item"
+            checked-color="#ee0a24"
+          >
+            <sku-item :is-show-stepper="isShowStepper" :sku="item" @change-num="changeNum"></sku-item>
+          </van-checkbox>
+        </van-checkbox-group>
+      </template>
     </div>
     <div class="order_footer van-hairline--top" v-if="hasFooter">
       <div class="btn-wrapper">
@@ -42,6 +44,7 @@
           :type="item.type"
           size="small"
           v-for="(item,index) in currentBtn"
+          @click="btnOperation(item)"
           :key="index"
         >{{ item.text }}</van-button>
       </div>
@@ -57,33 +60,44 @@ export default {
     return {
       stateMap: null,
       stateBtn: {
-        1: [
+        10: [
           {
             type: "danger",
-            text: "去支付"
+            text: "去支付",
+            btnType:'toPay'
           }
         ],
-        2: [
+        20: [
+          {
+            type: "danger",
+            text: "提醒卖家发货",
+            btnType:'warnSend'
+          }
+        ],
+        30: [
           {
             type: "default",
-            text: "查看物流"
+            text: "查看物流",
+            btnType:'lookLogistics'
           },
           {
             type: "danger",
-            text: "确认收货"
+            text: "确认收货",
+            btnType:'confirmGoods'
           }
         ],
-        3: [
+        40: [
           {
             type: "default",
-            text: "评论"
+            text: "评论",
+            btnType:'comment'
           },
           {
             type: "danger",
             text: "再次购买"
           }
         ],
-        4: [
+        0: [
           {
             type: "default",
             text: "退款明细"
@@ -122,7 +136,7 @@ export default {
         return [];
       }
     }, */
-    orderState: {
+    orderStatus: {
       type: Number,
       default: 1
     },
@@ -137,25 +151,30 @@ export default {
     SelectAll: {
       type: Boolean,
       default: false
+    },
+    isShopCart: {
+      type: Boolean,
+      default: false
     }
   },
   created() {
     this.stateMap = {
-      1: "代付款",
-      2: "卖家已发货",
-      3: "已完成",
-      4: "已取消",
+      10: "代付款",
+      20: "已付款",
+      30: "卖家已发货",
+      40: "已完成",
+      0: "已取消",
       5: ""
     };
-    console.log('sku-group create')
+    console.log("sku-group create");
     this.init();
   },
   computed: {
     currentState() {
-      return this.stateMap[this.orderState];
+      return this.stateMap[this.seller.status];
     },
     currentBtn() {
-      return this.stateBtn[this.orderState];
+      return this.stateBtn[this.seller.status];
     },
     currentStateCls() {
       return;
@@ -165,8 +184,12 @@ export default {
     deleteSku() {
       this.$emit("del");
     },
+    //底部订单按钮操作回调
+    btnOperation(item){
+      this.$emit(`${item.btnType}`)
+    },
     test() {
-      console.log("test" + "--" + this.orderState);
+      console.log("test" + "--" + this.orderStatus);
     },
     toggleSelectAll() {
       this.isSelectAll = !this.isSelectAll;
@@ -177,7 +200,7 @@ export default {
         console.log("全选");
         this.selectAllShow = true;
         this.result.splice(0);
-        console.log(this.skuList)
+        console.log(this.skuList);
         this.skuList.forEach((item, index) => {
           this.result.push(item);
         });
@@ -231,13 +254,13 @@ export default {
   watch: {
     //全选
     isSelectAll(newval, oldval) {
-      console.log('全选')
+      console.log("全选");
       if (newval) {
         console.log("全选");
         this.result.splice(0);
         this.selectAllShow = true;
         this.skuList.forEach((item, index) => {
-          console.log(item)
+          console.log(item);
           this.result.push(item);
         });
       } else {
@@ -256,7 +279,7 @@ export default {
     },
     //如果列表全选 让全选按钮高亮
     result() {
-      console.log(this.result)
+      console.log(this.result);
       if (this.result.length === this.skuList.length) {
         /* //满足条件让全选置为true
         this.isSelectAll = true; */
@@ -292,6 +315,12 @@ export default {
   padding: 10px;
   margin: 10px 0;
   background: $color-background-w;
+
+  &.isShopCart {
+    .van-checkbox__icon, .van-checkbox__icon--round {
+      display: none;
+    }
+  }
 
   .order_head {
     display: flex;

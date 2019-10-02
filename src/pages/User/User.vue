@@ -3,13 +3,16 @@
     <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
       <div class="user-profile">
         <div class="background">
-          <img src="http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100" alt="">
+          <img
+            src="http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100"
+            alt
+          />
         </div>
         <div class="user-profile-avatar">
           <router-link to="/user/userinfo">
             <img
               :src="user && user.avatar ? user.avatar : 'http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100'"
-            >
+            />
           </router-link>
         </div>
         <div class="user-profile-username">
@@ -20,12 +23,12 @@
       </div>
 
       <van-cell-group class="user-group">
-        <van-cell title="我的订单" value="查看全部订单" is-link to="/user/order/0"/>
+        <van-cell title="我的订单" value="查看全部订单" is-link to="/user/order/0" />
         <van-row class="user-links">
           <router-link to="/user/order/1">
             <van-col span="6">
               <van-icon name="pending-payment">
-                <van-info :info="11"/>
+                <van-info :info="11" />
               </van-icon>
               <div>待付款</div>
             </van-col>
@@ -33,7 +36,7 @@
           <router-link to="/user/order/2">
             <van-col span="6">
               <van-icon name="logistics">
-                <van-info :info="11"/>
+                <van-info :info="11" />
               </van-icon>
               <div>待发货</div>
             </van-col>
@@ -47,7 +50,7 @@
           <router-link to="/user/aftersale">
             <van-col span="6">
               <van-icon name="after-sale">
-                <van-info :info="data.AfterSaleTotal"/>
+                <van-info :info="data.AfterSaleTotal" />
               </van-icon>
               <div>售后</div>
             </van-col>
@@ -56,29 +59,29 @@
       </van-cell-group>
 
       <van-cell-group class="user-group">
-        <van-cell title="我的服务"/>
+        <van-cell title="我的服务" />
         <van-row class="user-links">
           <router-link to="/user/coupon" @click="showList=true">
             <van-col span="6">
-              <van-icon name="coupon-o"/>
+              <van-icon name="coupon-o" />
               <div>我的优惠券</div>
             </van-col>
           </router-link>
           <router-link to="/user/favorite">
             <van-col span="6">
-              <van-icon name="like-o"/>
+              <van-icon name="like-o" />
               <div>我的收藏</div>
             </van-col>
           </router-link>
           <router-link to="/user/address">
             <van-col span="6">
-              <van-icon name="location-o"/>
+              <van-icon name="location-o" />
               <div>收货地址</div>
             </van-col>
           </router-link>
           <router-link to="/chat">
             <van-col span="6">
-              <van-icon name="service-o"/>
+              <van-icon name="service-o" />
               <div>客服</div>
             </van-col>
           </router-link>
@@ -86,13 +89,13 @@
         <van-row class="user-links">
           <router-link to="/user/coupon" @click="showList=true">
             <van-col span="6">
-              <van-icon name="chat-o"/>
+              <van-icon name="chat-o" />
               <div>我的评价</div>
             </van-col>
           </router-link>
           <router-link to="/user/favorite">
             <van-col span="6">
-              <van-icon class-prefix="iconfont" name="icon-kanjia"/>
+              <van-icon class-prefix="iconfont" name="icon-kanjia" />
               <div>我的砍价</div>
             </van-col>
           </router-link>
@@ -101,7 +104,7 @@
     </van-pull-refresh>
 
     <transition name="van-slide-right">
-      <router-view :show-list="showList"></router-view>
+    <router-view :show-list="showList"></router-view>
     </transition>
   </div>
 </template>
@@ -110,7 +113,7 @@
 import { Cell, CellGroup, Icon, Row, Col, Info, PullRefresh } from "vant";
 
 export default {
-  name:'user',
+  name: "user",
   data() {
     return {
       data: {},
@@ -197,18 +200,18 @@ export default {
     display: block;
     width: 100%;
     height: 141px;
-    position relative
+    position: relative;
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    overflow hidden
+    overflow: hidden;
 
     .background {
-      position absolute
-      left 0
-      right 0
-      bottom 0
-      top 0
-      z-index -1
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      z-index: -1;
       filter: blur(20px);
     }
 

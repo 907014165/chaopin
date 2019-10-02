@@ -88,6 +88,7 @@ export default {
         scrollX: true,
         scrollY: false,
         momentum: false,
+        click:true,
         slide: {
           loop: this.loop,
           threshold: 0.3,

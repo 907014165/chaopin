@@ -6,7 +6,8 @@ const state = {
     token: getToken(),
     shopCart:[],
     shopCartList:[],
-    isAddShopCart:false
+    isAddShopCart:false,
+    currentCommentList:[]
 }
 
 export default state

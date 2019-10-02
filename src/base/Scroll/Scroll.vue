@@ -101,6 +101,7 @@ export default {
     },
     //刷新
     refresh() {
+      //console.log('我刷新啦')
       this.scroll && this.scroll.refresh();
     },
     //结束上拉刷新

@@ -9,3 +9,5 @@ export const shopCart = state => state.shopCart
 export const shopCartList = state => state.shopCartList
 
 export const isAddShopCart = state => state.isAddShopCart
+
+export const currentCommentList = state => state.currentCommentList

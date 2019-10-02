@@ -11,15 +11,66 @@
         <van-stepper v-model="num" button-size="20px" @change="changeNum"/>
       </div>
     </van-card>
+    <!-- <div class="order_footer van-hairline--top">
+      <div class="btn-wrapper">
+        <van-button
+          plain
+          hairline
+          :type="item.type"
+          size="small"
+          v-for="(item,index) in currentBtn"
+          :key="index"
+        >{{ item.text }}</van-button>
+      </div>
+    </div> -->
   </div>
 </template>
 <script>
-import { Card, Stepper } from "vant";
+import { Card, Stepper,Button } from "vant";
 export default {
   data() {
     return {
       value: 0,
-      num:this.sku.num
+      num:this.sku.num,
+      stateBtn: {
+        10: [
+          {
+            type: "danger",
+            text: "去支付"
+          }
+        ],
+        20: [
+          {
+            type: "default",
+            text: "查看物流"
+          },
+          {
+            type: "danger",
+            text: "确认收货"
+          }
+        ],
+        40: [
+          {
+            type: "default",
+            text: "评论"
+          },
+          {
+            type: "danger",
+            text: "再次购买"
+          }
+        ],
+        0: [
+          {
+            type: "default",
+            text: "退款明细"
+          },
+          {
+            type: "danger",
+            text: "再次购买"
+          }
+        ],
+        5: []
+      },
     };
   },
   props: {
@@ -37,10 +88,16 @@ export default {
           desc: "颜色:傻白 尺码:42",
           price: 2.0,
           num: 3,
+          orderStatus:10,
           thumb:"https://img.yzcdn.cn/vant/t-thirt.jpg"
         };
       }
     }
+  },
+  computed: {
+    currentBtn() {
+      return this.stateBtn[this.sku.orderStatus];
+    },
   },
   methods: {
     changeNum(num){
@@ -54,7 +111,8 @@ export default {
   },
   components: {
     [Card.name]: Card,
-    [Stepper.name]: Stepper
+    [Stepper.name]: Stepper,
+    [Button.name]:Button
   }
 };
 </script>

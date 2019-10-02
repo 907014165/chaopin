@@ -1,5 +1,5 @@
 <template>
-  <transition name="van-slide-right">
+  <transition :name="slideDirection">
     <div class="user-info-edit">
       <div class="user-info-edit-content">
         <van-nav-bar
@@ -11,13 +11,13 @@
         />
         <div class="avatar">
           <img
-            src="http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100"
+            :src="msgImgList[0]"
             alt
+            @click="showPreImg"
           />
-          <van-uploader>
+          <van-uploader :after-read="afterRead" :before-read="beforeRead">
             <span class="edit-text">更换头像</span>
           </van-uploader>
-          
         </div>
         <van-cell-group title=" ">
           <van-field v-model="username" clearable label="会员名" placeholder="请输入用户名" />
@@ -31,11 +31,27 @@
         </van-cell-group>
         <van-action-sheet title="修改性别" v-model="show" :actions="actions" @select="onSelect" />
       </div>
+      <van-image-preview
+        v-model="showPreview"
+        :images="msgImgList"
+      ></van-image-preview>
     </div>
   </transition>
 </template>
 <script>
-import { NavBar, Field, CellGroup, Cell, ActionSheet , Uploader } from "vant";
+import Vue from 'vue'
+
+import {
+  NavBar,
+  Field,
+  CellGroup,
+  Cell,
+  ActionSheet,
+  Uploader,
+  ImagePreview,
+  Toast
+} from "vant";
+Vue.use(ImagePreview)
 
 export default {
   data() {
@@ -45,12 +61,23 @@ export default {
       errorMessage: "",
       sex: "男",
       show: false,
-      actions: [{ name: "男" }, { name: "女" }]
+      actions: [{ name: "男" }, { name: "女" }],
+      slideDirection: "van-slide-right",
+      showPreview:false,//展示预览组件
+      msgImgList:['http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100'],//预览展示图地址列表
     };
+  },
+  beforeRouteLeave(to, from, next) {
+    console.log(to);
+    this.test();
+    setTimeout(function() {
+      next();
+    }, 17);
   },
   methods: {
     onClickLeft() {
       this.$router.back();
+      this.$router.isBack = true;
       console.log("取消");
     },
     onClickRight() {
@@ -64,6 +91,28 @@ export default {
       console.log(item);
       this.sex = item.name;
       this.toggleSexSelect();
+    },
+    showPreImg(){
+      this.showPreview = !this.showPreview
+    },
+    //文件读取完毕后的回调函数
+    afterRead(file) {
+      // 此时可以自行将文件上传至服务器
+      console.log(file);
+      //清空数组
+      this.msgImgList.splice(0,1,file.content)
+      //this.msgImgList.push()
+    },
+    //简单的图片上传检测
+    beforeRead(file) {
+      if (file.type !== 'image/jpeg') {
+        Toast('请上传 jpg 格式图片');
+        return false;
+      }
+      return true;
+    },
+    test() {
+      console.log("托尔斯泰");
     }
   },
   components: {
@@ -72,7 +121,9 @@ export default {
     [Cell.name]: Cell,
     [CellGroup.name]: CellGroup,
     [ActionSheet.name]: ActionSheet,
-    [Uploader.name]:Uploader
+    [Uploader.name]: Uploader,
+    [Toast.name]:Toast
+    //[ImagePreview.name]: ImagePreview
   }
 };
 </script>
@@ -106,7 +157,7 @@ export default {
       .edit-text {
         margin: 10px 0;
         color: $color-text-red;
-        font-size: $font-size-medium-x;
+        font-size: $font-size-medium;
       }
     }
 

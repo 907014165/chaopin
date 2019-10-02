@@ -317,6 +317,7 @@ export default {
       console.log(scrolldomHeight);
       console.log(shopcartdomHeight);
     },
+    //获取购物车列表
     _getShopCartList() {
       getShopCartList().then(res => {
         if (res.code === 0) {
@@ -347,6 +348,7 @@ export default {
         this.setShopCartList(this.shopCartList);
       });
     },
+     //删除购物车列表
     _delShopCartList() {
       let params = [];
       this.getShopCart.forEach(seller => {
@@ -361,6 +363,7 @@ export default {
         }
       });
     },
+     //更新购物车
     _updataShopCartList() {
       let params = [];
       //console.log(this.getVueShopCartList)

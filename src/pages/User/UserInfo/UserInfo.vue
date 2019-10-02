@@ -1,7 +1,7 @@
 <template>
   <div class="user-info">
     <nav-bar title="账户设置" @back="back"></nav-bar>
-    <van-cell value="" is-link :center="true" to="/user/userInfoEdit">
+    <van-cell value="" is-link :center="true" to="/user/userinfo/userInfoEdit">
       <!-- 使用 title 插槽来自定义标题 -->
       <template slot="title">
         <div class="user">
@@ -18,6 +18,9 @@
       <van-cell title="投诉建议" is-link/>
     </van-cell-group>
     <van-button color="linear-gradient(to right, #FF6347,#FF4500)" size="large">退出登录</van-button>
+    <transition name="van-slide-right">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 <script>
@@ -48,9 +51,9 @@ export default {
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 0px;
+  bottom: 0;
   left: 0;
-  z-index: 40;
+  
   background: $color-background;
 
   .user {

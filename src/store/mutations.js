@@ -90,6 +90,9 @@ const mutations = {
     //设置是否 已经有添加购物车的动作
     [types.SET_IS_SHOP_CART](state,status){
         state.isAddShopCart = status
+    },
+    [types.SET_CURRENT_COMMENT_LIST](state,params){
+        state.currentCommentList.splice(params.index,1,params.comment)
     }
 }
 

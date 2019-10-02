@@ -20,7 +20,7 @@
                   <span class="new-price">{{ goods1.sellPrice }}</span>
                   <span class="old-price">{{ goods1.costPrice }}</span>
                 </div>
-                <div class="add-favorite" @click="toggleFavorite">
+                <div class="add-favorite" @click="_toggleFavorite">
                   <van-icon name="like-o" v-show="!isFavorite" />
                   <van-icon name="like" v-show="isFavorite" color="#f23030" />
                   <div class="info">收藏</div>
@@ -54,6 +54,19 @@
           <van-cell-group class="goods-cell-group">
             <van-cell :title="currentSelectSku" is-link @click="toggleShowSku" />
           </van-cell-group>
+          <div class="comment-wrapper">
+            <div class="comment-title">
+              <div class="info">
+                <span class="info-text">评价</span>
+                <span class="info-num">65</span>
+              </div>
+              <div class="goods-evaluation">96%</div>
+            </div>
+            <rating-seller :is-all-ratings="false" @refresh="scrollRefresh"></rating-seller>
+            <div class="look-more">
+              <van-button plain hairline type="default" round size="small" to="/ratings">查看全部评论</van-button>
+            </div>
+          </div>
         </div>
         <van-goods-action>
           <van-goods-action-icon icon="chat-o" @click="connectKefu">客服</van-goods-action-icon>
@@ -61,6 +74,7 @@
           <van-goods-action-button type="warning" @click="clickShopCart">加入购物车</van-goods-action-button>
           <van-goods-action-button type="danger" @click="buy">立即购买</van-goods-action-button>
         </van-goods-action>
+
         <!-- <van-sku
         ref="sku"
         v-model="show"
@@ -79,6 +93,8 @@
         @buy-clicked="onBuyClicked"
         @add-cart="onAddCartClicked"
         />-->
+      </scroll>
+      <template v-if="goods1">
         <van-sku
           ref="sku"
           v-model="show"
@@ -97,10 +113,11 @@
           @buy-clicked="onBuyClicked"
           @add-cart="onAddCartClicked"
         />
-        <transition name="van-slide-right">
-          <router-view></router-view>
-        </transition>
-      </scroll>
+      </template>
+
+      <transition name="van-slide-right">
+        <router-view></router-view>
+      </transition>
       <skeleton v-if="!goods1"></skeleton>
     </div>
   </transition>
@@ -118,18 +135,21 @@ import {
   GoodsAction,
   GoodsActionIcon,
   GoodsActionButton,
-  Sku
+  Sku,
+  Button
 } from "vant";
 import Scroll from "base/Scroll/Scroll";
 import skuData from "./data.js";
 import Skeleton from "base/Skeleton/Skeleton";
-import { mapMutations } from 'vuex'
+import RatingSeller from "base/Ratings/RatingSeller";
+import { mapMutations } from "vuex";
 import {
   getSkuById,
   getGoodsById,
   toggleFavorite,
   addShopCart
 } from "api/goods.js";
+import data from "./data.js";
 export default {
   data() {
     return {
@@ -176,10 +196,13 @@ export default {
       } else {
         return "选择规格";
       }
-    },
-    
+    }
   },
   methods: {
+    scrollRefresh() {
+      console.log("scroll refresh");
+      this.$refs.scroll.refresh();
+    },
     formatPrice() {
       return "¥" + (this.goods.price / 100).toFixed(2);
     },
@@ -233,39 +256,50 @@ export default {
       //this.$toast("add cart:" + JSON.stringify(data));
       //console.log(data);
       let params = {
-        storeId:this.goods1.storeId,//店铺id
-        goodsId:data.selectedSkuComb.id,//规格id
-        memberId:1,
-        buyNum:data.selectedNum//选择商品的数量
-      }
-      console.log(params)
-      addShopCart(params).then(res=>{
-        console.log(res)
-        if(res.code === 0){
+        storeId: this.goods1.storeId, //店铺id
+        goodsId: data.selectedSkuComb.id, //规格id
+        memberId: 1,
+        buyNum: data.selectedNum //选择商品的数量
+      };
+      console.log(params);
+      addShopCart(params).then(res => {
+        console.log(res);
+        if (res.code === 0) {
           //console.log(res.data)
-          if(res.data){
+          if (res.data) {
             Toast.success("加入购物车成功");
-            this.setIsAddShopCart(true)
-          }else{
-            Toast.fail("加入购物车失败")
+            this.setIsAddShopCart(true);
+          } else {
+            Toast.fail("加入购物车失败");
           }
         }
-      })
+      });
 
       //console.log(this.$refs.sku.getSkuData());
     },
     currentSelect(data) {
       console.log(data);
-      this.initialSku.s1 = data.selectedSku.s1;
-      this.initialSku.s2 = data.selectedSku.s2;
+      this.initialSku.s1 = data.selectedSku.s1 ? data.selectedSku.s1 : 1;
+      this.initialSku.s2 = data.selectedSku.s2 ? data.selectedSku.s2 : 1;
     },
-    toggleFavorite() {
+    _toggleFavorite() {
       this.isFavorite = !this.isFavorite;
+      console.log(this.isFavorite);
+      //console.log(this.goods1)
+      let params = {
+        goodsCommonId: this.goods1.goodsCommonId
+      };
       if (this.isFavorite) {
         //this._
-        Toast.success("收藏成功");
+        toggleFavorite(params).then(res => {
+          console.log(res.data);
+          Toast.success("收藏成功");
+        });
       } else {
-        Toast.success("取消收藏");
+        toggleFavorite(params).then(res => {
+          console.log(res.data);
+          Toast.success("取消收藏");
+        });
       }
     },
     _getSkuById() {
@@ -284,21 +318,22 @@ export default {
       };
       getGoodsById(params).then(res => {
         if (res.code === 0) {
+          this.isFavorite = res.data.isFavorite;
           this.goods1 = res.data;
         }
       });
     },
-    _toggleFavorite() {
+    /* _toggleFavorite() {
       let params = {
-        goodsCommonId: goods1.goodsCommonId,
+        goodsCommonId: this.goods1.goodsCommonId,
         memberId: 1
       };
       toggleFavorite().then(res => {
         console.log(res);
       });
-    },
+    }, */
     ...mapMutations({
-      setIsAddShopCart:'SET_IS_SHOP_CART'
+      setIsAddShopCart: "SET_IS_SHOP_CART"
     })
   },
   components: {
@@ -313,8 +348,10 @@ export default {
     [GoodsActionIcon.name]: GoodsActionIcon,
     [GoodsActionButton.name]: GoodsActionButton,
     [Sku.name]: Sku,
+    [Button.name]:Button,
     Scroll,
-    Skeleton
+    Skeleton,
+    RatingSeller
   }
 };
 </script>
@@ -327,7 +364,7 @@ export default {
   right: 0;
   left: 0;
   bottom: 0px;
-  z-index 60
+  z-index: 60;
   padding-bottom: 50px;
   overflow: hidden;
   background: $color-background;
@@ -449,6 +486,41 @@ export default {
 
       .goods-tag {
         margin-left: 5px;
+      }
+
+      .comment-wrapper {
+        .comment-title {
+          display: flex;
+          justify-content: space-between;
+          align-items center 
+          padding: 18px;
+          background $color-background-w
+
+          .info {
+            line-height 18px
+            .info-text {
+              padding 0 6px
+              font-size $font-size-medium-x
+              border-left 4px solid red
+            }
+
+            .info-num {
+              font-size $font-size-medium
+            }
+          }
+          .goods-evaluation {
+            font-size $font-size-medium
+          }
+        }
+
+        .look-more {
+          padding 6px 0
+          background $color-background-w
+          text-align center 
+          .van-button__text {
+            padding 10px
+          }
+        }
       }
     }
   }

@@ -1,7 +1,7 @@
 <template>
   <div class="addresss-cart" @click="edit">
     <template v-if="!currentType">
-      <van-icon name="location-o"/>
+      <van-icon name="location-o" />
       <div class="content">
         <h1 class="address">{{ addressData.address }}</h1>
         <div class="info">
@@ -9,14 +9,15 @@
           <span class="tel">{{ addressData.tel }}</span>
         </div>
       </div>
-      <van-icon name="arrow"/>
+      <van-icon :name="isLink?'arrow':''" />
     </template>
     <template v-if="currentType">
       <div class="add-address-wrapper">
-        <van-icon name="add-square"/>
+        <van-icon name="add-square" />
         <span class="text">添加收货地址</span>
       </div>
-      <van-icon name="arrow"/>
+
+      <van-icon name="arrow" />
     </template>
   </div>
 </template>
@@ -39,6 +40,10 @@ export default {
     address: {
       type: String,
       default: ""
+    },
+    isLink: {
+      type: Boolean,
+      default: true
     },
     addressData: {
       type: Object,

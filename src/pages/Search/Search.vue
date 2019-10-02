@@ -211,6 +211,8 @@ export default {
       console.log("search");
       this.setSearchHistory(this.value);
       this.isSearchIng = true;
+      this.currentPage = 1;
+      this.goodsList.splice(0);
       let params = {
         keyWord: this.value,
         current: this.currentPage
@@ -241,7 +243,7 @@ export default {
       };
       getGoodsListByKeyWords(params).then(res => {
         if (res.code === 0) {
-          if (res.data.list.length) {
+          if (res.data.list.length === 0) {
             this.hasMore = false;
           }
           res.data.list.forEach(item => {

@@ -1,7 +1,7 @@
 <template>
-  <div class="goods-item-single" @click="selecItem">
+  <div class="goods-item-single" @click="selecItem" @click.stop>
     <div class="goods-photo">
-      <img v-lazy="goods.img" alt class="photo" />
+      <img v-lazy="`http://192.168.1.53:9090/${goods.img}`" alt class="photo" />
     </div>
     <div class="goods-info van-hairline--bottom">
       <div class="goods-info-title">{{ goods.desc }}</div>
@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     selecItem() {
-      this.$emit("select", 12);
+      this.$emit("select",this.goods.goodsId);
     },
     addShopCart(){
       this.$emit('add-shop-cart')

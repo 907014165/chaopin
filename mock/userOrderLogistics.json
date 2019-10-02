@@ -1,0 +1,17 @@
+[
+    {
+        "sellerId": 1,
+        "name": "潮品商城",
+        "status":30,
+        "orderList": [
+            {
+                "skuId": 1,
+                "title": "商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题",
+                "desc": "颜色:傻白 尺码:42",
+                "price": 2.0,
+                "num": 3,
+                "thumb": "https://img.yzcdn.cn/vant/t-thirt.jpg"
+            }
+        ]
+    }
+]

@@ -1,7 +1,7 @@
 <template>
   <div class="fill-order">
     <nav-bar title="确认订单" @back="back"></nav-bar>
-    <address-cart id="14756" name="阮受涣" tel="180****5907" address="福建省三明市尤溪县台溪乡盖住村82号" :addressData="getCurrentAddr" @edit="edit"></address-cart>
+    <address-card id="14756" name="阮受涣" tel="180****5907" address="福建省三明市尤溪县台溪乡盖住村82号" :addressData="getCurrentAddr" @edit="edit"></address-card>
     <sku-group :has-footer="hasFooter" :is-seller="isSeller">
       <sku-item></sku-item>
     </sku-group>
@@ -42,7 +42,7 @@
 import NavBar from "base/NavBar/NavBar";
 import SkuItem from "components/SkuItem/SkuItem";
 import SkuGroup from "components/SkuGroup/SkuGroup";
-import AddressCart from "base/AddressCart/AddressCart";
+import AddressCard from "base/AddressCard/AddressCard";
 import {
   Cell,
   CellGroup,
@@ -133,7 +133,7 @@ export default {
   },
   components: {
     NavBar,
-    AddressCart,
+    AddressCard,
     SkuItem,
     SkuGroup,
     [Cell.name]: Cell,

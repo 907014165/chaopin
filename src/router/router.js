@@ -72,13 +72,20 @@ let routes = [
       {
         path: 'userinfo',
         name: 'userinfo',
-        component: () => import('pages/User/UserInfo/UserInfo.vue')
+        component: () => import('pages/User/UserInfo/UserInfo.vue'),
+        children: [
+          {
+            path: 'userInfoEdit',
+            name: 'userInfoEdit',
+            component: () => import('pages/User/UserInfo/UserInfoEdit.vue')
+          },
+        ]
       },
-      {
+      /* {
         path: 'userInfoEdit',
         name: 'userInfoEdit',
         component: () => import('pages/User/UserInfo/UserInfoEdit.vue')
-      },
+      }, */
       {
         path: 'order/:id',
         name: 'userorder',
@@ -153,6 +160,31 @@ let routes = [
     path: '/goodsDetail/:id',
     name: 'goodsDetail',
     component: () => import('components/GoodsDetail/GoodsDetail.vue')
+  },
+  {
+    path: '/test',
+    name: 'test',
+    component: () => import('pages/User/UserOrder/UserOrderDetail.vue')
+  },
+  {
+    path:'/logisticsDetail',
+    name:'logisticsDetail',
+    component: ()=>import('base/Logistics/LogisticsDetail.vue')
+  },
+  {
+    path: '/ratings',
+    name: 'ratings',
+    component: () => import('base/Ratings/RatingSeller.vue')
+  },
+  {
+    path:'/testComment',
+    name:'testComment',
+    component:()=>import('pages/Comment/Comment.vue')
+  },
+  {
+    path:'/testCommentCentre',
+    name:'testCommentCentre',
+    component:()=>import('pages/Comment/CommentCentre.vue')
   }
 ]
 

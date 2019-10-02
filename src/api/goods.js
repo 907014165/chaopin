@@ -19,8 +19,10 @@ export function getGoodsById(params) {
 //切换收藏
 export function toggleFavorite(params) {
     const url = "/api/member/favorite/add"
-    return axios.get(url, {
-        params
+    return axios({
+        url: url,
+        method: 'post',
+        data:params
     }).then(res => {
         return Promise.resolve(res.data)
     })
@@ -40,4 +42,17 @@ export function addShopCart(params) {
     }).then(res => {
         return Promise.resolve(res.data)
     }) */
+}
+
+//获取 评论列表
+export function getRatings(){
+    const url = 'api/getRatings'
+    let params = {
+
+    }
+    return axios.get(url,{
+        params
+    }).then(res=>{
+        return Promise.resolve(res.data)
+    })
 }
