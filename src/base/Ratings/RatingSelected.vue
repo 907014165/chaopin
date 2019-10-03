@@ -30,9 +30,10 @@
 </template>
 <script>
 import { Checkbox } from "vant";
-const ALL = 2;
-const POSITIVE = 0;
-const NEGATIVE = 1;
+const ALL = 3;//说有
+const POSITIVE = 0;//好评
+const NEGATIVE = 1;//差评
+const MID = 2;//中评
 export default {
   data() {
     return {
@@ -76,6 +77,11 @@ export default {
     negatives() {
       return this.ratings.filter(rating => {
         return rating.rateType === NEGATIVE;
+      });
+    },
+    midComment(){
+      return this.ratings.filter(rating => {
+        return rating.rateType === MID;
       });
     }
   },
@@ -153,7 +159,7 @@ export default {
 
     .van-checkbox__label {
       color: #93999f;
-      font-size 14px
+      font-size: 14px;
     }
   }
 }

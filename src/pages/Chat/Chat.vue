@@ -313,6 +313,7 @@ export default {
               console.log(event.target);
               console.log(event.height);
               console.log(event.width);
+              //此处应该
               let msg = { url: event.target, w: event.width, h: event.height };
               _this.sendMsg(msg, "img");
             },
@@ -678,7 +679,7 @@ export default {
     _connect(){
       console.log('test')
 
-      this.socket = require("socket.io-client")('http://192.168.1.50:9010',{
+      this.socket = require("socket.io-client")('http://172.30.203.227:9010',{
         "transports":['websocket', 'polling']
       });
       let msg = {

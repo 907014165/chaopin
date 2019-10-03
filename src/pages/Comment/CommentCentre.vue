@@ -1,6 +1,6 @@
 <template>
   <div class="comment-centre">
-    <nav-bar :title="'评价中心'"></nav-bar>
+    <nav-bar :title="'评价中心'" @back="back"></nav-bar>
     <van-tabs v-model="active">
       <van-tab title="待评论">
         <sku-group
@@ -31,6 +31,9 @@ export default {
     this._getUserOrder();
   },
   methods: {
+    back(){
+      this.$router.back()
+    },
     comment(index) {
       console.log("点击了评论按钮" + index);
       console.log(this.orderList[index])
@@ -56,6 +59,7 @@ export default {
             };
             seller.orderList.forEach(sku => {
               obj.skuList.push({
+                goodsId:sku.goodsId,
                 skuId: sku.skuId,
                 title: sku.title,
                 desc: sku.desc,

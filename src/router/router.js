@@ -182,8 +182,8 @@ let routes = [
     component:()=>import('pages/Comment/Comment.vue')
   },
   {
-    path:'/testCommentCentre',
-    name:'testCommentCentre',
+    path:'/commentCentre',
+    name:'commentCentre',
     component:()=>import('pages/Comment/CommentCentre.vue')
   }
 ]

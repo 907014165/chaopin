@@ -1,5 +1,5 @@
 <template>
-  <div class="sku-item" @click.stop>
+  <div class="sku-item" @click.stop="selectGoods">
     <van-card
       :num="sku.num"
       :price="sku.price"
@@ -83,6 +83,7 @@ export default {
       default() {
         return {
           skuId:1,
+          goodsId:33,
           title:
             "商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题",
           desc: "颜色:傻白 尺码:42",
@@ -107,6 +108,15 @@ export default {
         num
       }
       this.$emit('change-num',params)
+    },
+    //点击
+    selectGoods(){
+      this.$router.push({
+        path: `/home/goodsDetail/${this.sku.goodsId}`,
+        query: {
+          ParentPath: "home"
+        }
+      })
     }
   },
   components: {

@@ -138,6 +138,14 @@ module.exports = {
                     '^/coupon': '/'
                 }
             },
+            '/dindang':{
+                target: 'http://192.168.1.53:9092/', //对应优惠券接口
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/dindang': '/'
+                }
+            },
 
         }
     },

@@ -41,7 +41,7 @@
               <div>待发货</div>
             </van-col>
           </router-link>
-          <router-link to="/user/order/3">
+          <router-link to="/commentCentre">
             <van-col span="6">
               <van-icon name="chat-o" :info="55"></van-icon>
               <div>待评价</div>

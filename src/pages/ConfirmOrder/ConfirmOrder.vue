@@ -3,7 +3,7 @@
     <nav-bar title="确认订单" @back="back"></nav-bar>
     <address-card id="14756" name="阮受涣" tel="180****5907" address="福建省三明市尤溪县台溪乡盖住村82号" :addressData="getCurrentAddr" @edit="edit"></address-card>
     <sku-group :has-footer="hasFooter" :is-seller="isSeller">
-      <sku-item></sku-item>
+      <sku-item :sku="order"></sku-item>
     </sku-group>
     <van-cell-group>
       <van-field
@@ -72,7 +72,7 @@ const coupon = {
 export default {
   data() {
     return {
-      order: this.$route.query.data,
+      order: this.$route.query.skuGoods,
       message: "",
       chosenCoupon: -1,
       hasFooter:false,
@@ -114,6 +114,8 @@ export default {
     },
     onSubmit() {
       Toast.success("暂无后续逻辑");
+      console.log(this.order)
+      console.log(this.$route)
     },
     toggle(index) {
       this.$refs.checkboxes[index].toggle();

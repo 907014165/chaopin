@@ -60,11 +60,14 @@
                 <span class="info-text">评价</span>
                 <span class="info-num">65</span>
               </div>
-              <div class="goods-evaluation">96%</div>
+              <div class="goods-evaluation" @click="lookMoreComment">
+                <span>96%</span>
+                <van-icon name="arrow" />
+              </div>
             </div>
             <rating-seller :is-all-ratings="false" @refresh="scrollRefresh"></rating-seller>
             <div class="look-more">
-              <van-button plain hairline type="default" round size="small" to="/ratings">查看全部评论</van-button>
+              <van-button plain hairline type="default" round size="small" @click="lookMoreComment">查看全部评论</van-button>
             </div>
           </div>
         </div>
@@ -192,9 +195,20 @@ export default {
   computed: {
     currentSelectSku() {
       if (JSON.stringify(this.sku) !== "{}") {
+        /* let str = '已选  '
+        for(let i=0;i<this.sku.length;i++){
+          str+=this.sku.tree[i].v[this.initialSku.s1 - 1].name
+        } */
         return `已选  ${this.sku.tree[0].v[this.initialSku.s1 - 1].name},${this.sku.tree[1].v[this.initialSku.s2 - 1].name}`;
       } else {
         return "选择规格";
+      }
+    },
+    currentSelectSkuImg() {
+      if (JSON.stringify(this.sku) !== "{}") {
+        return `${this.sku.tree[0].v[this.initialSku.s1 - 1].imgUrl}`;
+      } else {
+        return "";
       }
     }
   },
@@ -202,6 +216,11 @@ export default {
     scrollRefresh() {
       console.log("scroll refresh");
       this.$refs.scroll.refresh();
+    },
+    lookMoreComment(){
+      this.$router.push({
+        path:'/ratings',
+      })
     },
     formatPrice() {
       return "¥" + (this.goods.price / 100).toFixed(2);
@@ -247,7 +266,16 @@ export default {
       this.$router.push({
         path: `/${this.$route.query.ParentPath}/goodsDetail/${data.goodsId}/confirmOrder/${data.selectedSkuComb.id}`,
         query: {
-          data
+          id:33,
+          skuGoods: {
+            skuId: data.selectedSkuComb.id,
+            goodsId: data.goodsId,
+            title: this.goods1.goodsName,
+            desc: this.currentSelectSku,
+            price: data.selectedSkuComb.price,
+            num: data.selectedNum,
+            thumb: this.currentSelectSkuImg
+          }
         }
       });
     },
@@ -348,7 +376,7 @@ export default {
     [GoodsActionIcon.name]: GoodsActionIcon,
     [GoodsActionButton.name]: GoodsActionButton,
     [Sku.name]: Sku,
-    [Button.name]:Button,
+    [Button.name]: Button,
     Scroll,
     Skeleton,
     RatingSeller
@@ -492,33 +520,38 @@ export default {
         .comment-title {
           display: flex;
           justify-content: space-between;
-          align-items center 
+          align-items: center;
           padding: 18px;
-          background $color-background-w
+          background: $color-background-w;
 
           .info {
-            line-height 18px
+            line-height: 18px;
+
             .info-text {
-              padding 0 6px
-              font-size $font-size-medium-x
-              border-left 4px solid red
+              padding: 0 6px;
+              font-size: $font-size-medium-x;
+              border-left: 4px solid red;
             }
 
             .info-num {
-              font-size $font-size-medium
+              font-size: $font-size-medium;
             }
           }
+
           .goods-evaluation {
-            font-size $font-size-medium
+            font-size: $font-size-medium;
+            display flex
+            align-items center
           }
         }
 
         .look-more {
-          padding 6px 0
-          background $color-background-w
-          text-align center 
+          padding: 6px 0;
+          background: $color-background-w;
+          text-align: center;
+
           .van-button__text {
-            padding 10px
+            padding: 10px;
           }
         }
       }

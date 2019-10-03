@@ -24,17 +24,26 @@
       </div>
     </div>-->
     <div class="comment-content">
-      <comment-goods v-for="(item,index) in seller.skuList" :current-index="index" :key="index"></comment-goods>
+      <comment-goods
+        v-for="(item,index) in seller.skuList"
+        :current-index="index"
+        :goods-id="item.goodsId"
+        :key="index"
+      ></comment-goods>
       <span class="split"></span>
       <div class="seller-comment">
         <h2 class="title">店铺评价</h2>
         <div class="rateLogistics">
-          <span class="related-desc">物流服务</span>
+          <span class="related-desc">守时程度</span>
           <van-rate v-model="rateLogistics" color="#f23030" />
         </div>
         <div class="rateCourtesy">
           <span class="related-desc">服务态度</span>
           <van-rate v-model="rateCourtesy" color="#f23030" />
+        </div>
+        <div class="serviceQualityScores">
+          <span class="related-desc">服务质量</span>
+          <van-rate v-model="serviceQualityScores" color="#f23030" />
         </div>
       </div>
     </div>
@@ -46,14 +55,15 @@ import NavBar from "base/NavBar/NavBar";
 import CommentGoods from "./CommentGoods";
 import Scroll from "base/Scroll/Scroll";
 import { Rate, Field, Uploader, Checkbox, Toast } from "vant";
-import { mapGetters } from 'vuex'
-
+import { mapGetters } from "vuex";
+import { reportComment } from 'api/comment.js'
 export default {
   data() {
     return {
       rateLogistics: 0, //物流评价
       rateCourtesy: 0, //商家服务态度评价
-      seller:this.$route.query.seller,//待评价的商家以及带评价的商品列表
+      serviceQualityScores: 0, //服务质量
+      seller: this.$route.query.seller //待评价的商家以及带评价的商品列表
     };
   },
   props: {
@@ -90,7 +100,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getCurrentCommentList:'currentCommentList'
+      getCurrentCommentList: "currentCommentList"
     })
   },
   methods: {
@@ -107,7 +117,23 @@ export default {
         return;
       }
       console.log("发表评论");
-      console.log(this.getCurrentCommentList)
+      /* console.log(this.getCurrentCommentList) */
+      let comment = {
+        goodsComment: this.getCurrentCommentList,
+        storeComment: {
+          inTimeScores: this.rateLogistics,
+          serviceAttitudeScores: this.rateCourtesy,
+          serviceQualityScores: this.serviceQualityScores,
+          orderId: 34448,
+          storeId: 1,
+          memberId: 1
+        }
+      };
+      reportComment(comment).then(res=>{
+        if(res.data){
+          Toast.success('发表评论成功');
+        }
+      })
     }
   },
   components: {
@@ -167,6 +193,12 @@ export default {
     }
 
     .rateCourtesy {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+    }
+
+    .serviceQualityScores {
       display: flex;
       align-items: center;
       padding: 10px 15px;

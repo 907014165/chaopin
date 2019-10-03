@@ -16,7 +16,7 @@
         :autosize="{minHeight: 60}"
       />
       <div class="file-uploader">
-        <van-uploader v-model="fileList" multiple :max-count="5" />
+        <van-uploader v-model="fileList" multiple :max-count="5" @delete="fileListDelete" />
         <div class="anonymity van-hairline--top">
           <van-checkbox v-model="isAnonymity" checked-color="#f23030" @change="change">匿名</van-checkbox>
           <span class="anonymity-text">{{ anonymityText }}</span>
@@ -27,7 +27,8 @@
 </template>
 <script>
 import { Rate, Field, Uploader, Checkbox } from "vant";
-import { mapMutations } from 'vuex'
+import { mapMutations } from "vuex";
+import { fileUpload, fileUpload22 } from "api/comment.js";
 export default {
   data() {
     return {
@@ -35,22 +36,28 @@ export default {
       message: "",
       isAnonymity: true,
       fileList: [],
-      anonymityText: "你写的评论将以匿名的方式展现"
+      anonymityText: "你写的评论将以匿名的方式展现",
+      imgList:[]
     };
   },
   props: {
     currentIndex: {
       type: Number,
       default: 0
+    },
+    goodsId: {
+      type: Number,
+      default: 11
     }
   },
   computed: {
     comment() {
       return {
-        rateGoods: this.rateGoods,
-        message: this.message,
-        isAnonymity: this.isAnonymity,
-        fileList: this.fileList
+        scores: this.rateGoods,
+        content: this.message,
+        isAnonymous: this.isAnonymity?1:0,
+        commentImageList: this.imgList,
+        goodsId: this.goodsId
       };
     }
   },
@@ -62,13 +69,23 @@ export default {
         this.anonymityText = "公开的评价会展示在个人主页哟";
       }
     },
+    fileListDelete(file, detail) {
+      console.log(file);
+      console.log(detail);
+      this.imgList.splice(detail.index,1)
+      let params = {
+        index: this.currentIndex,
+        comment: this.comment
+      };
+      this.setCurrentCommentList(params);
+    },
     changeRate(score) {
       console.log(score);
       let params = {
         index: this.currentIndex,
         comment: this.comment
       };
-      this.setCurrentCommentList(params)
+      this.setCurrentCommentList(params);
     },
     blur() {
       console.log("fds");
@@ -76,10 +93,17 @@ export default {
         index: this.currentIndex,
         comment: this.comment
       };
-      this.setCurrentCommentList(params)
+      this.setCurrentCommentList(params);
     },
+    _fileUpload(file) {
+      fileUpload(file).then(res => {
+        console.log(res);
+        this.imgList.push(res.data)
+      });
+    },
+
     ...mapMutations({
-      setCurrentCommentList:'SET_CURRENT_COMMENT_LIST'
+      setCurrentCommentList: "SET_CURRENT_COMMENT_LIST"
     })
   },
   watch: {
@@ -89,15 +113,35 @@ export default {
         index: this.currentIndex,
         comment: this.comment
       };
-      this.setCurrentCommentList(params)
+      this.setCurrentCommentList(params);
     },
-    fileList() {
-      console.log("评论的图片列表发生改变");
-      let params = {
-        index: this.currentIndex,
-        comment: this.comment
-      };
-      this.setCurrentCommentList(params)
+    fileList(newval, oldval) {
+      if (newval.length > oldval.length) {
+        console.log('add')
+        let formdata = new FormData();
+        formdata.append(
+          "img",
+          this.fileList[0].file,
+          this.fileList[0].file.name
+        );
+        console.log(formdata.get("img"));
+        this._fileUpload(formdata);
+        let params = {
+          index: this.currentIndex,
+          comment: this.comment
+        };
+        this.setCurrentCommentList(params);
+      }
+
+      /* let arr = []
+      arr.push() */
+
+      /* formdata.append('img',this.fileList[0].file,this.fileList[0].file.name)
+      formdata.append('img',this.fileList[0].file,this.fileList[0].file.name) */
+
+      /* fileUpload22(formdata).then(res=>{
+        console.log(res)
+      }) */
     }
   },
   components: {

@@ -1,59 +1,63 @@
 <template>
-  <div class="rating-seller">
-    <nav-bar :title="'商品评论'" @back="back()" v-if="isAllRatings"></nav-bar>
-    <rating-selected
-      :ratings="ratings"
-      :select-type="selectType"
-      :onlyContent="onlyContent"
-      @toggle-only="toggleOnly"
-      @change-all="changeAll"
-      @change-positive="changePositive"
-      @change-negative="changeNegative"
-      v-if="isAllRatings"
-    ></rating-selected>
-    <div class="rating-wrapper">
-      <ul>
-        <li
-          class="rating-item van-hairline--bottom"
-          v-for="(rating,index) in selectRating"
-          :key="index"
-        >
-          <div class="avatar">
-            <img :src="rating.avatar" alt />
-          </div>
-          <div class="content">
-            <h1 class="name">{{ rating.username }}</h1>
-            <div class="star-wrapper">
-              <van-rate v-model="rating.score" readonly color="#f23030" />
+  <transition name="van-slide-right">
+    <div class="rating-seller">
+      <nav-bar :title="'商品评论'" @back="back()" v-if="isAllRatings"></nav-bar>
+      <rating-selected
+        :ratings="ratings"
+        :select-type="selectType"
+        :onlyContent="onlyContent"
+        @toggle-only="toggleOnly"
+        @change-all="changeAll"
+        @change-positive="changePositive"
+        @change-negative="changeNegative"
+        v-if="isAllRatings"
+      ></rating-selected>
+      <div class="rating-wrapper">
+        <ul>
+          <li
+            class="rating-item van-hairline--bottom"
+            v-for="(rating,index) in selectRating"
+            :key="index"
+          >
+            <div class="avatar">
+              <img :src="rating.avatar" alt />
             </div>
-            <p class="text">{{ rating.text }}</p>
-            <template v-if="rating.commentImgList.length">
-              <img
-                :src="img"
-                alt
-                v-for="(img,index) in rating.commentImgList"
-                :key="index"
-                @click="showImgPreview(rating.commentImgList,index)"
-              />
-            </template>
-            <div class="time">{{ rating.rateTime|formatDate }}</div>
-          </div>
-        </li>
-      </ul>
+            <div class="content">
+              <h1 class="name">{{ rating.username }}</h1>
+              <div class="star-wrapper">
+                <van-rate v-model="rating.score" readonly color="#f23030" />
+              </div>
+              <p class="text">{{ rating.text }}</p>
+              <template v-if="rating.commentImgList.length">
+                <img
+                  :src="img"
+                  alt
+                  v-for="(img,index) in rating.commentImgList"
+                  :key="index"
+                  @click="showImgPreview(rating.commentImgList,index)"
+                />
+              </template>
+              <div class="time">{{ rating.rateTime|formatDate }}</div>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 <script>
 import Vue from "vue";
 import RatingSelected from "./RatingSelected";
 import { Rate, ImagePreview } from "vant";
-import NavBar from 'base/NavBar/NavBar'
+import NavBar from "base/NavBar/NavBar";
 import moment from "moment";
 import { getRatings } from "api/goods.js";
 Vue.use(ImagePreview);
-const ALL = 2;
+//0 1 2 
+const ALL = 3;
 const POSITIVE = 0;
 const NEGATIVE = 1;
+const MID = 2;
 export default {
   data() {
     return {
@@ -77,9 +81,9 @@ export default {
       type: true,
       default: false
     },
-    isAllRatings:{
-      type:Boolean,
-      default:true
+    isAllRatings: {
+      type: Boolean,
+      default: true
     }
   },
   created() {
@@ -88,7 +92,7 @@ export default {
   computed: {
     //当前选中的评论类型
     selectRating() {
-      let ratings =  this.ratings.filter(rating => {
+      let ratings = this.ratings.filter(rating => {
         if (this.selectedType === 2) {
           if (this.onlycontent) {
             return rating.text !== "" ? true : false;
@@ -103,17 +107,17 @@ export default {
           }
         }
       });
-      if(this.isAllRatings){
-        return ratings
-      }else{
-        return ratings.splice(0,2)
+      if (this.isAllRatings) {
+        return ratings;
+      } else {
+        return ratings.splice(0, 2);
       }
     }
   },
   methods: {
     //返回的回调
-    back(){
-      this.$router.back()
+    back() {
+      this.$router.back();
     },
     //只看有内容的评论
     toggleOnly() {
@@ -131,7 +135,7 @@ export default {
     changeNegative() {
       this.selectedType = NEGATIVE;
     },
-    //图片预览 
+    //图片预览
     showImgPreview(imgList, startIndex) {
       ImagePreview({
         images: imgList,
@@ -159,10 +163,10 @@ export default {
   },
   watch: {
     //当组件被 商品详情调用时 为了能让better-scroll重新计算dom 监听raging数组的变化让scroll重新计算高度
-    ratings(){
-      setTimeout(()=>{
-        this.$emit('refresh')
-      },20)
+    ratings() {
+      setTimeout(() => {
+        this.$emit("refresh");
+      }, 20);
     }
   },
   components: {
@@ -173,9 +177,11 @@ export default {
 };
 </script>
 <style lang="stylus">
-@import '~common/stylus/variable.styl'
+@import '~common/stylus/variable.styl';
+
 .rating-seller {
-  background $color-background-w
+  background: $color-background-w;
+
   .rating-wrapper {
     padding: 0 18px;
 
@@ -202,7 +208,7 @@ export default {
         img {
           height: 96px;
           width: 96px;
-          margin 0 1px
+          margin: 0 1px;
           object-fit: cover;
         }
 
