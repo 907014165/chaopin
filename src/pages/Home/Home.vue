@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <scroll class="scroll-wrapper" :data="goodsList" ref="scroll" @load="loadMore" :pull-up="true">
+    <scroll class="scroll-wrapper" :data="goodsList" ref="scroll" :has-more="hasMore" @load="loadMore" :pull-up="true">
       <div class="scroll-content">
         <div class="search-box-wrapper">
           <van-search
@@ -31,14 +31,14 @@
         </van-grid>
         <goods-list :goods-list="goodsList" @selected="selectGoods"></goods-list>
         <!-- <goods-list :goods-list="recommendList" @selected="selectGoods"></goods-list> -->
-        <div class="pullup-wrapper">
+        <!-- <div class="pullup-wrapper">
           <div v-if="!isPullUpLoad" class="before-trigger">
             <span class="pullup-txt">{{ pullUpText }}</span>
           </div>
           <div v-else class="after-trigger">
             <van-loading size="24px">加载中...</van-loading>
           </div>
-        </div>
+        </div> -->
       </div>
     </scroll>
     <transition name="van-slide-right">
@@ -109,7 +109,7 @@ export default {
       currentPage: 1, //查询的当前页数
       loading: false, //
       finished: false, //
-      hsaMore: true, //判断是否 还有更多的值
+      hasMore: true, //判断是否 还有更多的值
       immediateCheck: false,
       isPullUpLoad: false, //是否上拉刷新
       pullUpText: "上拉加载更多..."
@@ -202,13 +202,13 @@ export default {
         }
       });
     },
-    loadMore() {
-      if (!this.hsaMore) {
+    loadMore(callback) {
+      if (!this.hasMore) {
         this.pullUpText = "别拉了！到底了...";
         return;
       }
       //开启上拉刷新
-      this.isPullUpLoad = true;
+      //this.isPullUpLoad = true;
       //当前页加一
       this.currentPage++;
       let params = {
@@ -219,7 +219,7 @@ export default {
         if (res.code === 0) {
           //如果获取 数据为0 则为没有更多的数据
           if (res.data.list.length === 0) {
-            this.hsaMore = false;
+            this.hasMore = false;
           }
           res.data.list.forEach(item => {
             this.goodsList.push(
@@ -233,12 +233,15 @@ export default {
               })
             );
           });
-          //结束上拉刷新
+          /* //结束上拉刷新
           this.$refs.scroll.finishPullUp();
           //让scroll重新渲染
           this.$refs.scroll.refresh();
           //结束上拉刷新
-          this.isPullUpLoad = false;
+          this.isPullUpLoad = false; */
+
+          //结束上拉刷新的回调函数
+          callback()
         }
       });
     },

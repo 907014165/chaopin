@@ -24,16 +24,16 @@
                     @click="showPreviewImg(row.msg.url)"
                     alt
                     :style="{'width': row.msg.w+'px','height': row.msg.h+'px'}"
-                  >
+                  />
                 </div>
               </div>
               <div class="right">
-                <img src="./face.jpg" alt>
+                <img src="./face.jpg" alt />
               </div>
             </div>
             <div class="other" v-if="row.uid!=myuid">
               <div class="left">
-                <img src="./logo.png" alt>
+                <img src="./logo.png" alt />
               </div>
               <div class="right">
                 <div class="username">
@@ -45,11 +45,11 @@
                 </div>
                 <div class="bubble img" v-if="row.type=='img'">
                   <img
-                    :src="row.msg.url"
+                    :src="`http://192.168.1.52:9010/${row.msg.url}`"
                     @click="showPreviewImg(row.msg.url)"
                     alt
                     :style="{'width': row.msg.w+'px','height': row.msg.h+'px'}"
-                  >
+                  />
                 </div>
               </div>
             </div>
@@ -58,7 +58,7 @@
       </scroll>
       <div class="input-box van-hairline--bottom" :class="showEmji">
         <div class="more" @click="pickImg">
-          <van-icon name="photo-o"/>
+          <van-icon name="photo-o" />
         </div>
 
         <div class="textbox">
@@ -73,7 +73,7 @@
             />
           </div>
           <div class="em" @click="chooseEmoji">
-            <van-icon name="smile-o"/>
+            <van-icon name="smile-o" />
           </div>
         </div>
 
@@ -85,7 +85,7 @@
         <van-swipe indicator-color="black">
           <van-swipe-item v-for="(page,pid) in emojiList" :key="pid">
             <div class="emoji" v-for="(em,eid) in page" :key="eid" @click="addEmoji(em)">
-              <img :src="em.url" alt>
+              <img :src="em.url" alt />
             </div>
           </van-swipe-item>
         </van-swipe>
@@ -97,12 +97,17 @@
         @select="onSelect"
         @cancel="onCancel"
       />
-      <van-image-preview v-model="showPreview" :images="msgImgList" @change="onChange" :start-position="startPosition"></van-image-preview>
+      <van-image-preview
+        v-model="showPreview"
+        :images="msgImgList"
+        @change="onChange"
+        :start-position="startPosition"
+      ></van-image-preview>
     </div>
   </transition>
 </template>
 <script>
-import Vue from 'vue'
+import Vue from "vue";
 import NavBar from "base/NavBar/NavBar";
 import Scroll from "base/Scroll/Scroll";
 import {
@@ -114,14 +119,14 @@ import {
   Uploader,
   ImagePreview
 } from "vant";
-Vue.use(ImagePreview)
+Vue.use(ImagePreview);
 export default {
   name: "chat",
   data() {
     return {
       show: false,
-      showPreview:false,
-      startPosition:0,
+      showPreview: false,
+      startPosition: 0,
       imgSrc: "",
       actions: [{ name: "从相册中选取", value: 1 }, { name: "拍照", value: 2 }],
       publicPath: process.env.BASE_URL,
@@ -263,24 +268,24 @@ export default {
       ],
       showEmji: "",
       isFocus: false,
-      socket: null,
+      socket: null
     };
   },
   created() {
-    this.getMsgList()
-    this._connect()
+    this.getMsgList();
+    this._connect();
   },
   methods: {
     back() {
       this.$router.back();
     },
-    showPreviewImg(imgUrl){
-      let index = this.msgImgList.findIndex((item)=>{
-        return item === imgUrl
-      })
-      console.log(index)
-      this.showPreview = true
-      this.startPosition = index
+    showPreviewImg(imgUrl) {
+      let index = this.msgImgList.findIndex(item => {
+        return item === imgUrl;
+      });
+      console.log(index);
+      this.showPreview = true;
+      this.startPosition = index;
     },
     //预览图 切换图片时 回调
     onChange(index) {
@@ -288,7 +293,7 @@ export default {
     },
     //当屏幕滚动时的回调函数
     onScroll(pos) {
-      this.showEmji = ""
+      this.showEmji = "";
       //console.log(pos)
       /* if (this.isFocus) {
         this.inputFoucs();
@@ -344,12 +349,50 @@ export default {
               console.log(event.height);
               console.log(event.width);
               let msg = { url: event.target, w: event.width, h: event.height };
+
+              var wt = plus.nativeUI.showWaiting("上传中...");
+              var task = plus.uploader.createUpload(
+                "http://192.168.1.52:9010/upload",
+                { method: "POST" },
+                function(t, status) {
+                  //上传完成
+                  console.log(JSON.stringify(t));
+                  console.log(t.responseText)
+                  console.log(t.responseText.path)
+                  let imgStr = `<img src="192.168.1.52:9010/${t.responseText.path}">`;
+                  let msg11 = {
+                    type: "private",
+                    uid: "潮品客服",
+                    content: imgStr,
+                    from_uid: "251525",
+                    chat_type: "text"
+                  };
+                  _this.socket.emit("message", msg11);
+                  if (status == 200) {
+                    wt.close();
+                  } else {
+                    wt.close();
+                  }
+                }
+              );
+              //task.addData('token', ORANGE.UserInfo.token());		//后台接口设定的参数
+              //task.addData('path', opt.path);						//后台接口设定的参数
+              task.addFile(event.target, { key: "file" });
+
+              task.start();
               _this.sendMsg(msg, "img");
             },
             function(error) {
               console.log("压缩失败");
             }
           );
+          let formdata = new FormData();
+          /* formdata.append(
+            "img",
+            this.fileList[0].file,
+            this.fileList[0].file.name
+          );
+          console.log(formdata.get("img")); */
         },
         function(err) {},
         null
@@ -391,7 +434,7 @@ export default {
         return;
       }
       this.isFocus = false;
-      this.showEmji = ""
+      this.showEmji = "";
     },
     //滚动到底部
     scrollEnd() {
@@ -426,7 +469,7 @@ export default {
     //接受消息(筛选处理)
     screenMsg(msg) {
       //从长连接处转发给这个方法，进行筛选处理
-      console.log(msg)
+      console.log(msg);
       switch (msg.type) {
         case "text":
           this.addTextMsg(msg);
@@ -450,15 +493,16 @@ export default {
       if (!this.textMsg) {
         return;
       }
+      
       //构造消息
       let msg11 = {
-        "type":"private",
-        "uid":'chat-kefu-admin',
-        "content":this.textMsg,
-        "from_uid":"251525",
-        "chat_type":"text"
-      }
-      this.socket.emit("message",msg11)
+        type: "private",
+        uid: "潮品客服",
+        content: this.textMsg,
+        from_uid: "251525",
+        chat_type: "text"
+      };
+      this.socket.emit("message", msg11);
       let content = this.replaceEmoji(this.textMsg);
       let msg = { content: content };
       this.sendMsg(msg, "text");
@@ -501,6 +545,15 @@ export default {
           content.h = img.height;
         }
       }
+
+      /* let msg11 = {
+        type: "private",
+        uid: "潮品客服",
+        content: content,
+        from_uid: "251525",
+        chat_type: "text"
+      };
+      this.socket.emit("message", msg11); */
       var nowDate = new Date();
       let lastid = this.msgList[this.msgList.length - 1].id;
       lastid++;
@@ -546,7 +599,7 @@ export default {
       this.msgList.push(msg);
     },
     //获取聊天记录
-    getMsgList(){
+    getMsgList() {
       let list = [
         {
           id: 0,
@@ -668,42 +721,42 @@ export default {
         }
       ];
       this.msgList = list;
-      for(let i=0;i<list.length;i++){
-        if(list[i].type=='img'){
-						list[i] = this.setPicSize(list[i]);
-						//console.log("list[i]: " + JSON.stringify(list[i]));
-						this.msgImgList.push(list[i].msg.url);
-				}
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].type == "img") {
+          list[i] = this.setPicSize(list[i]);
+          //console.log("list[i]: " + JSON.stringify(list[i]));
+          this.msgImgList.push(list[i].msg.url);
+        }
       }
     },
-    _connect(){
-      console.log('test')
+    _connect() {
+      console.log("test");
 
-      this.socket = require("socket.io-client")('http://172.30.203.227:9010',{
-        "transports":['websocket', 'polling']
+      this.socket = require("socket.io-client")("http://192.168.1.52:9010", {
+        transports: ["websocket", "polling"]
       });
       let msg = {
-        "uid":'251525',
-      }
+        uid: "251525"
+      };
       //客户端上线
-      this.socket.emit('login',msg)
+      this.socket.emit("login", msg);
 
       //服务端连接
-      this.socket.on('message',msg => {
-        console.log(msg)
+      this.socket.on("message", msg => {
+        console.log(msg);
         let msg1 = {
           id: 6,
           uid: 1,
           username: "大黑哥",
           face: "/static/img/face.jpg",
-          time:'',
+          time: "",
           type: msg.chat_type,
           msg: {
-            content:msg.content
+            content: msg.content
           }
-        }
-        this.screenMsg(msg1)
-      })
+        };
+        this.screenMsg(msg1);
+      });
     }
   },
   components: {
@@ -714,7 +767,7 @@ export default {
     [Icon.name]: Icon,
     [Button.name]: Button,
     [ActionSheet.name]: ActionSheet,
-    [Uploader.name]: Uploader,
+    [Uploader.name]: Uploader
   }
 };
 </script>

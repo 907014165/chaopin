@@ -98,6 +98,9 @@ export default {
       }
     } */
   },
+  mounted() {
+    console.log(this.seller)
+  },
   computed: {
     ...mapGetters({
       getCurrentCommentList: "currentCommentList"
@@ -124,11 +127,11 @@ export default {
           inTimeScores: this.rateLogistics,
           serviceAttitudeScores: this.rateCourtesy,
           serviceQualityScores: this.serviceQualityScores,
-          orderId: 34448,
-          storeId: 1,
-          memberId: 1
+          orderId: this.seller.orderId,
+          storeId: 1
         }
       };
+      console.log(comment)
       reportComment(comment).then(res=>{
         if(res.data){
           Toast.success('发表评论成功');

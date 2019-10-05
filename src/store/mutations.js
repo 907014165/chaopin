@@ -91,8 +91,17 @@ const mutations = {
     [types.SET_IS_SHOP_CART](state,status){
         state.isAddShopCart = status
     },
+    //？？？ 当前即将评论的 商品列表
     [types.SET_CURRENT_COMMENT_LIST](state,params){
         state.currentCommentList.splice(params.index,1,params.comment)
+    },
+    //当前订单详情
+    [types.SET_CURRENT_ORDER_DETAIL](state,currentOrderDetail){
+        state.currentOrderDetail = Object.assign({},currentOrderDetail)
+    },
+    //设置是否有 从购物车购买商品的动作
+    [types.SET_IS_BUY_GOODS](state,status){
+        state.isByGoods = status
     }
 }
 

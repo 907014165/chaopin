@@ -10,6 +10,7 @@
         @change-all="changeAll"
         @change-positive="changePositive"
         @change-negative="changeNegative"
+        @change-mid="changeMid"
         v-if="isAllRatings"
       ></rating-selected>
       <div class="rating-wrapper">
@@ -30,7 +31,7 @@
               <p class="text">{{ rating.text }}</p>
               <template v-if="rating.commentImgList.length">
                 <img
-                  :src="img"
+                  :src="`http://192.168.1.53:9092/${img}`"
                   alt
                   v-for="(img,index) in rating.commentImgList"
                   :key="index"
@@ -50,20 +51,24 @@ import Vue from "vue";
 import RatingSelected from "./RatingSelected";
 import { Rate, ImagePreview } from "vant";
 import NavBar from "base/NavBar/NavBar";
+import Scroll from 'base/Scroll/Scroll'
 import moment from "moment";
 import { getRatings } from "api/goods.js";
+import { getComments } from "api/comment.js";
+import GoodsComment from "common/js/goodsComment.js";
 Vue.use(ImagePreview);
-//0 1 2 
-const ALL = 3;
-const POSITIVE = 0;
-const NEGATIVE = 1;
-const MID = 2;
+//0 1 2
+const ALL = 3; //所有
+const POSITIVE = 0; //好评
+const NEGATIVE = 2; //差评
+const MID = 1; //中评
 export default {
   data() {
     return {
       selectedType: this.selectType,
       onlycontent: this.onlyContent,
-      ratings: [] //所有的评论列表
+      ratings: [], //评论列表
+      currentPage: 1
     };
   },
   props: {
@@ -75,7 +80,7 @@ export default {
     }, */
     selectType: {
       type: Number,
-      default: 2
+      default: 3
     },
     onlyContent: {
       type: true,
@@ -87,13 +92,14 @@ export default {
     }
   },
   created() {
-    this._getRatings();
+    //this._getRatings();
+    this._getComments();
   },
   computed: {
     //当前选中的评论类型
     selectRating() {
       let ratings = this.ratings.filter(rating => {
-        if (this.selectedType === 2) {
+        if (this.selectedType === ALL) {
           if (this.onlycontent) {
             return rating.text !== "" ? true : false;
           } else {
@@ -135,6 +141,10 @@ export default {
     changeNegative() {
       this.selectedType = NEGATIVE;
     },
+    //切换为中评
+    changeMid() {
+      this.selectedType = MID;
+    },
     //图片预览
     showImgPreview(imgList, startIndex) {
       ImagePreview({
@@ -153,6 +163,32 @@ export default {
           this.ratings = res.data.ratings;
         }
       });
+    },
+    _getComments(){
+      this.currentPage = 1;
+      let params = {
+        current: this.currentPage,
+        goodsCommonId:1,
+        type:this.selectedType===ALL?null:this.selectedType
+      };
+      this.ratings.splice(0);
+      getComments(params).then(res=>{
+        console.log(res)
+        res.data.forEach(comment=>{
+          let commentImgList = comment.commentImageList
+          let goodsComment = new GoodsComment({
+            username:comment.nickname,
+            rateTime:comment.createTime,
+            score:comment.scores,
+            rateType:comment.type,
+            desc:comment.spec,
+            text:comment.content,
+            avatar:comment.avatar,
+            commentImgList:commentImgList
+          })
+          this.ratings.push(goodsComment)
+        })
+      })
     }
   },
   filters: {
@@ -167,6 +203,10 @@ export default {
       setTimeout(() => {
         this.$emit("refresh");
       }, 20);
+    },
+    //监听selectedType 的变化根据不同的selectedType 请求对应的数据
+    selectedType() {
+      this._getComments()
     }
   },
   components: {

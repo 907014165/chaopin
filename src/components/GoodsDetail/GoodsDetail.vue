@@ -67,16 +67,17 @@
             </div>
             <rating-seller :is-all-ratings="false" @refresh="scrollRefresh"></rating-seller>
             <div class="look-more">
-              <van-button plain hairline type="default" round size="small" @click="lookMoreComment">查看全部评论</van-button>
+              <van-button
+                plain
+                hairline
+                type="default"
+                round
+                size="small"
+                @click="lookMoreComment"
+              >查看全部评论</van-button>
             </div>
           </div>
         </div>
-        <van-goods-action>
-          <van-goods-action-icon icon="chat-o" @click="connectKefu">客服</van-goods-action-icon>
-          <van-goods-action-icon icon="cart-o" @click="onClickCart">购物车</van-goods-action-icon>
-          <van-goods-action-button type="warning" @click="clickShopCart">加入购物车</van-goods-action-button>
-          <van-goods-action-button type="danger" @click="buy">立即购买</van-goods-action-button>
-        </van-goods-action>
 
         <!-- <van-sku
         ref="sku"
@@ -97,6 +98,12 @@
         @add-cart="onAddCartClicked"
         />-->
       </scroll>
+      <van-goods-action>
+        <van-goods-action-icon icon="chat-o" @click="connectKefu">客服</van-goods-action-icon>
+        <van-goods-action-icon icon="cart-o" @click="onClickCart">购物车</van-goods-action-icon>
+        <van-goods-action-button type="warning" @click="clickShopCart">加入购物车</van-goods-action-button>
+        <van-goods-action-button type="danger" @click="buy">立即购买</van-goods-action-button>
+      </van-goods-action>
       <template v-if="goods1">
         <van-sku
           ref="sku"
@@ -217,10 +224,10 @@ export default {
       console.log("scroll refresh");
       this.$refs.scroll.refresh();
     },
-    lookMoreComment(){
+    lookMoreComment() {
       this.$router.push({
-        path:'/ratings',
-      })
+        path: "/ratings"
+      });
     },
     formatPrice() {
       return "¥" + (this.goods.price / 100).toFixed(2);
@@ -266,7 +273,23 @@ export default {
       this.$router.push({
         path: `/${this.$route.query.ParentPath}/goodsDetail/${data.goodsId}/confirmOrder/${data.selectedSkuComb.id}`,
         query: {
-          id:33,
+          id: 33,
+          /* sellerId:,
+          sellerName:, */
+          /* seller: {
+            
+            skuList: [
+              {
+                skuId: data.selectedSkuComb.id,
+                goodsId: data.goodsId,
+                title: this.goods1.goodsName,
+                desc: this.currentSelectSku,
+                price: data.selectedSkuComb.price,
+                num: data.selectedNum,
+                thumb: this.currentSelectSkuImg
+              }
+            ]
+          }, */
           skuGoods: {
             skuId: data.selectedSkuComb.id,
             goodsId: data.goodsId,
@@ -540,8 +563,8 @@ export default {
 
           .goods-evaluation {
             font-size: $font-size-medium;
-            display flex
-            align-items center
+            display: flex;
+            align-items: center;
           }
         }
 
@@ -556,6 +579,10 @@ export default {
         }
       }
     }
+  }
+
+  .van-goods-action {
+    z-index: 10;
   }
 }
 </style>

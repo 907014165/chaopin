@@ -1,9 +1,9 @@
 <template>
   <div class="rating-selected">
     <div class="rating-type">
-      <span class="block positive" :class="{'active':selectedType===2}" @click="changeRatingToAll">
+      <span class="block positive" :class="{'active':selectedType===3}" @click="changeRatingToAll">
         {{ desc.all }}
-        <span class="count">{{ ratings.length }}</span>
+        <span class="count">{{ ratingTypeNum[0] }}</span>
       </span>
       <span
         class="block positive"
@@ -11,15 +11,23 @@
         @click="changeRatingToPositive"
       >
         {{ desc.positive }}
-        <span class="count">{{ positives.length }}</span>
+        <span class="count">{{ ratingTypeNum[1] }}</span>
+      </span>
+      <span
+        class="block positive"
+        :class="{'active':selectedType===2}"
+        @click="changeRatingToNegative"
+      >
+        {{ desc.negative }}
+        <span class="count">{{ ratingTypeNum[3] }}</span>
       </span>
       <span
         class="block positive"
         :class="{'active':selectedType===1}"
-        @click="changeRatingToNegative"
+        @click="changeRatingToMid"
       >
-        {{ desc.negative }}
-        <span class="count">{{ negatives.length }}</span>
+        {{ desc.mid }}
+        <span class="count">{{ ratingTypeNum[2] }}</span>
       </span>
     </div>
 
@@ -30,16 +38,18 @@
 </template>
 <script>
 import { Checkbox } from "vant";
-const ALL = 3;//说有
+import { getComentTypeNum } from 'api/comment.js'
+const ALL = 3;//所有
 const POSITIVE = 0;//好评
-const NEGATIVE = 1;//差评
-const MID = 2;//中评
+const NEGATIVE = 2;//差评
+const MID = 1;//中评
 export default {
   data() {
     return {
       selectedType: this.selectType,
       onlycontent: this.onlyContent,
-      checked: false
+      checked: false,
+      ratingTypeNum:[]
     };
   },
   props: {
@@ -62,11 +72,15 @@ export default {
       default() {
         return {
           all: "全部",
-          positive: "满意",
-          negative: "不满意"
+          positive: "好评",
+          negative: "差评",
+          mid:"还不错"
         };
       }
     }
+  },
+  created() {
+    this._getComentTypeNum()
   },
   computed: {
     positives() {
@@ -101,6 +115,21 @@ export default {
     changeRatingToNegative(e) {
       this.selectedType = NEGATIVE;
       this.$emit("change-negative", e);
+    },
+    changeRatingToMid(e) {
+      this.selectedType = MID;
+      this.$emit("change-mid", e);
+    },
+    _getComentTypeNum(){
+      let params = {
+        goodsCommonId:1
+      }
+      console.log(params)
+      getComentTypeNum(params).then(res=>{
+        if(res.code === 0){
+          this.ratingTypeNum = res.data
+        }
+      })
     }
   },
   components: {

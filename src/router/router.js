@@ -35,7 +35,14 @@ let routes = [
   {
     path: '/shopcart',
     name: 'shopcart',
-    component: () => import('pages/ShopCart/ShopCart.vue')
+    component: () => import('pages/ShopCart/ShopCart.vue'),
+    children: [
+      {
+        path: 'confirmOder',
+        name: 'shopCartComfirmOder',
+        component: () => import('pages/ConfirmOrder/ConfirmOrder.vue')
+      }
+    ]
   },
   {
     path: '/user',
@@ -65,6 +72,11 @@ let routes = [
         component: () => import('pages/User/UserAfterSale/UserAfterSale.vue')
       },
       {
+        path: 'myComment',
+        name: 'myComment',
+        component: () => import('pages/Comment/MyComment.vue')
+      },
+      {
         path: 'favorite',
         name: 'userFavorite',
         component: () => import('pages/User/UserFavorite/UserFavorite.vue')
@@ -89,7 +101,14 @@ let routes = [
       {
         path: 'order/:id',
         name: 'userorder',
-        component: () => import('pages/User/UserOrder/UserOrder.vue')
+        component: () => import('pages/User/UserOrder/UserOrder.vue'),
+        children: [
+          {
+            path: 'orderDetail/:orderId',
+            name: 'orderDetail',
+            component: () => import('pages/User/UserOrder/UserOrderDetail.vue')
+          }
+        ]
       },
 
     ]
@@ -167,9 +186,9 @@ let routes = [
     component: () => import('pages/User/UserOrder/UserOrderDetail.vue')
   },
   {
-    path:'/logisticsDetail',
-    name:'logisticsDetail',
-    component: ()=>import('base/Logistics/LogisticsDetail.vue')
+    path: '/logisticsDetail',
+    name: 'logisticsDetail',
+    component: () => import('base/Logistics/LogisticsDetail.vue')
   },
   {
     path: '/ratings',
@@ -177,14 +196,24 @@ let routes = [
     component: () => import('base/Ratings/RatingSeller.vue')
   },
   {
-    path:'/testComment',
-    name:'testComment',
-    component:()=>import('pages/Comment/Comment.vue')
+    path: '/refund',
+    name: 'refund',
+    component: () => import('pages/Refund/Refund.vue')
   },
   {
-    path:'/commentCentre',
-    name:'commentCentre',
-    component:()=>import('pages/Comment/CommentCentre.vue')
+    path: '/testComment',
+    name: 'testComment',
+    component: () => import('pages/Comment/Comment.vue')
+  },
+  {
+    path: '/commentCentre',
+    name: 'commentCentre',
+    component: () => import('pages/Comment/CommentCentre.vue')
+  },
+  {
+    path: '/testSkeleton',
+    name: 'testSkeleton',
+    component: () => import('base/Skeleton/Skeleton.vue')
   }
 ]
 

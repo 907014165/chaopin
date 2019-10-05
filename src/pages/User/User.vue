@@ -87,7 +87,7 @@
           </router-link>
         </van-row>
         <van-row class="user-links">
-          <router-link to="/user/coupon" @click="showList=true">
+          <router-link to="/user/myComment" @click="showList=true">
             <van-col span="6">
               <van-icon name="chat-o" />
               <div>我的评价</div>

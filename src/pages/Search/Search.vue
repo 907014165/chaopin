@@ -61,6 +61,7 @@
         :data="goodsList"
         ref="scroll"
         @load="loadMore"
+        :has-more="hasMore"
         :pull-up="true"
       >
         <div class="content-wrapper">
@@ -70,14 +71,14 @@
             v-if="!toggleShow"
             @selected="selectGoods"
           ></goods-list>
-          <div class="pullup-wrapper">
+          <!-- <div class="pullup-wrapper">
             <div v-if="!isPullUpLoad" class="before-trigger">
               <span class="pullup-txt">{{ pullUpText }}</span>
             </div>
             <div v-else class="after-trigger">
               <van-loading size="24px">加载中...</van-loading>
             </div>
-          </div>
+          </div> -->
         </div>
       </Scroll>
       <div class="loading-wrapper" v-show="isSearchIng">
@@ -178,13 +179,13 @@ export default {
       this.goodsShow = false;
       console.log(this.goodsShow);
     },
-    loadMore() {
+    loadMore(callback) {
       if (!this.hasMore) {
         this.pullUpText = "别拉啦,到底了...";
         return;
       }
-      this.isPullUpLoad = true;
-      this._getMoreGoodsList();
+      /* this.isPullUpLoad = true; */
+      this._getMoreGoodsList(callback);
     },
     toggleDelete() {
       this.deleteShow = !this.deleteShow;
@@ -235,7 +236,7 @@ export default {
         }
       });
     },
-    _getMoreGoodsList() {
+    _getMoreGoodsList(callback) {
       this.currentPage++;
       let params = {
         keyWord: this.value,
@@ -258,12 +259,13 @@ export default {
               })
             );
           });
-          //结束上拉刷新动作
+          /* //结束上拉刷新动作
           this.$refs.scroll.finishPullUp();
           //让scroll 刷新 重新计算dom高度
           this.$refs.scroll.refresh();
           //结束上拉刷新（控制显示提示字段）
-          this.isPullUpLoad = false;
+          this.isPullUpLoad = false; */
+          callback()
         }
       });
     },

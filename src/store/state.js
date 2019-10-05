@@ -7,7 +7,9 @@ const state = {
     shopCart:[],
     shopCartList:[],
     isAddShopCart:false,
-    currentCommentList:[]
+    currentCommentList:[],
+    currentOrderDetail:{},
+    isByGoods:false
 }
 
 export default state

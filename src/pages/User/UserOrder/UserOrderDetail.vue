@@ -12,7 +12,50 @@
       <logistics-card></logistics-card>
     </div>
     <div class="tpl-wrapper">
-      <address-card :addressData="address" :is-link="false"></address-card>
+      <address-card :addressData="getCurrentOrderDetail.addr" :is-link="false"></address-card>
+    </div>
+    <sku-group :is-shop-cart="true" :has-footer="false">
+      <div>
+        <sku-item
+          v-for="(sku,index) in getCurrentOrderDetail.skuList"
+          :sku="sku"
+          :is-footer="true"
+          :key="index"
+        >
+          <van-button type="default" size="small" @click.stop="refund(index)" v-if="showReFundBtn">退还</van-button>
+        </sku-item>
+      </div>
+      <div slot="order-price" class="order-price">
+        <span>共{{getCuttentOrderNum(getCurrentOrderDetail.skuList) }}件商品</span>
+        <span>合计:￥{{ getCurrentOrderDetail.orderAmount }}</span>
+      </div>
+    </sku-group>
+    <div class="order-detail-info">
+      <div class="info-header">
+        <span class="info">订单信息</span>
+      </div>
+      <div class="info-content">
+        <div class="item">
+          <span class="item-info">订单编号</span>
+          <span class="item-text">{{ getCurrentOrderDetail.orderNo }}</span>
+        </div>
+        <div class="item">
+          <span class="item-info">创建时间</span>
+          <span class="item-text">{{ getCurrentOrderDetail.orderNo }}</span>
+        </div>
+        <div class="item">
+          <span class="item-info">付款时间</span>
+          <span class="item-text">{{ getCurrentOrderDetail.orderNo }}</span>
+        </div>
+        <div class="item">
+          <span class="item-info">发货时间</span>
+          <span class="item-text">{{ getCurrentOrderDetail.orderNo }}</span>
+        </div>
+        <div class="item">
+          <span class="item-info">成交时间</span>
+          <span class="item-text">{{ getCurrentOrderDetail.orderNo }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -20,7 +63,12 @@
 import NavBar from "base/NavBar/NavBar";
 import AddressCard from "base/AddressCard/AddressCard";
 import LogisticsCard from "base/Logistics/LogisticsCard";
+import SkuItem from "components/SkuItem/SkuItem";
+import Scroll from "base/Scroll/Scroll";
+import SkuGroup from "components/SkuGroup/SkuGroup";
 import AddressInfo from "common/js/addressInfo.js";
+import { mapGetters } from "vuex";
+import { Button } from "vant";
 export default {
   data() {
     return {
@@ -38,15 +86,47 @@ export default {
       })
     };
   },
+  computed: {
+    showReFundBtn() {
+      const PendingLogistics = 20,
+        Logistics = 30,
+        Complete = 40,
+        Comment = 50;
+      let map = [PendingLogistics, Logistics, Complete, Comment];
+      return map.indexOf(this.getCurrentOrderDetail.status) != -1 ? true : false;
+    },
+    ...mapGetters({
+      getCurrentOrderDetail: "currentOrderDetail"
+    })
+  },
   methods: {
     back() {
       this.$router.back();
+    },
+    test() {
+      console.log(this.getCurrentOrderDetail);
+    },
+    refund(index){
+      console.log('退还')
+      console.log(index)
+    },
+    //获得当前订单的商品数量
+    getCuttentOrderNum(skulist) {
+      let num = 0;
+      skulist.forEach(sku => {
+        num += sku.num;
+      });
+      return num;
     }
   },
   components: {
+    [Button.name]: Button,
     NavBar,
     AddressCard,
-    LogisticsCard
+    LogisticsCard,
+    SkuGroup,
+    Scroll,
+    SkuItem
   }
 };
 </script>
@@ -59,6 +139,8 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 10;
+  overflow-y: scroll;
   background: $color-background;
 
   .header {
@@ -90,6 +172,47 @@ export default {
 
       &img {
         width: 100%;
+      }
+    }
+  }
+
+  .order-price {
+    font-size: 14px;
+    text-align: right;
+    padding: 6px 4px;
+
+    span {
+      margin: 0 8px;
+    }
+  }
+
+  .order-detail-info {
+    padding: 5px 10px;
+    background: $color-text-w;
+
+    .info-header {
+      .info {
+        border-left: 4px solid red;
+        font-size: $font-size-medium-x;
+        padding: 0 6px;
+      }
+    }
+
+    .info-content {
+      margin-top: 10px;
+
+      .item {
+        font-size: $font-size-medium;
+        padding: 10px 8px;
+        display: flex;
+
+        .item-info {
+          width: 100px;
+        }
+
+        .item-text {
+          flex: 1;
+        }
       }
     }
   }

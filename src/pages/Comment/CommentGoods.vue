@@ -37,7 +37,7 @@ export default {
       isAnonymity: true,
       fileList: [],
       anonymityText: "你写的评论将以匿名的方式展现",
-      imgList:[]
+      imgList: []
     };
   },
   props: {
@@ -55,7 +55,7 @@ export default {
       return {
         scores: this.rateGoods,
         content: this.message,
-        isAnonymous: this.isAnonymity?1:0,
+        isAnonymous: this.isAnonymity ? 1 : 0,
         commentImageList: this.imgList,
         goodsId: this.goodsId
       };
@@ -72,7 +72,7 @@ export default {
     fileListDelete(file, detail) {
       console.log(file);
       console.log(detail);
-      this.imgList.splice(detail.index,1)
+      this.imgList.splice(detail.index, 1);
       let params = {
         index: this.currentIndex,
         comment: this.comment
@@ -98,7 +98,13 @@ export default {
     _fileUpload(file) {
       fileUpload(file).then(res => {
         console.log(res);
-        this.imgList.push(res.data)
+        this.imgList.push(res.data);
+        let params = {
+          index: this.currentIndex,
+          comment: this.comment
+        };
+        this.setCurrentCommentList(params);
+        //console.log(this.imgList);
       });
     },
 
@@ -117,7 +123,7 @@ export default {
     },
     fileList(newval, oldval) {
       if (newval.length > oldval.length) {
-        console.log('add')
+        console.log("add");
         let formdata = new FormData();
         formdata.append(
           "img",
@@ -132,14 +138,19 @@ export default {
         };
         this.setCurrentCommentList(params);
       }
-
+      /* let formdata1 = new FormData();
+        formdata1.append(
+          "file",
+          this.fileList[0].file,
+          this.fileList[0].file.name
+        ); */
       /* let arr = []
       arr.push() */
 
       /* formdata.append('img',this.fileList[0].file,this.fileList[0].file.name)
       formdata.append('img',this.fileList[0].file,this.fileList[0].file.name) */
 
-      /* fileUpload22(formdata).then(res=>{
+      /* fileUpload22(formdata1).then(res=>{
         console.log(res)
       }) */
     }

@@ -107,7 +107,7 @@ module.exports = {
         },
         proxy: {
             '/api': {
-                target: 'http://192.168.1.101:9090/', //对应自己的接口
+                target: 'http://192.168.1.53:9090/', //对应赵阳的接口
                 changeOrigin: true,
                 ws: true,
                 pathRewrite: {
@@ -115,7 +115,7 @@ module.exports = {
                 }
             },
             '/rongbin': {
-                target: 'http://192.168.1.66:21002/', //对应自己的接口
+                target: 'http://192.168.1.66:21002/', //对应荣彬的接口
                 changeOrigin: true,
                 ws: true,
                 pathRewrite: {
@@ -123,7 +123,7 @@ module.exports = {
                 }
             },
             '/jiahao':{
-                target: 'http://192.168.1.101:18052/', //对应自己的接口
+                target: 'http://192.168.1.101:18052/', //对应佳豪轮播图的接口
                 changeOrigin: true,
                 ws: true,
                 pathRewrite: {
@@ -146,7 +146,14 @@ module.exports = {
                     '^/dindang': '/'
                 }
             },
-
+            '/order':{
+                target: 'http://192.168.1.101:9092/', //对应优订单接口
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/order': '/'
+                }
+            },
         }
     },
     css: {

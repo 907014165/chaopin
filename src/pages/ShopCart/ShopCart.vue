@@ -33,6 +33,9 @@
     <van-submit-bar :price="selectPrice*100" button-text="提交订单" @submit="onSubmit">
       <van-checkbox v-model="checked" checked-color="#ee0a24" @click="toggleSelect">全选</van-checkbox>
     </van-submit-bar>
+    <transition name="van-slide-right">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 <script>
@@ -52,7 +55,7 @@ import { mapGetters, mapMutations } from "vuex";
 let scrolldom = null;
 let shopcartdom = null;
 
-let vue_this = null
+let vue_this = null;
 
 /* window.onbeforeunload = onbeforeunload_handler;
 window.onunload = onunload_handler;
@@ -68,7 +71,7 @@ function onunload_handler() {
 } */
 
 export default {
-  name:'shopcart',
+  name: "shopcart",
   data() {
     return {
       showStepper: true,
@@ -187,7 +190,7 @@ export default {
   },
   mounted() {
     //this.observeShopCartDOM();
-    vue_this = this
+    vue_this = this;
   },
   beforeDestroy() {
     getTest1();
@@ -219,7 +222,8 @@ export default {
     ...mapGetters({
       getShopCart: "shopCart",
       getIsAddShopCart: "isAddShopCart",
-      getVueShopCartList: "shopCartList"
+      getVueShopCartList: "shopCartList",
+      getIsByGoods:'isByGoods'
     })
   },
   methods: {
@@ -239,8 +243,13 @@ export default {
     },
     //提交
     onSubmit() {
-      console.log(this)
-      console.log(vue_this)
+      console.log(this.getShopCart);
+      this.$router.push({
+        path: "/shopcart/confirmOder",
+        query:{
+          seller:this.getShopCart
+        }
+      });
     },
     //切换全选按钮的 转态
     toggleSelect() {
@@ -330,7 +339,7 @@ export default {
             };
             seller.cartList.forEach(sku => {
               obj.skuList.push({
-                goodsId:sku.goodsId,
+                goodsId: sku.goodsId,
                 skuId: sku.goodsId,
                 title: sku.goodsName,
                 desc: sku.spec,
@@ -349,7 +358,7 @@ export default {
         this.setShopCartList(this.shopCartList);
       });
     },
-     //删除购物车列表
+    //删除购物车列表
     _delShopCartList() {
       let params = [];
       this.getShopCart.forEach(seller => {
@@ -364,7 +373,7 @@ export default {
         }
       });
     },
-     //更新购物车
+    //更新购物车
     _updataShopCartList() {
       let params = [];
       //console.log(this.getVueShopCartList)
@@ -393,7 +402,8 @@ export default {
     ...mapMutations({
       delShopCartItem: "DEL_SLECT_SHOP_CART_ITEM",
       setShopCartList: "SET_SHOP_CART_LIST",
-      setIsAddShopCart: "SET_IS_SHOP_CART"
+      setIsAddShopCart: "SET_IS_SHOP_CART",
+      setIsBuyGoods:'SET_IS_BUY_GOODS'
     })
   },
   watch: {
@@ -431,10 +441,18 @@ export default {
           this._getShopCartList();
           this.setIsAddShopCart(false);
         }
+        if(this.getIsByGoods){
+          this.isSelectAll = false;
+          this.checked = false;
+          this.delShopCartItem();
+          this.shopCartList.splice(0);
+          this._getShopCartList();
+          this.setIsBuyGoods(false)
+        }
       } else {
         console.log("离开购物车");
         //离开购物车时 将购物车数据发给后端数据发给后端
-        this._updataShopCartList()
+        this._updataShopCartList();
       }
       //console.log("route change");
     },

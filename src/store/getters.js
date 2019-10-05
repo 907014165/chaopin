@@ -11,3 +11,5 @@ export const shopCartList = state => state.shopCartList
 export const isAddShopCart = state => state.isAddShopCart
 
 export const currentCommentList = state => state.currentCommentList
+
+export const currentOrderDetail = state => state.currentOrderDetail

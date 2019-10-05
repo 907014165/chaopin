@@ -8,7 +8,10 @@
       :thumb="sku.thumb"
     >
       <div slot="num" v-if="isShowStepper" @click.stop>
-        <van-stepper v-model="num" button-size="20px" @change="changeNum"/>
+        <van-stepper v-model="num" button-size="20px" @change="changeNum" />
+      </div>
+      <div slot="footer" v-if="isFooter">
+        <slot></slot>
       </div>
     </van-card>
     <!-- <div class="order_footer van-hairline--top">
@@ -22,16 +25,16 @@
           :key="index"
         >{{ item.text }}</van-button>
       </div>
-    </div> -->
+    </div>-->
   </div>
 </template>
 <script>
-import { Card, Stepper,Button } from "vant";
+import { Card, Stepper, Button } from "vant";
 export default {
   data() {
     return {
       value: 0,
-      num:this.sku.num,
+      num: this.sku.num,
       stateBtn: {
         10: [
           {
@@ -70,7 +73,7 @@ export default {
           }
         ],
         5: []
-      },
+      }
     };
   },
   props: {
@@ -78,51 +81,64 @@ export default {
       type: Boolean,
       default: false
     },
+    isFooter:{
+      type:Boolean,
+      default:false
+    },
     sku: {
       type: Object,
       default() {
         return {
-          skuId:1,
-          goodsId:33,
+          skuId: 1,
+          goodsId: 33,
           title:
             "商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题商品标题",
           desc: "颜色:傻白 尺码:42",
           price: 2.0,
           num: 3,
-          orderStatus:10,
-          thumb:"https://img.yzcdn.cn/vant/t-thirt.jpg"
+          orderStatus: 10,
+          thumb: "https://img.yzcdn.cn/vant/t-thirt.jpg"
         };
       }
+    },
+    isOrder: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
     currentBtn() {
       return this.stateBtn[this.sku.orderStatus];
-    },
+    }
   },
   methods: {
-    changeNum(num){
+    changeNum(num) {
       //console.log(params)
       let params = {
-        skuId:this.sku.skuId,
+        skuId: this.sku.skuId,
         num
-      }
-      this.$emit('change-num',params)
+      };
+      this.$emit("change-num", params);
     },
     //点击
-    selectGoods(){
-      this.$router.push({
-        path: `/home/goodsDetail/${this.sku.goodsId}`,
-        query: {
-          ParentPath: "home"
-        }
-      })
+    selectGoods() {
+      console.log(this.isOrder);
+      if (this.isOrder) {
+        this.$emit("clickOrder");
+      } else {
+        this.$router.push({
+          path: `/home/goodsDetail/${this.sku.goodsId}`,
+          query: {
+            ParentPath: "home"
+          }
+        });
+      }
     }
   },
   components: {
     [Card.name]: Card,
     [Stepper.name]: Stepper,
-    [Button.name]:Button
+    [Button.name]: Button
   }
 };
 </script>
@@ -136,13 +152,15 @@ export default {
     .van-card__header {
       .van-card__content {
         .van-card__title {
-          font-size 14px
-          margin 3px 0
+          font-size: 14px;
+          margin: 3px 0;
         }
+
         .van-card__bottom {
-          margin 4px 0
+          margin: 4px 0;
+
           .van-card__price {
-            font-size 16px
+            font-size: 16px;
           }
         }
       }

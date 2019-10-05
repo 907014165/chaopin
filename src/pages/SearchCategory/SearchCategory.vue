@@ -6,6 +6,7 @@
         class="search-category-wrapper"
         :data="goodsList"
         @load="loadMore"
+        :has-more="hasMore"
         :pull-up="true"
         ref="scroll"
         :listen-scroll="true"
@@ -31,14 +32,14 @@
             :shape-type="currentShape"
             @selected="selectGoods"
           ></goods-list>
-          <div class="pullup-wrapper">
+          <!-- <div class="pullup-wrapper">
             <div v-if="!isPullUpLoad" class="before-trigger">
               <span class="pullup-txt">{{ pullUpText }}</span>
             </div>
             <div v-else class="after-trigger">
               <van-loading size="24px">加载中...</van-loading>
             </div>
-          </div>
+          </div> -->
         </div>
         <div class="fixed-title" v-show="showFixedTitle">
           <goods-filter @shapeChanged="shapeChanged"></goods-filter>
@@ -142,15 +143,15 @@ export default {
         } */
       });
     },
-    loadMore() {
+    loadMore(callback) {
       if (!this.hasMore) {
         this.pullUpText = "别拉啦,到底了...";
         return;
       }
-      this.isPullUpLoad = true;
-      this._getMoreGoodsList();
+      /* this.isPullUpLoad = true; */
+      this._getMoreGoodsList(callback);
     },
-    _getMoreGoodsList() {
+    _getMoreGoodsList(callback) {
       this.currentPage++;
       let params = {
         goodsClassId: this.$route.query.goodsClassId,
@@ -175,9 +176,10 @@ export default {
               })
             );
           });
-          this.$refs.scroll.finishPullUp();
+          /* this.$refs.scroll.finishPullUp();
           this.$refs.scroll.refresh();
-          this.isPullUpLoad = false;
+          this.isPullUpLoad = false; */
+          callback()
         }
       });
     },

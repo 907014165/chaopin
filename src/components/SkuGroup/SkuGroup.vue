@@ -31,10 +31,17 @@
             :name="item"
             checked-color="#ee0a24"
           >
-            <sku-item :is-show-stepper="isShowStepper" :sku="item" @change-num="changeNum"></sku-item>
+            <sku-item
+              :is-show-stepper="isShowStepper"
+              :sku="item"
+              @change-num="changeNum"
+              :is-order="isOrder"
+              @clickOrder="clickOrder"
+            ></sku-item>
           </van-checkbox>
         </van-checkbox-group>
       </template>
+      <slot name="order-price"></slot>
     </div>
     <div class="order_footer van-hairline--top" v-if="hasFooter">
       <div class="btn-wrapper">
@@ -62,45 +69,58 @@ export default {
       stateBtn: {
         10: [
           {
+            type: "default",
+            text: "取消订单",
+            btnType: "cancelOrder"
+          },
+          {
             type: "danger",
             text: "去支付",
-            btnType:'toPay'
+            btnType: "toPay"
           }
         ],
         20: [
           {
             type: "danger",
             text: "提醒卖家发货",
-            btnType:'warnSend'
+            btnType: "warnSend"
           }
         ],
         30: [
           {
             type: "default",
             text: "查看物流",
-            btnType:'lookLogistics'
+            btnType: "lookLogistics"
           },
           {
             type: "danger",
             text: "确认收货",
-            btnType:'confirmGoods'
+            btnType: "confirmGoods"
           }
         ],
         40: [
           {
             type: "default",
             text: "评论",
-            btnType:'comment'
+            btnType: "comment"
           },
           {
             type: "danger",
-            text: "再次购买"
+            text: "申请退款"
+          }
+        ],
+        50: [
+          {
+            type: "default",
+            text: "查看评论",
+            btnType: "SeeComment"
           }
         ],
         0: [
           {
             type: "default",
-            text: "退款明细"
+            text: "删除订单",
+            btnType: "delOrder"
           },
           {
             type: "danger",
@@ -155,14 +175,19 @@ export default {
     isShopCart: {
       type: Boolean,
       default: false
+    },
+    isOrder: {
+      type: Boolean,
+      default: false
     }
   },
   created() {
     this.stateMap = {
-      10: "代付款",
+      10: "待付款",
       20: "已付款",
       30: "卖家已发货",
       40: "已完成",
+      50: "已评价",
       0: "已取消",
       5: ""
     };
@@ -181,12 +206,15 @@ export default {
     }
   },
   methods: {
+    clickOrder() {
+      this.$emit("clickOrder");
+    },
     deleteSku() {
       this.$emit("del");
     },
     //底部订单按钮操作回调
-    btnOperation(item){
-      this.$emit(`${item.btnType}`)
+    btnOperation(item) {
+      this.$emit(`${item.btnType}`);
     },
     test() {
       console.log("test" + "--" + this.orderStatus);

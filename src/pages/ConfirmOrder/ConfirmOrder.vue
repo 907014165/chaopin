@@ -1,10 +1,27 @@
 <template>
   <div class="fill-order">
     <nav-bar title="确认订单" @back="back"></nav-bar>
-    <address-card id="14756" name="阮受涣" tel="180****5907" address="福建省三明市尤溪县台溪乡盖住村82号" :addressData="getCurrentAddr" @edit="edit"></address-card>
-    <sku-group :has-footer="hasFooter" :is-seller="isSeller">
+    <address-card
+      id="14756"
+      name="阮受涣"
+      tel="180****5907"
+      address="福建省三明市尤溪县台溪乡盖住村82号"
+      :addressData="getCurrentAddr"
+      @edit="edit"
+    ></address-card>
+    <sku-group :has-footer="hasFooter" :is-seller="isSeller" v-if="order">
       <sku-item :sku="order"></sku-item>
     </sku-group>
+    <template v-if="seller">
+      <sku-group
+        :has-footer="hasFooter"
+        :seller="item"
+        v-for="(item,index) in seller"
+        :key="index"
+        :is-seller="isSeller"
+        :is-shop-cart="true"
+      ></sku-group>
+    </template>
     <van-cell-group>
       <van-field
         v-model="message"
@@ -15,18 +32,18 @@
         autosize
       />
     </van-cell-group>
-    <van-coupon-cell :coupons="coupons" :chosen-coupon="chosenCoupon" @click="showList = true"/>
+    <van-coupon-cell :coupons="coupons" :chosen-coupon="chosenCoupon" @click="showList = true" />
     <van-radio-group v-model="radio">
       <van-cell-group>
         <van-cell title="支付宝支付" clickable @click="radio = '1'" icon="alipay">
-          <van-radio slot="right-icon" name="1"/>
+          <van-radio slot="right-icon" name="1" />
         </van-cell>
         <van-cell title="微信支付" clickable @click="radio = '2'" icon="wechat">
-          <van-radio slot="right-icon" name="2"/>
+          <van-radio slot="right-icon" name="2" />
         </van-cell>
       </van-cell-group>
     </van-radio-group>
-    <van-submit-bar :price="3050" button-text="提交订单" @submit="onSubmit"/>
+    <van-submit-bar :price="totlePrice" button-text="提交订单" @submit="onSubmit" />
     <van-popup v-model="showList" position="bottom">
       <van-coupon-list
         :coupons="coupons"
@@ -43,6 +60,7 @@ import NavBar from "base/NavBar/NavBar";
 import SkuItem from "components/SkuItem/SkuItem";
 import SkuGroup from "components/SkuGroup/SkuGroup";
 import AddressCard from "base/AddressCard/AddressCard";
+import { createOrderImmediately, createOrderByShopCart } from "api/order.js";
 import {
   Cell,
   CellGroup,
@@ -55,7 +73,7 @@ import {
   SubmitBar,
   Toast
 } from "vant";
-import { mapGetters } from 'vuex';
+import { mapGetters, mapMutations } from "vuex";
 
 const coupon = {
   available: 1,
@@ -73,10 +91,11 @@ export default {
   data() {
     return {
       order: this.$route.query.skuGoods,
+
       message: "",
       chosenCoupon: -1,
-      hasFooter:false,
-      isSeller:false,
+      hasFooter: false,
+      isSeller: false,
       showList: false,
       coupons: [coupon],
       disabledCoupons: [coupon],
@@ -84,21 +103,29 @@ export default {
       radio: "1"
     };
   },
-  props: {
-    seller: {
-      type: Object,
-      default() {
-        return {
-          sellerId:78,
-          name: "潮品商城",
-          skuList:[],
-        };
+  computed: {
+    totlePrice() {
+      if (this.order) {
+        return this.order.price;
+      } else {
+        let price = 0;
+        this.seller.forEach(seller => {
+          seller.skuList.forEach(sku => {
+            price += sku.price;
+          });
+        });
+        return price;
       }
     },
-  },
-  computed: {
+    seller() {
+      if (this.$route.query.seller) {
+        return [...this.$route.query.seller];
+      } else {
+        return null;
+      }
+    },
     ...mapGetters({
-      getCurrentAddr:'getCurrentAddress'
+      getCurrentAddr: "getCurrentAddress"
     })
   },
   methods: {
@@ -114,24 +141,70 @@ export default {
     },
     onSubmit() {
       Toast.success("暂无后续逻辑");
-      console.log(this.order)
-      console.log(this.$route)
+      console.log(this.order);
+      console.log(this.$route);
+      //用户立即股买
+      if (this.order) {
+        let params = {
+          activityId: null,
+          buyNum: this.order.num,
+          couponId: null,
+          freightType: "fast",
+          goodsId: this.order.skuId,
+          memberAddressId: 35935,
+          remark: this.message
+        };
+        console.log(params);
+        createOrderImmediately(params).then(res => {
+          console.log(res);
+        });
+      }
+      //用户从购物车下单
+      if (this.seller) {
+        let cartIdArr = [];
+        this.seller.forEach((seller, index) => {
+          cartIdArr[index] = [];
+          seller.skuList.forEach(sku => {
+            cartIdArr[index].push(sku.cartId);
+          });
+        });
+
+        let params = {
+          memberAddressId: 35935,
+          orderAddDTOs: [
+            {
+              activityId: null,
+              cartIds: cartIdArr[0],
+              couponId: null,
+              freightType: "fast",
+              remark: "我就是个gaygay"
+            }
+          ]
+        };
+        console.log(params);
+        createOrderByShopCart(params).then(res => {
+          if (res.data) {
+            this.setIsBuyGoods(true);
+          }
+        });
+      }
     },
     toggle(index) {
       this.$refs.checkboxes[index].toggle();
     },
-    edit(){
-      console.log('hhh')
+    edit() {
+      console.log("hhh");
       this.$router.push({
-        path:'/user/address',
-        query:{
-          isSelect:true
+        path: "/user/address",
+        query: {
+          isSelect: true
         }
-      })
+      });
     },
-    _getAddr(){
-      
-    }
+    _getAddr() {},
+    ...mapMutations({
+      setIsBuyGoods: "SET_IS_BUY_GOODS"
+    })
   },
   components: {
     NavBar,

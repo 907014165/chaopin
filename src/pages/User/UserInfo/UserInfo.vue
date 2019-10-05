@@ -13,7 +13,7 @@
         </div>
       </template>
     </van-cell>
-    <van-cell-group title=" ">
+    <van-cell-group title=" " :center="true">
       <van-cell title="关于我们" is-link/>
       <van-cell title="投诉建议" is-link/>
     </van-cell-group>
