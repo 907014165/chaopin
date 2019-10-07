@@ -274,7 +274,7 @@ export default {
   created() {
     //this._getUserOrder(1);
     //this._getUserAllOrder();
-    this.getOrderListByStatus(this.active)
+    this.getOrderListByStatus(this.active);
     //this._deleteOrder()
   },
   computed: {
@@ -302,11 +302,11 @@ export default {
       this.getOrderListByStatus(this.active, callback);
     },
     //查看评论
-    seeComment(){
-      console.log('查看评论')
+    seeComment() {
+      console.log("查看评论");
       this.$router.push({
-        path:'/user/myComment'
-      })
+        path: "/user/myComment"
+      });
     },
     //取消订单
     cancelOrder(orderId) {
@@ -431,6 +431,7 @@ export default {
     },
     //初始化 数据结构
     init(res) {
+      console.log(res);
       console.log(this.isLoading);
       this.isLoading = false;
 
@@ -460,6 +461,7 @@ export default {
         order.orderGoodsList.forEach(ordergoods => {
           let skugoods = new SkuGoods({
             goodsId: ordergoods.goodsId,
+            orderGoodsId: ordergoods.orderGoodsId,
             title: ordergoods.goodsName,
             desc: spec(ordergoods.spec),
             num: ordergoods.buyNum,
@@ -483,7 +485,9 @@ export default {
         //console.log(res);
         this.init(res);
         if (callback) {
-          callback();
+          this.$nextTick(() => {
+            callback();
+          });
         }
       });
     },
@@ -513,7 +517,9 @@ export default {
         if (res.code === 0) {
           this.init(res);
           if (callback) {
-            callback();
+            this.$nextTick(() => {
+              callback();
+            });
           }
         }
       });

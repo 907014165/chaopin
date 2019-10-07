@@ -1,15 +1,20 @@
 <template>
   <div class="phone-login">
     <div class="close-wrapper" @click="close">
-      <van-icon name="cross"/>
+      <van-icon name="cross" />
     </div>
     <div class="m-logo">
-      <img src="./logo.png" alt>
+      <img src="./logo.png" alt />
     </div>
     <div class="phone-login-wrapper">
       <van-cell-group>
-        <van-field placeholder="请输入手机号" @input="inputMobile"/>
-        <van-field center clearable placeholder="请输入短信验证码" :maxlength="6" @input="inputCode">
+        <van-field
+          placeholder="请输入手机号"
+          :error-message="errorMobile"
+          v-model="mobile"
+          @blur="checkMobileNumber"
+        />
+        <van-field v-model="code" center clearable placeholder="请输入短信验证码" :maxlength="6">
           <van-button slot="button" size="small" type="primary" @click="SendAuthenticode">发送验证码</van-button>
         </van-field>
       </van-cell-group>
@@ -25,25 +30,29 @@
 import { Dialog } from 'vant';
 import { setLoginToken } from '../../utils/cache'; */
 
-import { Dialog, Button, CellGroup, Field, Cell, Icon } from "vant";
+import { Dialog, Button, CellGroup, Field, Cell, Icon, Toast } from "vant";
+import { getCode, register } from "api/login.js";
+import { smLogin } from "api/login.js";
+import { mapMutations } from 'vuex'
 
 export default {
   data() {
     return {
       mobile: "",
       code: "",
-      disabled: true
+      errorMobile: ""
     };
   },
-
+  computed: {
+    disabled() {
+      if (!this.code || !this.mobile) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
   methods: {
-    inputMobile: function(value) {
-      this.mobile = value;
-    },
-    inputCode: function(value) {
-      this.code = value;
-      this.disabled = this.mobile.length === 6 ? false : true;
-    },
     sendCode: function() {
       if (!this.mobile || this.mobile.length !== 11) {
         Dialog.alert({
@@ -60,32 +69,50 @@ export default {
         });
       });
     },
-    submit: function() {
-      let that = this;
-      let response = doPassportMobileRegister(this.mobile, this.code);
-      response.then(data => {
-        setLoginToken(data.token.accessToken, data.token.refreshToken);
-        Dialog.alert({
-          title: "系统提示",
-          message: "登陆成功",
-          beforeClose: function(action, done) {
-            done();
-            // TODO 芋艿，简单的 callback 后续完善
-            let redirect = that.$route.query.redirect || "/user/index";
-            that.$router.push(redirect);
-          }
-        });
-      });
-    },
+    submit: function() {},
     SendAuthenticode() {
       console.log("发送验证码");
+      let params = new FormData();
+      params.append("mobile", this.mobile);
+      console.log(params.get("mobile"));
+      getCode(params).then(res => {
+        if (res.code == 0) {
+          Toast.success("发送成功");
+        }
+        console.log(res);
+      });
+    },
+    checkMobileNumber() {
+      this.checkPhone(this.mobile);
+    },
+    checkPhone(phone) {
+      if (!/^1[3456789]\d{9}$/.test(phone)) {
+        console.log("error");
+        this.errorMobile = "手机号格式错误";
+        return false;
+      } else {
+        console.log("success");
+        this.errorMobile = "";
+        return true;
+      }
     },
     close() {
       this.$router.back();
     },
     login() {
       console.log("登录");
-    }
+      let params = {
+        code: this.code,
+        mobile: this.mobile
+      };
+      console.log(params);
+      smLogin(params).then(res => {
+        console.log(res);
+      });
+    },
+    ...mapMutations({
+      setToken:'SET_TOKEN'
+    })
   },
   components: {
     [Dialog.name]: Dialog,
@@ -93,7 +120,8 @@ export default {
     [CellGroup.name]: CellGroup,
     [Field.name]: Field,
     [Cell.name]: Cell,
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [Toast.name]: Toast
   }
 };
 </script>

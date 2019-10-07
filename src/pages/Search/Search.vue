@@ -57,7 +57,7 @@
       ></goods-filter>
       <Scroll
         class="scroll-wrapper"
-        v-if="!toggleShow&&!isSearchIng"
+        v-show="!toggleShow&&!isSearchIng"
         :data="goodsList"
         ref="scroll"
         @load="loadMore"
@@ -78,7 +78,7 @@
             <div v-else class="after-trigger">
               <van-loading size="24px">加载中...</van-loading>
             </div>
-          </div> -->
+          </div>-->
         </div>
       </Scroll>
       <div class="loading-wrapper" v-show="isSearchIng">
@@ -114,6 +114,7 @@ export default {
       goodsShow: false, //true 为focus false为blur focus显示热词 有点恶心 后期想想怎么优化
       isPullUpLoad: false, //上拉时 是否正在加载数据
       hasMore: true,
+      sortMap: ["byDefault", "bySaleNum", "byPrice", "byDiscount"],
       sortIndex: 1,
       sortOrder: 1, //1 降序
       currentPage: 1,
@@ -160,6 +161,7 @@ export default {
       this.sortIndex = data.sort;
       this.sortOrder = data.order;
       this.currentPage = 1;
+      this.hasMore = true;
       this.goodsList.splice(0);
       this._getGoodsListByKeyWords();
     },
@@ -180,10 +182,6 @@ export default {
       console.log(this.goodsShow);
     },
     loadMore(callback) {
-      if (!this.hasMore) {
-        this.pullUpText = "别拉啦,到底了...";
-        return;
-      }
       /* this.isPullUpLoad = true; */
       this._getMoreGoodsList(callback);
     },
@@ -218,6 +216,7 @@ export default {
         keyWord: this.value,
         current: this.currentPage
       };
+      params[this.sortMap[this.sortIndex]] = this.sortOrder;
       getGoodsListByKeyWords(params).then(res => {
         if (res.code === 0) {
           res.data.list.forEach(item => {
@@ -265,7 +264,9 @@ export default {
           this.$refs.scroll.refresh();
           //结束上拉刷新（控制显示提示字段）
           this.isPullUpLoad = false; */
-          callback()
+          this.$nextTick(() => {
+            callback();
+          });
         }
       });
     },

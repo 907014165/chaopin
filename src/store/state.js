@@ -9,7 +9,8 @@ const state = {
     isAddShopCart:false,
     currentCommentList:[],
     currentOrderDetail:{},
-    isByGoods:false
+    isByGoods:false,
+    currentRefundGoods:{}
 }
 
 export default state

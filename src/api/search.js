@@ -12,7 +12,7 @@ export function getHotKey() {
 }
 
 export function getGoodsListByKeyWords(params) {
-    const url = '/api/member/search/page'
+    const url = '/search/member/search/page'
     
     console.log(params)
     return axios({
@@ -25,7 +25,7 @@ export function getGoodsListByKeyWords(params) {
 }
 export function getSearchGoodsList(params){
     console.log(params)
-    const url = '/api/member/search/page'
+    const url = '/search/member/search/page'
     return axios({
         url: url,
         method: 'post',

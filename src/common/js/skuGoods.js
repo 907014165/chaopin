@@ -6,8 +6,9 @@ export default class SkuGoods {
         desc,
         num,
         price,
-        thumb
-    }){
+        thumb,
+        orderGoodsId
+    }) {
         this.skuId = skuId
         this.goodsId = goodsId
         this.title = title
@@ -15,5 +16,6 @@ export default class SkuGoods {
         this.num = num
         this.price = price
         this.thumb = thumb
+        this.orderGoodsId = orderGoodsId
     }
 }

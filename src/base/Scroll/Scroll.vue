@@ -2,14 +2,16 @@
   <div ref="wrapper" class="scroll-wrapper-zujian">
     <div class="scroll-content-s">
       <slot></slot>
-      <div class="pullup-wrapper" v-if="pullUp">
-        <div v-show="!isPullUpLoad" class="before-trigger">
-          <span class="pullup-txt">{{ pullUpText }}</span>
+      <template v-if="hasPllupTxt">
+        <div class="pullup-wrapper" v-if="pullUp">
+          <div v-show="!isPullUpLoad" class="before-trigger">
+            <span class="pullup-txt">{{ pullUpText }}</span>
+          </div>
+          <div v-show="isPullUpLoad" class="after-trigger">
+            <van-loading size="24px">加载中...</van-loading>
+          </div>
         </div>
-        <div v-show="isPullUpLoad" class="after-trigger">
-          <van-loading size="24px">加载中...</van-loading>
-        </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -25,9 +27,10 @@ BScroll.use(Pullup)
 export default {
   data() {
     return {
-      isPullUpLoad: false,//是否正在上拉刷新
-      pullUpText: "上拉加载更多...",//上拉刷新开启时 底部提示文案
-      scroll: null
+      isPullUpLoad: false, //是否正在上拉刷新
+      pullUpText: "上拉加载更多...", //上拉刷新开启时 底部提示文案
+      scroll: null,
+      hasPllupTxt: true //判断是否有上拉的提示文字（当内容小于scroll的高度 则不用提示文字）
     };
   },
   props: {
@@ -66,7 +69,7 @@ export default {
       type: Boolean,
       default: false
     },
-    //是否还可以上拉刷新 
+    //是否还可以上拉刷新
     hasMore: {
       type: Boolean,
       default: true
@@ -164,11 +167,22 @@ export default {
     data() {
       setTimeout(() => {
         this.refresh();
+        //判断是否可以滚动
+        console.log(this.scroll.maxScrollY)
+        if (!this.scroll.maxScrollY) {
+          this.hasPllupTxt = false;
+        } else {
+          this.hasPllupTxt = true;
+        }
       }, this.refreshDelay);
     },
     hasMore() {
+      console.log(this.hasMore)
       if (!this.hasMore) {
         this.pullUpText = "别拉了,到底了...";
+      }else{
+        this._initBScroll()
+        this.pullUpText = '上拉加载更多...'
       }
     }
   }

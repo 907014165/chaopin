@@ -16,10 +16,7 @@
       >
         <div class="search-category">
           <banner ref="banner">
-            <img
-              :src="`http://192.168.1.53:9090/${bannerImg}`"
-              alt
-            />
+            <img :src="`http://192.168.1.53:9090/${bannerImg}`" alt />
           </banner>
           <goods-filter
             @shapeChanged="shapeChanged"
@@ -39,7 +36,7 @@
             <div v-else class="after-trigger">
               <van-loading size="24px">加载中...</van-loading>
             </div>
-          </div> -->
+          </div>-->
         </div>
         <div class="fixed-title" v-show="showFixedTitle">
           <goods-filter @shapeChanged="shapeChanged"></goods-filter>
@@ -76,11 +73,11 @@ export default {
       sortMap: ["byDefault", "bySaleNum", "byPrice", "byDiscount"],
       isPullUpLoad: false, //上拉时 是否正在加载数据
       pullUpText: "上拉加载更多...",
-      bannerImg:null,
+      bannerImg: null,
       pageY: 0,
       bannerDom: null,
       currentPage: 1,
-      title:this.$route.query.title
+      title: this.$route.query.title
     };
   },
   props: {
@@ -127,7 +124,8 @@ export default {
       this.sortIndex = data.sort;
       this.sortOrder = data.order;
       this.currentPage = 1;
-      this.goodsList.splice(0)
+      this.hasMore = true;
+      this.goodsList.splice(0);
       this._getSearchGoodsList();
     },
     shapeChanged(currentShape) {
@@ -144,8 +142,8 @@ export default {
       });
     },
     loadMore(callback) {
+      console.log(this.hasMore);
       if (!this.hasMore) {
-        this.pullUpText = "别拉啦,到底了...";
         return;
       }
       /* this.isPullUpLoad = true; */
@@ -179,7 +177,7 @@ export default {
           /* this.$refs.scroll.finishPullUp();
           this.$refs.scroll.refresh();
           this.isPullUpLoad = false; */
-          callback()
+          callback();
         }
       });
     },
@@ -201,7 +199,7 @@ export default {
       console.log(params);
       getSearchGoodsList(params).then(res => {
         if (res.code === 0) {
-          this.bannerImg = res.data.image
+          this.bannerImg = res.data.image;
           res.data.list.forEach(item => {
             this.goodsList.push(
               new Goods({
@@ -219,9 +217,9 @@ export default {
     }
   },
   watch: {
-    bannerImg(){
+    bannerImg() {
       /* this.bannerDom = this.$refs.banner.$el; */
-      console.log(this.bannerDom)
+      console.log(this.bannerDom);
     }
   },
   components: {
@@ -274,8 +272,8 @@ export default {
     }
 
     .loading-wrapper {
-      text-align center
-      margin auto 
+      text-align: center;
+      margin: auto;
     }
   }
 }

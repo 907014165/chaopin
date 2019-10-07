@@ -174,7 +174,7 @@ export default {
             this.goodsList.push(
               new Goods({
                 goodsId: item.goodsCommonId,
-                desc: item.body,
+                desc: item.goodsName,
                 imgUrl: item.image,
                 price: item.sellPrice,
                 oldPrice: item.costPrice,

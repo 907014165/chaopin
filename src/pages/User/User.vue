@@ -28,7 +28,7 @@
           <router-link to="/user/order/1">
             <van-col span="6">
               <van-icon name="pending-payment">
-                <van-info :info="11" />
+                <van-info :info="orderStatusCount.nonPayment" />
               </van-icon>
               <div>待付款</div>
             </van-col>
@@ -36,14 +36,14 @@
           <router-link to="/user/order/2">
             <van-col span="6">
               <van-icon name="logistics">
-                <van-info :info="11" />
+                <van-info :info="orderStatusCount.nonSign" />
               </van-icon>
-              <div>待发货</div>
+              <div>待收货</div>
             </van-col>
           </router-link>
           <router-link to="/commentCentre">
             <van-col span="6">
-              <van-icon name="chat-o" :info="55"></van-icon>
+              <van-icon name="chat-o" :info="orderStatusCount.nonComment"></van-icon>
               <div>待评价</div>
             </van-col>
           </router-link>
@@ -104,13 +104,14 @@
     </van-pull-refresh>
 
     <transition name="van-slide-right">
-    <router-view :show-list="showList"></router-view>
+      <router-view :show-list="showList"></router-view>
     </transition>
   </div>
 </template>
 
 <script>
 import { Cell, CellGroup, Icon, Row, Col, Info, PullRefresh } from "vant";
+import { getOrderCount } from "api/order.js";
 
 export default {
   name: "user",
@@ -119,8 +120,12 @@ export default {
       data: {},
       user: undefined,
       showList: true,
-      isLoading: false
+      isLoading: false,
+      orderStatusCount: {}
     };
+  },
+  created() {
+    this._getOrderCount();
   },
   components: {
     [Cell.name]: Cell,
@@ -140,15 +145,20 @@ export default {
       this.$router.push("/login");
     },
     onRefresh() {
-      setTimeout(() => {
+      this._getOrderCount(() => {
         this.isLoading = false;
-      }, 500);
+      });
+    },
+    _getOrderCount(callback) {
+      getOrderCount().then(res => {
+        if (res.code === 0) {
+          this.orderStatusCount = res.data;
+        }
+        if (callback) {
+          callback();
+        }
+      });
     }
-  },
-  created: function() {
-    // GetUserIndex().then(response=>{
-    //     this.data=response;
-    // });
   },
   mounted() {
     /* if (getAccessToken()) { // 存在

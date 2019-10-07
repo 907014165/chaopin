@@ -6,7 +6,7 @@
       name="阮受涣"
       tel="180****5907"
       address="福建省三明市尤溪县台溪乡盖住村82号"
-      :addressData="getCurrentAddr"
+      :addressData="addr"
       @edit="edit"
     ></address-card>
     <sku-group :has-footer="hasFooter" :is-seller="isSeller" v-if="order">
@@ -61,6 +61,8 @@ import SkuItem from "components/SkuItem/SkuItem";
 import SkuGroup from "components/SkuGroup/SkuGroup";
 import AddressCard from "base/AddressCard/AddressCard";
 import { createOrderImmediately, createOrderByShopCart } from "api/order.js";
+import { getDefaultAddr } from "api/user.js";
+import AddressInfo from "common/js/addressInfo.js";
 import {
   Cell,
   CellGroup,
@@ -91,7 +93,7 @@ export default {
   data() {
     return {
       order: this.$route.query.skuGoods,
-
+      defaultAddr: null,
       message: "",
       chosenCoupon: -1,
       hasFooter: false,
@@ -103,10 +105,13 @@ export default {
       radio: "1"
     };
   },
+  created() {
+    this._getDefaultAddr();
+  },
   computed: {
     totlePrice() {
       if (this.order) {
-        return this.order.price;
+        return this.order.price*this.order.num;
       } else {
         let price = 0;
         this.seller.forEach(seller => {
@@ -123,6 +128,9 @@ export default {
       } else {
         return null;
       }
+    },
+    addr(){
+      return this.defaultAddr?this.defaultAddr:this.getCurrentAddr
     },
     ...mapGetters({
       getCurrentAddr: "getCurrentAddress"
@@ -151,12 +159,15 @@ export default {
           couponId: null,
           freightType: "fast",
           goodsId: this.order.skuId,
-          memberAddressId: 35935,
+          memberAddressId: this.addr.id,
           remark: this.message
         };
         console.log(params);
         createOrderImmediately(params).then(res => {
           console.log(res);
+          this.$router.push({
+            path: "homePay"
+          });
         });
       }
       //用户从购物车下单
@@ -170,7 +181,7 @@ export default {
         });
 
         let params = {
-          memberAddressId: 35935,
+          memberAddressId: this.addr.id,
           orderAddDTOs: [
             {
               activityId: null,
@@ -201,7 +212,28 @@ export default {
         }
       });
     },
-    _getAddr() {},
+    _getDefaultAddr() {
+      let params = {
+        memberId: "146000"
+      };
+      getDefaultAddr(params).then(res => {
+        console.log(res);
+        if (res.code === 0) {
+          this.defaultAddr = new AddressInfo({
+            id: res.data.memberAddressId,
+            name: res.data.consignee,
+            tel: res.data.mobile,
+            province: res.data.province,
+            city: res.data.city,
+            county: res.data.area,
+            addressDetail: res.data.address,
+            areaCode: res.data.areaCode + "",
+            postalCode: res.data.zipCode,
+            isDefault: res.data.isDefault
+          });
+        }
+      });
+    },
     ...mapMutations({
       setIsBuyGoods: "SET_IS_BUY_GOODS"
     })

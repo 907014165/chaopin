@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from './config'
 //获得用户收藏列表
 export function getCollectList() {
     const url = '/api/member/favorite/list'
@@ -25,6 +25,15 @@ export function deleteCollectList(params) {
 //获取用户收货地址
 export function getUserAddressList(params) {
     const url = '/rongbin/member-api/memberAddress/selectAddresslist'
+    return axios.get(url, {
+        params
+    }).then(res => {
+        return Promise.resolve(res.data)
+    })
+}
+//默认
+export function getDefaultAddr(params) {
+    const url = '/rongbin/member-api/memberAddress/selectDefault'
     return axios.get(url, {
         params
     }).then(res => {
@@ -76,6 +85,7 @@ export function updataUserAddressList(params) {
         return Promise.resolve(res.data)
     })
 }
+
 export function deleteUserAddressList(params) {
     console.log(params)
     const url = '/rongbin/member-api/memberAddress/deleteAddress'

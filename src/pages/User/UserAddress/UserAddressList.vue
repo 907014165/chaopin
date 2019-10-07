@@ -69,10 +69,7 @@ export default {
     //console.log(this.getAddressList);
     this._getAddressList();
   },
-  mounted() {
-    
-    
-  },
+  mounted() {},
   computed: {
     ...mapGetters({
       getAddressList: "getAddressList"
@@ -100,6 +97,9 @@ export default {
       });
     },
     onSelect(item, index) {
+      if (!this.isSelect) {
+        return;
+      }
       this.setCurrentAddrIndex(index);
       this.$router.back();
     },
@@ -130,17 +130,17 @@ export default {
                 city: addr.city,
                 county: addr.area,
                 addressDetail: addr.address,
-                areaCode: addr.areaCode+'',
+                areaCode: addr.areaCode + "",
                 postalCode: addr.zipCode,
                 isDefault: addr.isDefault
               })
             );
           });
-          this.setAddressList(this.addrList)
+          this.setAddressList(this.addrList);
         }
-        this.$nextTick(()=>{
+        this.$nextTick(() => {
           this.setDefaultAddr();
-        })
+        });
       });
     },
     ...mapMutations({

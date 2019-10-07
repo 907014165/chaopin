@@ -1,6 +1,4 @@
 
-
-
 import axios from 'axios'
 import store from '../store/store'
 import router from '../router/router'
@@ -11,7 +9,7 @@ axios.defaults.timeout = 5000
 axios.interceptors.request.use(
     config => {
         if (store.state.token) {
-            config.headers.Authorization = `token ${store.state.token}`
+            config.headers.Authorization = `Bearer ${store.state.token}`
         }
         return config
     },

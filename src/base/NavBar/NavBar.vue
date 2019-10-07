@@ -1,6 +1,13 @@
 <template>
   <div class="nav-bar">
-    <van-nav-bar :title="title"  :right-text="rightText" :left-text="leftText" left-arrow @click-left="back" @click-right="onClickRight"/>
+    <van-nav-bar
+      :title="title"
+      :right-text="rightText"
+      :left-text="leftText"
+      left-arrow
+      @click-left="back"
+      @click-right="onClickRight"
+    />
   </div>
 </template>
 <script>
@@ -40,8 +47,8 @@ export default {
     back() {
       this.$emit("back");
     },
-    onClickRight(){
-      this.$emit('onClickRight')
+    onClickRight() {
+      this.$emit("onClickRight");
     }
   },
   components: {
@@ -60,6 +67,10 @@ export default {
 
   .van-nav-bar__title {
     font-size: $font-size-large;
+  }
+
+  .van-nav-bar__text {
+    color: #1e1e1e;
   }
 }
 </style>

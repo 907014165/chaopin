@@ -17,7 +17,7 @@
       <van-cell title="关于我们" is-link/>
       <van-cell title="投诉建议" is-link/>
     </van-cell-group>
-    <van-button color="linear-gradient(to right, #FF6347,#FF4500)" size="large">退出登录</van-button>
+    <van-button color="linear-gradient(to right, #FF6347,#FF4500)" size="large" @click="loginOut">退出登录</van-button>
     <transition name="van-slide-right">
       <router-view></router-view>
     </transition>
@@ -26,6 +26,7 @@
 <script>
 import NavBar from "base/NavBar/NavBar";
 import { Cell, CellGroup, Button } from "vant";
+import { mapMutations } from 'vuex'
 
 export default {
   data() {
@@ -34,7 +35,14 @@ export default {
   methods: {
     back() {
       this.$router.back();
-    }
+    },
+    //退出登录
+    loginOut(){
+      this.removeToken()
+    },
+    ...mapMutations({
+      removeToken:'REMOVE_TOKEN'
+    })
   },
   components: {
     [Cell.name]: Cell,

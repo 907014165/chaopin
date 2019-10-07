@@ -10,11 +10,7 @@
           @click-right="onClickRight"
         />
         <div class="avatar">
-          <img
-            :src="msgImgList[0]"
-            alt
-            @click="showPreImg"
-          />
+          <img :src="msgImgList[0]" alt @click="showPreImg" />
           <van-uploader :after-read="afterRead" :before-read="beforeRead">
             <span class="edit-text">更换头像</span>
           </van-uploader>
@@ -31,15 +27,12 @@
         </van-cell-group>
         <van-action-sheet title="修改性别" v-model="show" :actions="actions" @select="onSelect" />
       </div>
-      <van-image-preview
-        v-model="showPreview"
-        :images="msgImgList"
-      ></van-image-preview>
+      <van-image-preview v-model="showPreview" :images="msgImgList"></van-image-preview>
     </div>
   </transition>
 </template>
 <script>
-import Vue from 'vue'
+import Vue from "vue";
 
 import {
   NavBar,
@@ -51,7 +44,7 @@ import {
   ImagePreview,
   Toast
 } from "vant";
-Vue.use(ImagePreview)
+Vue.use(ImagePreview);
 
 export default {
   data() {
@@ -61,10 +54,15 @@ export default {
       errorMessage: "",
       sex: "男",
       show: false,
-      actions: [{ name: "男" }, { name: "女" }],
+      actions: [
+        { name: "男" },
+        { name: "女" }
+      ],
       slideDirection: "van-slide-right",
-      showPreview:false,//展示预览组件
-      msgImgList:['http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100'],//预览展示图地址列表
+      showPreview: false, //展示预览组件
+      msgImgList: [
+        "http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100"
+      ] //预览展示图地址列表
     };
   },
   beforeRouteLeave(to, from, next) {
@@ -92,21 +90,21 @@ export default {
       this.sex = item.name;
       this.toggleSexSelect();
     },
-    showPreImg(){
-      this.showPreview = !this.showPreview
+    showPreImg() {
+      this.showPreview = !this.showPreview;
     },
     //文件读取完毕后的回调函数
     afterRead(file) {
       // 此时可以自行将文件上传至服务器
       console.log(file);
       //清空数组
-      this.msgImgList.splice(0,1,file.content)
+      this.msgImgList.splice(0, 1, file.content);
       //this.msgImgList.push()
     },
     //简单的图片上传检测
     beforeRead(file) {
-      if (file.type !== 'image/jpeg') {
-        Toast('请上传 jpg 格式图片');
+      if (file.type !== "image/jpeg") {
+        Toast("请上传 jpg 格式图片");
         return false;
       }
       return true;
@@ -122,7 +120,7 @@ export default {
     [CellGroup.name]: CellGroup,
     [ActionSheet.name]: ActionSheet,
     [Uploader.name]: Uploader,
-    [Toast.name]:Toast
+    [Toast.name]: Toast
     //[ImagePreview.name]: ImagePreview
   }
 };

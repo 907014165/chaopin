@@ -2,19 +2,18 @@
   <div class="password-login">
     <!-- <headerNav title="登录"/> -->
     <div class="close-wrapper" @click="close">
-      <van-icon name="cross"/>
+      <van-icon name="cross" />
     </div>
     <div class="m-logo">
-      <img src="./logo.png" alt>
+      <img src="./logo.png" alt />
     </div>
-
     <div class="content-wrapper">
       <van-cell-group>
-        <van-field placeholder="请输入账号"/>
-        <van-field type="password" placeholder="请输入密码"/>
+        <van-field v-model="username" placeholder="请输入账号" />
+        <van-field v-model="password" type="password" placeholder="请输入密码" />
       </van-cell-group>
       <div class="login-btn">
-        <van-button size="large" type="primary" :disabled="disabled">登录</van-button>
+        <van-button size="large" type="primary" :disabled="disabled" @click="_login">登录</van-button>
       </div>
       <div class="other">
         <span @click="register">新用户注册</span>
@@ -26,15 +25,39 @@
 
 <script>
 import { Field, CellGroup, Button, Icon } from "vant";
+import { login } from "api/login.js";
+import { mapMutations } from "vuex";
 export default {
   data() {
     return {
-      disabled:true
+      username: "",
+      password: ""
     };
+  },
+  computed: {
+    disabled() {
+      if (!this.password || !this.username) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   },
   methods: {
     close() {
       this.$router.back();
+    },
+    _login() {
+      let params = {
+        mobile: this.username,
+        password: this.password
+      };
+      console.log(params);
+      login(params).then(res => {
+        console.log(res);
+        let token = res.data;
+        this.setToken(token)
+      });
     },
     //忘记密码
     forgotPwd() {
@@ -44,9 +67,12 @@ export default {
     register() {
       console.log("用户注册");
       this.$router.push({
-        path:'/login/register'
-      })
-    }
+        path: "/login/register"
+      });
+    },
+    ...mapMutations({
+      setToken: "SET_TOKEN"
+    })
   },
   components: {
     [Field.name]: Field,

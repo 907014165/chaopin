@@ -21,7 +21,14 @@ let routes = [
         children: [
           {
             path: 'confirmOrder/:skuid',
-            component: () => import('pages/ConfirmOrder/ConfirmOrder.vue')
+            component: () => import('pages/ConfirmOrder/ConfirmOrder.vue'),
+            children: [
+              {
+                path: 'pay',
+                name:'homePay',
+                component: () => import('pages/ConfirmOrder/Pay.vue')
+              }
+            ]
           }
         ]
       }
@@ -69,7 +76,14 @@ let routes = [
       {
         path: 'aftersale',
         name: 'userAfterSale',
-        component: () => import('pages/User/UserAfterSale/UserAfterSale.vue')
+        component: () => import('pages/User/UserAfterSale/UserAfterSale.vue'),
+        children: [
+          {
+            path: 'aftersaleDetail',
+            name: 'aftersaleDetail',
+            component: () => import('pages/Refund/RefundDetail.vue')
+          }
+        ]
       },
       {
         path: 'myComment',
@@ -214,6 +228,16 @@ let routes = [
     path: '/testSkeleton',
     name: 'testSkeleton',
     component: () => import('base/Skeleton/Skeleton.vue')
+  },
+  {
+    path: '/testRefundItem',
+    name: 'testRefundItem',
+    component: () => import('pages/Refund/RefundItem.vue')
+  },
+  {
+    path: '/testPay',
+    name: 'testPay',
+    component: () => import('pages/ConfirmOrder/Pay.vue')
   }
 ]
 

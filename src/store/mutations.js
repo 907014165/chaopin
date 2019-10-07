@@ -102,6 +102,10 @@ const mutations = {
     //设置是否有 从购物车购买商品的动作
     [types.SET_IS_BUY_GOODS](state,status){
         state.isByGoods = status
+    },
+    //设置当前退款的商品
+    [types.SET_CURRENT_REFUND_GOODS](state,currentRefundGoods){
+        state.currentRefundGoods = currentRefundGoods
     }
 }
 

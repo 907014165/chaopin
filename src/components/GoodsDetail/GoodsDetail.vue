@@ -52,6 +52,12 @@
           </van-cell-group>
 
           <van-cell-group class="goods-cell-group">
+            <van-cell :title="info" v-for="(info,index) in goods1.parameterList" :key="index">  
+            </van-cell>
+            <!--  <van-cell title="线下门店" icon="location-o" is-link @click="sorry"/> -->
+          </van-cell-group>
+
+          <van-cell-group class="goods-cell-group">
             <van-cell :title="currentSelectSku" is-link @click="toggleShowSku" />
           </van-cell-group>
           <div class="comment-wrapper">

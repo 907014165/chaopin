@@ -22,7 +22,12 @@
           :is-footer="true"
           :key="index"
         >
-          <van-button type="default" size="small" @click.stop="refund(index)" v-if="showReFundBtn">退还</van-button>
+          <van-button
+            type="default"
+            size="small"
+            @click.stop="refund(index)"
+            v-if="showReFundBtn"
+          >退还</van-button>
         </sku-item>
       </div>
       <div slot="order-price" class="order-price">
@@ -67,7 +72,7 @@ import SkuItem from "components/SkuItem/SkuItem";
 import Scroll from "base/Scroll/Scroll";
 import SkuGroup from "components/SkuGroup/SkuGroup";
 import AddressInfo from "common/js/addressInfo.js";
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 import { Button } from "vant";
 export default {
   data() {
@@ -93,7 +98,9 @@ export default {
         Complete = 40,
         Comment = 50;
       let map = [PendingLogistics, Logistics, Complete, Comment];
-      return map.indexOf(this.getCurrentOrderDetail.status) != -1 ? true : false;
+      return map.indexOf(this.getCurrentOrderDetail.status) != -1
+        ? true
+        : false;
     },
     ...mapGetters({
       getCurrentOrderDetail: "currentOrderDetail"
@@ -106,9 +113,22 @@ export default {
     test() {
       console.log(this.getCurrentOrderDetail);
     },
-    refund(index){
-      console.log('退还')
-      console.log(index)
+    refund(index) {
+      console.log("退还");
+      console.log(this.getCurrentOrderDetail.skuList[index]);
+      this.setCurrentRefundGoods({
+        orderId: this.getCurrentOrderDetail.orderId,
+        goods: this.getCurrentOrderDetail.skuList[index]
+      });
+      this.$router.push({
+        path: "/refund",
+        query: {
+          refundInfo: {
+            orderId: this.getCurrentOrderDetail.orderId,
+            goods: this.getCurrentOrderDetail.skuList[index]
+          }
+        }
+      });
     },
     //获得当前订单的商品数量
     getCuttentOrderNum(skulist) {
@@ -117,7 +137,10 @@ export default {
         num += sku.num;
       });
       return num;
-    }
+    },
+    ...mapMutations({
+      setCurrentRefundGoods: "SET_CURRENT_REFUND_GOODS"
+    })
   },
   components: {
     [Button.name]: Button,

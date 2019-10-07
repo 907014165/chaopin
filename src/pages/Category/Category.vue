@@ -13,7 +13,7 @@
         <scroll class="slider-wrapper" ref="slide">
           <van-sidebar v-model="activeKey" @change="changeSlideItem">
             <van-sidebar-item
-              v-for="(item,index) in sliderList"
+              v-for="(item,index) in sliderList" 
               :key="index"
               :title="item.goodsClass.className"
               ref="slidelist"
@@ -26,7 +26,7 @@
           </banner>
           <van-grid :border="false" :column-num="3" v-if="currentCategory">
             <van-grid-item v-for="category in currentCategory.brands"
-              :to="{path:'/searchCategory',query:{goodsClassId:currentCategory.goodsClass.goodsClassId,brandId:category.brandId}}"
+              :to="{path:'/searchCategory',query:{goodsClassId:currentCategory.goodsClass.goodsClassId,brandId:category.brandId,title:category.brandName}}"
               :key="category.brandId">
               <div class="item-content">
                 <van-image :src="`http://192.168.1.53:9090/${category.image}`"/>

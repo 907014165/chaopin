@@ -106,6 +106,17 @@ export function getLogistics(params) {
     })
 }
 
+//获取用户订单统计
+
+export function getOrderCount() {
+    const url = 'http://192.168.1.101:9092/order/member/purchase/count'
+    return axios({
+        url: url,
+        method: 'get'
+    }).then(res => {
+        return Promise.resolve(res.data)
+    })
+}
 
 
 

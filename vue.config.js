@@ -114,6 +114,14 @@ module.exports = {
                     '^/api': '/'
                 }
             },
+            '/search': {
+                target: 'http://192.168.1.53:9097/', //对应赵阳的search
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/search': '/'
+                }
+            },
             '/rongbin': {
                 target: 'http://192.168.1.66:21002/', //对应荣彬的接口
                 changeOrigin: true,

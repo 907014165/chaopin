@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <keep-alive exclude="search,chat,searchCategory,user">
+    <keep-alive exclude="search,chat,searchCategory,refund">
       <router-view></router-view>
     </keep-alive>
     <div class="tabbar-wrapper">

@@ -34,9 +34,12 @@ export default {
     },
     _getLogistics() {
       getLogistics().then(res => {
-        let express = JSON.parse(res.data);
-        console.log(express);
-        this.expressData = express.showapi_res_body.data;
+        console.log(res);
+        if (res.code === 0) {
+          let express = JSON.parse(res.data);
+          console.log(express);
+          this.expressData = express.showapi_res_body.data;
+        }
       });
     }
   },
