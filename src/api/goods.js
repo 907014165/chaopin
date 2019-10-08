@@ -1,6 +1,7 @@
 import axios from 'axios'
+const baseUrl = 'http://192.168.1.53:9090'
 export function getSkuById(params) {
-    const url = "/api/member/search/spec"
+    const url = `${baseUrl}/member/search/spec`
     return axios.get(url, {
         params
     }).then(res => {
@@ -9,7 +10,7 @@ export function getSkuById(params) {
 }
 
 export function getGoodsById(params) {
-    const url = "/api/member/search/detail"
+    const url = `${baseUrl}/member/search/detail`
     return axios.get(url, {
         params
     }).then(res => {
@@ -18,7 +19,7 @@ export function getGoodsById(params) {
 }
 //切换收藏
 export function toggleFavorite(params) {
-    const url = "/api/member/favorite/add"
+    const url = `${baseUrl}/member/favorite/add`
     return axios({
         url: url,
         method: 'post',
@@ -29,7 +30,7 @@ export function toggleFavorite(params) {
 }
 //添加商品到购物车
 export function addShopCart(params) {
-    const url = "/api/member/cart/add"
+    const url = `${baseUrl}/member/cart/add`
     return axios({
         url: url,
         method: 'get',

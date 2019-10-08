@@ -10,7 +10,8 @@ const state = {
     currentCommentList:[],
     currentOrderDetail:{},
     isByGoods:false,
-    currentRefundGoods:{}
+    currentRefundGoods:{},
+    inPayment:{}
 }
 
 export default state

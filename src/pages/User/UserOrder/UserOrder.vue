@@ -9,7 +9,7 @@
           v-show="orderList.length"
           :has-more="hasMore"
           @load="loadMore"
-          :pull-up="true"
+          :pull-up="true" 
         >
           <sku-group
             :seller="seller"
@@ -21,6 +21,7 @@
             @clickOrder="clickOrder(seller.orderId,index)"
             @delOrder="delOrder(seller.orderId)"
             @confirmGoods="confirmGoods(seller.orderId)"
+            @toPay="toPay(seller)"
             @SeeComment="seeComment"
           >
             <div slot="order-price" class="order-price">
@@ -308,6 +309,18 @@ export default {
         path: "/user/myComment"
       });
     },
+    //去支付
+    toPay(order){
+      console.log(order)
+      let inPaying = {
+        ordersId:[order.orderId],
+        num:order.orderAmount
+      }
+      this.setInPayMent(inPaying)
+      this.$router.push({
+        name:'toPay'
+      })
+    },
     //取消订单
     cancelOrder(orderId) {
       console.log(orderId);
@@ -535,7 +548,8 @@ export default {
       });
     },
     ...mapMutations({
-      setCurrentOrderDetail: "SET_CURRENT_ORDER_DETAIL"
+      setCurrentOrderDetail: "SET_CURRENT_ORDER_DETAIL",
+      setInPayMent: "SET_IN_PAYMENT"
     })
   },
   watch: {

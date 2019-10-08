@@ -17,3 +17,5 @@ export const currentOrderDetail = state => state.currentOrderDetail
 export const isByGoods = state => state.isByGoods
 
 export const currentRefundGoods = state => state.currentRefundGoods
+
+export const inPayment = state => state.inPayment

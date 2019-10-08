@@ -1,4 +1,5 @@
 import axios from 'axios'
+const baseUrl = 'http://192.168.1.53:9097'
 export function getHotKey() {
     const url = '/api/getHotKey'
     const params = {
@@ -12,7 +13,7 @@ export function getHotKey() {
 }
 
 export function getGoodsListByKeyWords(params) {
-    const url = '/search/member/search/page'
+    const url = `${baseUrl}/member/search/page`
     
     console.log(params)
     return axios({
@@ -25,7 +26,7 @@ export function getGoodsListByKeyWords(params) {
 }
 export function getSearchGoodsList(params){
     console.log(params)
-    const url = '/search/member/search/page'
+    const url = `${baseUrl}/member/search/page`
     return axios({
         url: url,
         method: 'post',

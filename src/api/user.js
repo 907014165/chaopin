@@ -1,7 +1,10 @@
 import axios from './config'
 //获得用户收藏列表
+const baseUrl = 'http://192.168.1.53:9090'
+const baseUrl1 = '/rongbin'
+//用户收藏列表
 export function getCollectList() {
-    const url = '/api/member/favorite/list'
+    const url = `${baseUrl}/member/favorite/list`
     let params = {
     }
     return axios.get(url, {
@@ -13,7 +16,7 @@ export function getCollectList() {
 
 //取消用户收藏列表
 export function deleteCollectList(params) {
-    const url = '/api/member/favorite/delete'
+    const url = `${baseUrl}/member/favorite/delete`
     return axios({
         url: url,
         method: 'post',
@@ -24,16 +27,16 @@ export function deleteCollectList(params) {
 }
 //获取用户收货地址
 export function getUserAddressList(params) {
-    const url = '/rongbin/member-api/memberAddress/selectAddresslist'
+    const url = `${baseUrl1}/member-api/memberAddress/selectAddresslist`
     return axios.get(url, {
         params
     }).then(res => {
         return Promise.resolve(res.data)
     })
 }
-//默认
+//用户默认收货地址
 export function getDefaultAddr(params) {
-    const url = '/rongbin/member-api/memberAddress/selectDefault'
+    const url = `${baseUrl1}/member-api/memberAddress/selectDefault`
     return axios.get(url, {
         params
     }).then(res => {
@@ -43,7 +46,7 @@ export function getDefaultAddr(params) {
 //添加收货地址
 export function addUserAddressList(params) {
     //console.log(params)
-    const url = '/rongbin/member-api/memberAddress/insertAddress'
+    const url = `${baseUrl1}/member-api/memberAddress/insertAddress`
     return axios({
         url: url,
         method: 'post',
@@ -73,7 +76,7 @@ export function addUserAddressList(params) {
 //更新收货地址
 export function updataUserAddressList(params) {
     console.log(params)
-    const url = '/rongbin/member-api/memberAddress/updateAddress'
+    const url = `${baseUrl1}/member-api/memberAddress/updateAddress`
     return axios({
         url: url,
         method: 'post',
@@ -85,10 +88,10 @@ export function updataUserAddressList(params) {
         return Promise.resolve(res.data)
     })
 }
-
+//删除用户收货地址
 export function deleteUserAddressList(params) {
     console.log(params)
-    const url = '/rongbin/member-api/memberAddress/deleteAddress'
+    const url = `${baseUrl1}/member-api/memberAddress/deleteAddress`
     return axios({
         url: url,
         method: 'get',
@@ -97,7 +100,18 @@ export function deleteUserAddressList(params) {
         return Promise.resolve(res.data)
     })
 }
-//获取用户订单列表
+
+//用户信息
+
+export function getUserInfo(params){
+    const url = `${baseUrl1}/member-api/member/selectMemberlist`
+    return axios.get(url, {
+        params
+    }).then(res => {
+        return Promise.resolve(res.data)
+    })
+}
+/* //获取用户订单列表
 export function getUserOrder(params) {
     //0:已取消 1:全部 10:未付款 20:已收货 30:已发货 40:已完成 50:已评价
     let urlMap = {
@@ -174,4 +188,4 @@ export function cancelOrder(params) {
     }).then(res => {
         return Promise.resolve(res.data)
     })
-}
+} */

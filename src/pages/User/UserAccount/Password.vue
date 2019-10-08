@@ -55,8 +55,10 @@ export default {
       console.log(params);
       login(params).then(res => {
         console.log(res);
-        let token = res.data;
-        this.setToken(token)
+        let token = res.data.token;
+        this.setToken(token);
+        let redirect = this.$route.query.redirect || "/home";
+        this.$router.push(redirect);
       });
     },
     //忘记密码

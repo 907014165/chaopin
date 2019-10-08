@@ -1,9 +1,7 @@
 import axios from 'axios'
-const config = {
-    headers: {"Content-Type":"multipart/form-data"}
-}
+const baseUrl = "http://192.168.1.53:9092"
 export function fileUpload(params){
-    const url = '/dindang/member/file/add'
+    const url = `${baseUrl}/member/file/add`
     return axios.post(url,params).then(res=>{
         return Promise.resolve(res.data)
     })
@@ -11,7 +9,7 @@ export function fileUpload(params){
 
 export function reportComment(params){
     console.log(params)
-    const url = '/dindang/member/comment/add'
+    const url = `${baseUrl}/member/comment/add`
     return axios({
         url: url,
         method: 'post',
@@ -23,7 +21,7 @@ export function reportComment(params){
 
 export function getComments(params){
     console.log(params)
-    const url = '/dindang/member/comment/page'
+    const url = `${baseUrl}/member/comment/page`
     return axios({
         url: url,
         method: 'get',
@@ -34,7 +32,7 @@ export function getComments(params){
 }
 
 export function getComentTypeNum(params){
-    const url = '/dindang/member/comment/getNum'
+    const url = `${baseUrl}/member/comment/getNum`
     return axios.get(url,{
         params
     }).then(res=>{
@@ -44,7 +42,7 @@ export function getComentTypeNum(params){
 
 export function getCompleteComments(params){
     console.log(params)
-    const url = '/dindang/member/comment/list'
+    const url = `${baseUrl}/member/comment/list`
     return axios({
         url: url,
         method: 'get',

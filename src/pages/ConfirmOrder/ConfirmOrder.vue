@@ -33,7 +33,7 @@
       />
     </van-cell-group>
     <van-coupon-cell :coupons="coupons" :chosen-coupon="chosenCoupon" @click="showList = true" />
-    <van-radio-group v-model="radio">
+    <!-- <van-radio-group v-model="radio">
       <van-cell-group>
         <van-cell title="支付宝支付" clickable @click="radio = '1'" icon="alipay">
           <van-radio slot="right-icon" name="1" />
@@ -42,7 +42,7 @@
           <van-radio slot="right-icon" name="2" />
         </van-cell>
       </van-cell-group>
-    </van-radio-group>
+    </van-radio-group>-->
     <van-submit-bar :price="totlePrice" button-text="提交订单" @submit="onSubmit" />
     <van-popup v-model="showList" position="bottom">
       <van-coupon-list
@@ -111,7 +111,7 @@ export default {
   computed: {
     totlePrice() {
       if (this.order) {
-        return this.order.price*this.order.num;
+        return this.order.price * this.order.num;
       } else {
         let price = 0;
         this.seller.forEach(seller => {
@@ -129,11 +129,12 @@ export default {
         return null;
       }
     },
-    addr(){
-      return this.defaultAddr?this.defaultAddr:this.getCurrentAddr
+    addr() {
+      return this.defaultAddr ? this.defaultAddr : this.getCurrentAddr;
     },
     ...mapGetters({
-      getCurrentAddr: "getCurrentAddress"
+      getCurrentAddr: "getCurrentAddress",
+      getInPayMent: "inPayment"
     })
   },
   methods: {
@@ -164,10 +165,15 @@ export default {
         };
         console.log(params);
         createOrderImmediately(params).then(res => {
+          if (res.code === 0) {
+            let inpayment = res.data;
+            console.log(inpayment)
+            this.setInPayMent(inpayment);
+            this.$router.push({
+              name: "toPay"
+            });
+          }
           console.log(res);
-          this.$router.push({
-            path: "homePay"
-          });
         });
       }
       //用户从购物车下单
@@ -195,6 +201,7 @@ export default {
         console.log(params);
         createOrderByShopCart(params).then(res => {
           if (res.data) {
+            console.log(res);
             this.setIsBuyGoods(true);
           }
         });
@@ -235,7 +242,8 @@ export default {
       });
     },
     ...mapMutations({
-      setIsBuyGoods: "SET_IS_BUY_GOODS"
+      setIsBuyGoods: "SET_IS_BUY_GOODS",
+      setInPayMent: "SET_IN_PAYMENT"
     })
   },
   components: {

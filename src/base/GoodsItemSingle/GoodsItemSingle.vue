@@ -7,9 +7,9 @@
       <div class="goods-info-title">{{ goods.desc }}</div>
       <div class="goods-info-content">
         <span class="goods-info-price">￥{{ goods.price }}</span>
-        <div class="goods-add-cart" @click.stop="addShopCart">
+        <!-- <div class="goods-add-cart" @click.stop="addShopCart">
           <van-icon name="cart-circle-o" />
-        </div>
+        </div> -->
       </div>
       <div class="goods-info-other"></div>
     </div>

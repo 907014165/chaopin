@@ -1,7 +1,7 @@
 import axios from 'axios'
-
+const baseUrl = 'http://192.168.1.53:9090'
 export function getSlideImages() {
-    //const url = '/api/getSlideImages'
+    //const url = '${baseUrl}/getSlideImages'
     const url = '/jiahao/system/index/carousel'
     //const url = 'api/getImg'
     //const url = 'api/admins/getDo/getImg'
@@ -15,7 +15,7 @@ export function getSlideImages() {
 }
 
 export function getRecommendList() {
-    const url = '/api/getRecommendList'
+    const url = `${baseUrl}/getRecommendList`
     let params = {}
     return axios.get(url, {
         params
@@ -25,9 +25,9 @@ export function getRecommendList() {
 }
 
 export function getGoodsList(params) {
-    //const url = '/api/member/search/page'
+    //const url = '${baseUrl}/member/search/page'
     //let params = {}
-    const url = '/api/member/search/page'
+    const url = `${baseUrl}/member/search/page`
     return axios({
         url: url,
         method: 'post',
@@ -39,7 +39,7 @@ export function getGoodsList(params) {
 
 
 export function getClassList() {
-    const url = '/api/member/class/list'
+    const url = `${baseUrl}/member/class/list`
     let params = {}
     return axios.get(url, {
         params
@@ -50,7 +50,7 @@ export function getClassList() {
 
 
 export function getTest() {
-    const url = '/api/test'
+    const url = `${baseUrl}/test`
     let params = {
         name: 'rsh'
     }
@@ -62,7 +62,7 @@ export function getTest() {
 }
 
 export function getTest1() {
-    const url = 'api/member/cart/test'
+    const url = `api/member/cart/test`
     return axios.get(url, {
         params
     }).then((res) => {

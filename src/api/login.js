@@ -1,6 +1,7 @@
 import axios from 'axios'
+const baseUrl = '/rongbin'
 export function getCode(params) {
-    const url = '/rongbin/member-api/member/getCode'
+    const url = `${baseUrl}/member-api/member/getCode`
     return axios({
         url: url,
         method: 'post',
@@ -11,7 +12,7 @@ export function getCode(params) {
 }
 
 export function register(params) {
-    const url = '/rongbin/member-api/member/insert'
+    const url = `${baseUrl}/member-api/member/insert`
     return axios({
         url: url,
         method: 'post',
@@ -22,7 +23,7 @@ export function register(params) {
 }
 
 export function smLogin(params) {
-    const url = '/rongbin/member-api/member/smslogin'
+    const url = `${baseUrl}/member-api/member/smslogin`
     return axios({
         url: url,
         method: 'post',
@@ -33,7 +34,7 @@ export function smLogin(params) {
 }
 
 export function login(params) {
-    const url = '/rongbin/member-api/member/pwdlogin'
+    const url = `${baseUrl}/member-api/member/pwdlogin`
     return axios({
         url: url,
         method: 'post',

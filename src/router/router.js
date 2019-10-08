@@ -25,7 +25,7 @@ let routes = [
             children: [
               {
                 path: 'pay',
-                name:'homePay',
+                name: 'homePay',
                 component: () => import('pages/ConfirmOrder/Pay.vue')
               }
             ]
@@ -42,7 +42,9 @@ let routes = [
   {
     path: '/shopcart',
     name: 'shopcart',
-    component: () => import('pages/ShopCart/ShopCart.vue'),
+    component: () => import('pages/ShopCart/ShopCart.vue'), meta: {
+      //requireAuth: true,
+    },
     children: [
       {
         path: 'confirmOder',
@@ -235,8 +237,8 @@ let routes = [
     component: () => import('pages/Refund/RefundItem.vue')
   },
   {
-    path: '/testPay',
-    name: 'testPay',
+    path: '/toPay',
+    name: 'toPay',
     component: () => import('pages/ConfirmOrder/Pay.vue')
   }
 ]

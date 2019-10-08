@@ -46,7 +46,7 @@
 import NavBar from "base/NavBar/NavBar";
 import SkuGroup from "components/SkuGroup/SkuGroup";
 import Scroll from "base/Scroll/Scroll";
-import { getUserOrder } from "api/user.js";
+
 import { getUserOrderByStatus } from "api/order.js";
 import AddressInfo from "common/js/addressInfo.js";
 import SkuGoods from "common/js/skuGoods.js";

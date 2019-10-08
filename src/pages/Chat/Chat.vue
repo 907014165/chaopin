@@ -57,8 +57,10 @@
         </div>
       </scroll>
       <div class="input-box van-hairline--bottom" :class="showEmji">
-        <div class="more" @click="pickImg">
-          <van-icon name="photo-o" />
+        <div class="more">
+          <van-uploader :after-read="afterRead">
+            <van-icon name="photo-o" />
+          </van-uploader>
         </div>
 
         <div class="textbox">
@@ -90,13 +92,13 @@
           </van-swipe-item>
         </van-swipe>
       </div>
-      <van-action-sheet
+      <!-- <van-action-sheet
         v-model="show"
         :actions="actions"
         cancel-text="取消"
         @select="onSelect"
         @cancel="onCancel"
-      />
+      />-->
       <van-image-preview
         v-model="showPreview"
         :images="msgImgList"
@@ -299,6 +301,12 @@ export default {
         this.inputFoucs();
       } */
     },
+    afterRead(file) {
+      // 此时可以自行将文件上传至服务器
+      console.log(file);
+      let msg = { url: file.content, w: 500, h: 500 };
+      this.sendMsg(msg, "img");
+    },
     //相机拍照
     captureImage() {
       let _this = this;
@@ -357,8 +365,8 @@ export default {
                 function(t, status) {
                   //上传完成
                   console.log(JSON.stringify(t));
-                  console.log(t.responseText)
-                  console.log(t.responseText.path)
+                  console.log(t.responseText);
+                  console.log(t.responseText.path);
                   let imgStr = `<img src="192.168.1.52:9010/${t.responseText.path}">`;
                   let msg11 = {
                     type: "private",
@@ -420,6 +428,7 @@ export default {
     //选图
     pickImg() {
       this.show = !this.show;
+      console.log("xuan 图");
     },
     //让消息输入框聚焦
     inputFoucs() {
@@ -493,7 +502,7 @@ export default {
       if (!this.textMsg) {
         return;
       }
-      
+
       //构造消息
       let msg11 = {
         type: "private",

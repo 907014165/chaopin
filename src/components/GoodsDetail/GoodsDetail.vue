@@ -7,7 +7,7 @@
             <van-icon name="arrow-left" />
           </span>
           <van-swipe class="goods-swipe" :autoplay="3000" @change="onChange" v-if="goods1">
-            <van-swipe-item v-for="thumb in goods1.album" :key="thumb">
+            <van-swipe-item v-for="(thumb,index) in goods1.album" :key="index">
               <img :src="`http://192.168.1.53:9090/${thumb}`" />
             </van-swipe-item>
             <div class="custom-indicator" slot="indicator">{{ current + 1 }}/{{goods1.album.length}}</div>
@@ -26,7 +26,7 @@
                   <div class="info">收藏</div>
                 </div>
               </div>
-              <div class="goods-title">{{ goods1.body }}</div>
+              <div class="goods-title">{{ goods1.goodsName }}</div>
             </van-cell>
             <van-cell class="goods-express">
               <van-col span="10">运费：{{ goods.express }}</van-col>
@@ -52,8 +52,7 @@
           </van-cell-group>
 
           <van-cell-group class="goods-cell-group">
-            <van-cell :title="info" v-for="(info,index) in goods1.parameterList" :key="index">  
-            </van-cell>
+            <van-cell :title="info" v-for="(info,index) in goods1.parameterList" :key="index"></van-cell>
             <!--  <van-cell title="线下门店" icon="location-o" is-link @click="sorry"/> -->
           </van-cell-group>
 
@@ -71,7 +70,11 @@
                 <van-icon name="arrow" />
               </div>
             </div>
-            <rating-seller :is-all-ratings="false" @refresh="scrollRefresh"></rating-seller>
+            <rating-seller
+              :is-all-ratings="false"
+              :goods-common-id="goods1.goodsCommonId"
+              @refresh="scrollRefresh"
+            ></rating-seller>
             <div class="look-more">
               <van-button
                 plain
@@ -326,8 +329,10 @@ export default {
           if (res.data) {
             Toast.success("加入购物车成功");
             this.setIsAddShopCart(true);
+            this.toggleShowSku();
           } else {
             Toast.fail("加入购物车失败");
+            this.toggleShowSku();
           }
         }
       });
@@ -392,6 +397,17 @@ export default {
     ...mapMutations({
       setIsAddShopCart: "SET_IS_SHOP_CART"
     })
+  },
+  watch: {
+    $route(to, from) {
+      /* console.log(to);
+      console.log(from); */
+      if (from.name === "shopcart") {
+        this._getGoodsById();
+        this._getSkuById();
+        console.log('fsa')
+      }
+    }
   },
   components: {
     [Tag.name]: Tag,

@@ -69,7 +69,6 @@ export default {
         });
       });
     },
-    submit: function() {},
     SendAuthenticode() {
       console.log("发送验证码");
       let params = new FormData();
@@ -107,7 +106,10 @@ export default {
       };
       console.log(params);
       smLogin(params).then(res => {
-        console.log(res);
+        if(res.code === 0){
+          console.log(res)
+          //this.setToken(res.data.token)
+        }
       });
     },
     ...mapMutations({

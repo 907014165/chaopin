@@ -127,7 +127,7 @@ export default {
         this.$emit("clickOrder");
       } else {
         this.$router.push({
-          path: `/home/goodsDetail/${this.sku.goodsId}`,
+          path: `/home/goodsDetail/${this.sku.goodsCommonId}`,
           query: {
             ParentPath: "home"
           }

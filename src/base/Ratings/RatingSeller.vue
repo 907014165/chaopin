@@ -89,6 +89,10 @@ export default {
     isAllRatings: {
       type: Boolean,
       default: true
+    },
+    goodsCommonId:{
+      type:Number,
+      default:1
     }
   },
   created() {
@@ -168,7 +172,7 @@ export default {
       this.currentPage = 1;
       let params = {
         current: this.currentPage,
-        goodsCommonId:1,
+        goodsCommonId:this.goodsCommonId,
         type:this.selectedType===ALL?null:this.selectedType
       };
       this.ratings.splice(0);

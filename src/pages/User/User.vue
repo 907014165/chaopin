@@ -4,20 +4,20 @@
       <div class="user-profile">
         <div class="background">
           <img
-            src="http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100"
+            :src="userInfo && userInfo.avatar ? userInfo.avatar : 'http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100'"
             alt
           />
         </div>
         <div class="user-profile-avatar">
           <router-link to="/user/userinfo">
             <img
-              :src="user && user.avatar ? user.avatar : 'http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100'"
+              :src="userInfo && userInfo.avatar ? userInfo.avatar : 'http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100'"
             />
           </router-link>
         </div>
         <div class="user-profile-username">
           <a href="/#/user/info">
-            <span class="m-nick">{{user ? user.nickname : '未登陆'}}</span>
+            <span class="m-nick">{{userInfo ? userInfo.memberName : '未登陆'}}</span>
           </a>
         </div>
       </div>
@@ -112,6 +112,7 @@
 <script>
 import { Cell, CellGroup, Icon, Row, Col, Info, PullRefresh } from "vant";
 import { getOrderCount } from "api/order.js";
+import { getUserInfo } from "api/user.js";
 
 export default {
   name: "user",
@@ -121,11 +122,13 @@ export default {
       user: undefined,
       showList: true,
       isLoading: false,
-      orderStatusCount: {}
+      orderStatusCount: {},
+      userInfo: {}
     };
   },
   created() {
     this._getOrderCount();
+    this._getUserInfo();
   },
   components: {
     [Cell.name]: Cell,
@@ -156,6 +159,16 @@ export default {
         }
         if (callback) {
           callback();
+        }
+      });
+    },
+    _getUserInfo() {
+      let params = {
+        memberId: "146601"
+      };
+      getUserInfo(params).then(res => {
+        if (res.code === 0) {
+          this.userInfo = res.data;
         }
       });
     }

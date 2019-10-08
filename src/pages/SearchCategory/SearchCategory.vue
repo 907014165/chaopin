@@ -42,7 +42,7 @@
           <goods-filter @shapeChanged="shapeChanged"></goods-filter>
         </div>
       </scroll>
-      <div class="loading-wrapper" v-show="!goodsList.length">
+      <div class="loading-wrapper" v-show="showLoading">
         <van-loading size="24px" vertical>加载中...</van-loading>
       </div>
       <transition name="van-slide-right">
@@ -77,6 +77,7 @@ export default {
       pageY: 0,
       bannerDom: null,
       currentPage: 1,
+      hasResult: false,
       title: this.$route.query.title
     };
   },
@@ -108,6 +109,16 @@ export default {
           : false;
       } else {
         return false;
+      }
+    },
+    showLoading() {
+      if (!this.hasResult && !this.goodsList.length) {
+        return false;
+      } else {
+        if (this.goodsList.length) {
+          return false;
+        }
+        return true;
       }
     }
   },
@@ -199,6 +210,7 @@ export default {
       console.log(params);
       getSearchGoodsList(params).then(res => {
         if (res.code === 0) {
+          this.hasResult = res.data.list.length === 0 ? false : true;
           this.bannerImg = res.data.image;
           res.data.list.forEach(item => {
             this.goodsList.push(

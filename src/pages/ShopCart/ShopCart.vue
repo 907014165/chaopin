@@ -339,6 +339,7 @@ export default {
             };
             seller.cartList.forEach(sku => {
               obj.skuList.push({
+                goodsCommonId:sku.goodsCommonId,
                 goodsId: sku.goodsId,
                 skuId: sku.goodsId,
                 title: sku.goodsName,

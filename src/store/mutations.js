@@ -106,6 +106,10 @@ const mutations = {
     //设置当前退款的商品
     [types.SET_CURRENT_REFUND_GOODS](state,currentRefundGoods){
         state.currentRefundGoods = currentRefundGoods
+    },
+    //设置单前购买的商品数据
+    [types.SET_IN_PAYMENT](state,inPayment){
+        state.inPayment = inPayment
     }
 }
 

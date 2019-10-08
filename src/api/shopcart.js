@@ -1,7 +1,7 @@
 import axios from 'axios'
-
+const baseUrl = 'http://192.168.1.53:9090'
 export function getShopCartList(params) {
-    const url = "/api/member/cart/list"
+    const url = `${baseUrl}/member/cart/list`
     return axios.get(url, {
         params
     }).then(res => {
@@ -19,7 +19,7 @@ export function addShopCartList(params) {
 }
 
 export function delShopCartList(params) {
-    const url = "/api/member/cart/delete"
+    const url = `${baseUrl}/member/cart/delete`
     return axios({
         url: url,
         method: 'post',
@@ -31,7 +31,7 @@ export function delShopCartList(params) {
 
 export function updataShopCartList(params){
     console.log(params)
-    const url = "/api/member/cart/update"
+    const url = `${baseUrl}/member/cart/update`
     return axios({
         url: url,
         method: 'post',
