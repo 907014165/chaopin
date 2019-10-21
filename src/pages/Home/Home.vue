@@ -1,87 +1,65 @@
 <template>
   <div class="home">
-    <scroll class="scroll-wrapper" :data="goodsList" ref="scroll" :has-more="hasMore" @load="loadMore" :pull-up="true">
-      <div class="scroll-content">
-        <div class="search-box-wrapper">
-          <van-search
-            v-model="value"
-            placeholder="请输入搜索关键词"
-            show-action
-            shape="round"
-            @search="onSearch"
-            @cancel="onCancel"
-            @click="toSearch"
-          />
-        </div>
-        <div class="slide-wrapper" v-if="slideImages.length">
-          <slider ref="slide">
-            <div v-for="(item,index) in slideImages" :key="index" @click="goToDetail(item)"> 
-              <img :src="`http://192.168.1.101:18052${item.image}`" @click="test" alt  />
-            </div>
-          </slider>
-        </div>
-        <van-grid :column-num="5">
-          <van-grid-item
-            v-for="item in classList"
-            :key="item.goodsClassId"
-            :icon="`http://192.168.1.53:9090/${item.posterImage}`"
-            :text="item.className"
-            :to="{path:'/searchCategory',query:{goodsClassId:item.goodsClassId,title:item.className}}"
-          />
-        </van-grid>
-        <goods-list :goods-list="goodsList" @selected="selectGoods"></goods-list>
-        <!-- <goods-list :goods-list="recommendList" @selected="selectGoods"></goods-list> -->
-        <!-- <div class="pullup-wrapper">
+    <div class="search-box-wrapper">
+      <van-search
+        v-model="value"
+        class="van-hairline--bottom"
+        placeholder="请输入搜索关键词"
+        show-action
+        shape="round"
+        @search="onSearch"
+        @cancel="onCancel"
+        @click="toSearch"
+      />
+    </div>
+    <van-pull-refresh v-model="isLoading" :disabled="disabled" @refresh="onRefresh">
+      <scroll
+        class="scroll-wrapper"
+        :data="goodsList"
+        ref="scroll"
+        @pull-down-handler="reFresh"
+        @load="loadMore"
+        :has-more="hasMore"
+        :pull-up="true"
+        :listen-scroll="true"
+        @scroll="scroll"
+      >
+        <div class="scroll-content">
+          <div class="slide-wrapper" v-if="slideImages.length">
+            <slider ref="slide">
+              <div v-for="(item,index) in slideImages" :key="index" @click="goToDetail(item)">
+                <img :src="item.full" @click="test" alt />
+              </div>
+            </slider>
+          </div>
+          <van-grid :column-num="5">
+            <van-grid-item
+              v-for="item in classList"
+              :key="item.goodsClassId"
+              :icon="item.fullImage"
+              :text="item.className"
+              :to="{path:'/searchCategory',query:{goodsClassId:item.goodsClassId,title:item.className}}"
+            />
+          </van-grid>
+          <goods-list :goods-list="goodsList" @selected="selectGoods"></goods-list>
+          <!-- <goods-list :goods-list="recommendList" @selected="selectGoods"></goods-list> -->
+          <!-- <div class="pullup-wrapper">
           <div v-if="!isPullUpLoad" class="before-trigger">
             <span class="pullup-txt">{{ pullUpText }}</span>
           </div>
           <div v-else class="after-trigger">
             <van-loading size="24px">加载中...</van-loading>
           </div>
-        </div> -->
-      </div>
-    </scroll>
+          </div>-->
+        </div>
+      </scroll>
+    </van-pull-refresh>
     <transition name="van-slide-right">
       <router-view></router-view>
     </transition>
   </div>
 </template>
 <script>
-document.addEventListener("plusready", function() {
-  var webview = plus.webview.currentWebview();
-  plus.key.addEventListener("backbutton", function() {
-    webview.canBack(function(e) {
-      if (e.canBack) {
-        webview.back();
-      } else {
-        //webview.close(); //hide,quit
-        //plus.runtime.quit();
-        //首页返回键处理
-        //处理逻辑：1秒内，连续两次按返回键，则退出应用；
-        var first = null;
-        plus.key.addEventListener(
-          "backbutton",
-          function() {
-            //首次按键，提示‘再按一次退出应用’
-            if (!first) {
-              first = new Date().getTime();
-              plus.nativeUI.toast('再按一次退出应用');
-              setTimeout(function() {
-                first = null;
-              }, 1000);
-            } else {
-              if (new Date().getTime() - first < 1500) {
-                plus.runtime.quit();
-              }
-            }
-          },
-          false
-        );
-      }
-    });
-  });
-});
-
 import { ERR_OK } from "api/config";
 import Goods from "common/js/goods";
 import {
@@ -95,10 +73,13 @@ import {
 import Slider from "base/slider/slider";
 import Scroll from "base/Scroll/Scroll";
 import Vue from "vue";
-import { Search, Grid, GridItem, List, Loading } from "vant";
+import { Search, Grid, GridItem, List, Loading, PullRefresh } from "vant";
 import GoodsList from "components/GoodsList/GoodsList";
+//监听 返回事件
+import { listenBack } from "common/js/app.js";
 
 export default {
+  name: "home",
   data() {
     return {
       slideImages: [], //轮播图列表
@@ -111,15 +92,32 @@ export default {
       finished: false, //
       hasMore: true, //判断是否 还有更多的值
       immediateCheck: false,
+      isLoading: false,
+      disabled: false,
       isPullUpLoad: false, //是否上拉刷新
       pullUpText: "上拉加载更多..."
     };
   },
+  beforeRouteEnter(to, from, next) {
+    console.log("附近的萨克雷");
+    next(vm => {
+      // 通过 `vm` 访问组件实例
+      if (from.path.indexOf("login") != -1) {
+        console.log("来自 登录");
+        vm.currentPage = 1;
+        vm.goodsList = [];
+        vm._getGoodsList();
+        vm._getClassList();
+      }
+    });
+  },
   created() {
     //获得轮播图图片列表
     this._getSlideImages();
+    listenBack();
     //this._getRecommendList();
     //获取商品列表
+    //this.goodsList.splice(0);
     this._getGoodsList();
     //获取商品分类列表
     this._getClassList();
@@ -128,28 +126,55 @@ export default {
   },
   mounted() {},
   methods: {
-    test(){
-      console.log('测试')
+    test(finishPullDown) {
+      setTimeout(() => {
+        finishPullDown();
+      }, 300);
+    },
+    //监听 scroll的变化
+    //因为和scroll组件和pullrefresh冲突 所以有了这么一个恶心的方法
+    scroll(pos) {
+      this.scrollY = pos.y;
+      //console.log(pos.y);
+      //当y的滚动距离大于-10时 让下拉刷新 启动
+      if (pos.y >= -10) {
+        this.disabled = false;
+      } else {
+        this.disabled = true;
+      }
+    },
+    onRefresh() {
+      this.currentPage = 1;
+      this.hasMore = true;
+      this.goodsList.splice(0);
+      this._getClassList();
+      this._getSlideImages();
+      this._getGoodsList(() => {
+        this.isLoading = false;
+      });
+    },
+    reFresh(finishPullDown) {
+      this._getGoodsList(finishPullDown);
     },
     //点击轮播图 去商品详情
-    goToDetail(item){
-      console.log(item)
-      if(item.type!=='goods'){
-        return ;
+    goToDetail(item) {
+      console.log(item);
+      if (item.type !== "goods") {
+        return;
       }
       this.$router.push({
         path: `/home/goodsDetail/${item.value}`,
         query: {
           ParentPath: "home"
         }
-      })
+      });
     },
     _getSlideImages() {
       getSlideImages().then(res => {
         //console.log(res);
         if (res.code === ERR_OK) {
           this.slideImages = res.data.carousel;
-          console.log(res)
+          console.log(res);
         }
       });
     },
@@ -161,29 +186,42 @@ export default {
       });
     },
     //获取推荐商品列表
-    _getGoodsList() {
+    _getGoodsList(finishPullDown) {
       let params = {
         byDefault: 1,
         current: this.currentPage
       };
       console.log(params);
-      getGoodsList(params).then(res => {
-        if (res.code === 0) {
-          console.log(res);
-          res.data.list.forEach(item => {
-            this.goodsList.push(
-              new Goods({
-                goodsId: item.goodsCommonId,
-                desc: item.goodsName,
-                imgUrl: item.image,
-                price: item.sellPrice,
-                oldPrice: item.costPrice,
-                discount: item.discount
-              })
-            );
-          });
-        }
-      });
+      getGoodsList(params)
+        .then(res => {
+          if (res.code === 0) {
+            console.log(res);
+            res.data.list.forEach(item => {
+              this.goodsList.push(
+                new Goods({
+                  goodsId: item.goodsCommonId,
+                  desc: item.goodsName,
+                  imgUrl: item.fullImage,
+                  price: item.sellPrice,
+                  oldPrice: item.costPrice,
+                  discount: item.discount
+                })
+              );
+            });
+            this.$nextTick(() => {
+              this.goodsList = this.goodsList.slice(0);
+            });
+
+            if (finishPullDown) {
+              this.$nextTick(() => {
+                finishPullDown();
+              });
+            }
+          }
+        })
+        .catch(err => {
+          finishPullDown && finishPullDown();
+        });
     },
     _getTest() {
       getTest().then(res => {
@@ -195,10 +233,15 @@ export default {
         console.log(res);
       });
     },
-    _getClassList() {
+    _getClassList(finishPullDown) {
       getClassList().then(res => {
         if (res.code === 0) {
           this.classList = res.data;
+          if (finishPullDown) {
+            this.$nextTick(() => {
+              finishPullDown();
+            });
+          }
         }
       });
     },
@@ -241,7 +284,7 @@ export default {
           this.isPullUpLoad = false; */
 
           //结束上拉刷新的回调函数
-          callback()
+          callback();
         }
       });
     },
@@ -274,45 +317,69 @@ export default {
       });
     }
   },
+  watch: {
+    /* $route(to, from) {
+      console.log("1111");
+      console.log(from);
+      if (from.path.indexOf("login") != -1) {
+        console.log("来自 登录");
+        this.currentPage = 1;
+        this.goodsList = [];
+        let params = {
+          byDefault: 1,
+          current: this.currentPage
+        };
+        this._getGoodsList();
+        this._getClassList();
+      }
+    } */
+  },
   components: {
     [Search.name]: Search,
     [Grid.name]: Grid,
     [List.name]: List,
     [GridItem.name]: GridItem,
     [Loading.name]: Loading,
+    [PullRefresh.name]: PullRefresh,
     Slider,
     GoodsList,
     Scroll
   }
 };
 </script>
-<style lang="stylus" scoped>
+<style lang="stylus">
 @import '~common/stylus/variable.styl';
 
 .home {
-  .scroll-wrapper {
+  .van-pull-refresh {
     position: fixed;
-    top: 0;
+    top: 54px;
     right: 0;
     bottom: 50px;
     left: 0;
     overflow: hidden;
 
-    .scroll-content {
-      overflow: hidden;
+    .van-pull-refresh__track {
+      height: 100%;
 
-      .pullup-wrapper {
-        text-align: center;
-        line-height: 24px;
+      .scroll-wrapper {
+        height: 100%;
 
-        .before-trigger {
-          text-align: center;
-          font-size: $font-size-medium;
-        }
+        .scroll-content {
+          .pullup-wrapper {
+            text-align: center;
+            line-height: 24px;
 
-        .after-trigger {
-          height: 24px;
-          text-align: center;
+            .before-trigger {
+              text-align: center;
+              font-size: $font-size-medium;
+            }
+
+            .after-trigger {
+              height: 24px;
+              text-align: center;
+            }
+          }
         }
       }
     }

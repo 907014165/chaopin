@@ -4,9 +4,11 @@
     <div class="close-wrapper" @click="close">
       <van-icon name="cross" />
     </div>
+    <div class="title">{{ title }}</div>
     <div class="m-logo">
       <img src="./logo.png" alt />
     </div>
+
     <div class="content-wrapper">
       <van-cell-group>
         <van-field v-model="username" placeholder="请输入账号" />
@@ -24,14 +26,15 @@
 </template>
 
 <script>
-import { Field, CellGroup, Button, Icon } from "vant";
+import { Field, CellGroup, Button, Icon, Toast } from "vant";
 import { login } from "api/login.js";
-import { mapMutations } from "vuex";
+import { mapMutations, mapGetters } from "vuex";
 export default {
   data() {
     return {
       username: "",
-      password: ""
+      password: "",
+      title: this.$route.query.title ? this.$route.query.title : "用户登录"
     };
   },
   computed: {
@@ -41,29 +44,84 @@ export default {
       } else {
         return false;
       }
-    }
+    },
+    ...mapGetters({
+      getThirdloginInfo: "ThirdloginInfo"
+    })
   },
   methods: {
     close() {
       this.$router.back();
     },
     _login() {
-      let params = {
-        mobile: this.username,
-        password: this.password
-      };
-      console.log(params);
-      login(params).then(res => {
-        console.log(res);
-        let token = res.data.token;
-        this.setToken(token);
-        let redirect = this.$route.query.redirect || "/home";
-        this.$router.push(redirect);
+      //console.log(params);
+      Toast.loading({
+        mask: true,
+        message: "登录中..."
       });
+      if (!this.getThirdloginInfo) {
+        let params = {
+          mobile: this.username,
+          password: this.password
+        };
+        login(params).then(res => {
+          console.log(res);
+          Toast.clear();
+          if (res.code === 0) {
+            let token = res.data;
+            console.log(token);
+            this.setToken(token);
+            console.log(this.$route);
+            let redirect = this.$route.query.redirect || "/home";
+            this.$router.replace({
+              path: redirect
+            });
+          } else {
+            Toast({
+              message: res.message
+            });
+          }
+        });
+      } else {
+        let params = {
+          mobile: this.username,
+          password: this.password,
+          openId: this.getThirdloginInfo.authResult.openid,
+          accessToken: this.getThirdloginInfo.authResult.access_token,
+          fromType: this.getThirdloginInfo.fromType
+        };
+        let str = JSON.stringify(params);
+        console.log(str);
+        login(params).then(res => {
+          console.log(res);
+          Toast.clear();
+          if (res.code === 0) {
+            let token = res.data;
+            console.log(token);
+            this.setToken(token);
+            console.log(this.$route);
+            let redirect = this.$route.query.redirect || "/home";
+            this.$router.replace({
+              path: redirect
+            });
+          } else {
+            Toast({
+              message: res.message
+            });
+          }
+        });
+      }
     },
     //忘记密码
     forgotPwd() {
       console.log("忘记密码");
+      this.$router.push({
+        path: "/login/register",
+        query: {
+          forgetPwd: true,
+          title: "找回密码"
+        }
+      });
     },
     //注册
     register() {
@@ -80,7 +138,8 @@ export default {
     [Field.name]: Field,
     [CellGroup.name]: CellGroup,
     [Button.name]: Button,
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [Toast.name]: Toast
   }
 };
 </script>
@@ -101,6 +160,14 @@ export default {
     position: absolute;
     left: 15px;
     top: 15px;
+  }
+
+  .title {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
   }
 
   .m-logo {

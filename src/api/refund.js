@@ -1,6 +1,9 @@
 import axios from 'axios'
+import { URL } from './config'
+//const baseUrl = 'http://192.168.1.101:9092'
+const baseUrl = `${URL}:9092`
 export function getRefundReason() {
-    const url = 'http://192.168.1.53:9092/order/member/refund/reason'
+    const url = `${baseUrl}/order/member/refund/reason`
     return axios({
         url: url,
         method: 'get'
@@ -12,7 +15,7 @@ export function getRefundReason() {
 //申请退款
 export function applyRefund(params) {
     console.log(params)
-    const url = 'http://192.168.1.101:9092/order/member/refund/add'
+    const url = `${baseUrl}/order/member/refund/add`
     return axios({
         url: url,
         method: 'post',
@@ -24,7 +27,7 @@ export function applyRefund(params) {
 //获取用户售后列表
 export function getRefundList(params) {
     console.log(params)
-    const url = 'http://192.168.1.101:9092/order/member/refund/list'
+    const url = `${baseUrl}/order/member/refund/list`
     return axios({
         url: url,
         method: 'get',
@@ -36,7 +39,7 @@ export function getRefundList(params) {
 //获取退货订单详情
 export function getRefundDetail(params) {
     console.log(params)
-    const url = 'http://192.168.1.101:9092/order/member/refund/get'
+    const url = `${baseUrl}/order/member/refund/get`
     return axios({
         url: url,
         method: 'get',
@@ -48,7 +51,7 @@ export function getRefundDetail(params) {
 //撤销申请
 
 export function delRefund(params) {
-    const url = 'http://192.168.1.101:9092/order/member/refund/delete'
+    const url = `${baseUrl}/order/member/refund/delete`
     return axios.delete(url, {
         params
     }).then(res => {
@@ -59,7 +62,7 @@ export function delRefund(params) {
 //获取快递公司
 export function getExpressCompany(params) {
     console.log(params)
-    const url = 'http://192.168.1.101:9092/order/member/refund/express/company'
+    const url = `${baseUrl}/order/member/refund/express/company`
     return axios({
         url: url,
         method: 'get',
@@ -71,7 +74,7 @@ export function getExpressCompany(params) {
 //用户退单提交物流快递单号
 
 export function subRefundExpNo(params) {
-    const url = 'http://192.168.1.101:9092/order/member/refund/express'
+    const url = `${baseUrl}/order/member/refund/express`
     console.log(params)
     return axios({
         url: url,

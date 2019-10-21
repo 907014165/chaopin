@@ -3,22 +3,17 @@
     <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
       <div class="user-profile">
         <div class="background">
-          <img
-            :src="userInfo && userInfo.avatar ? userInfo.avatar : 'http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100'"
-            alt
-          />
+          <img :src="getUserInfo && getUserInfo.avatar ? getUserInfo.avatar : defaultAvatar" alt />
         </div>
         <div class="user-profile-avatar">
           <router-link to="/user/userinfo">
-            <img
-              :src="userInfo && userInfo.avatar ? userInfo.avatar : 'http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100'"
-            />
+            <img :src="getUserInfo && getUserInfo.avatar ? getUserInfo.avatar : defaultAvatar" />
           </router-link>
         </div>
         <div class="user-profile-username">
-          <a href="/#/user/info">
-            <span class="m-nick">{{userInfo ? userInfo.memberName : '未登陆'}}</span>
-          </a>
+          <router-link to="/user/userinfo">
+            <span class="m-nick">{{getUserInfo ? getUserInfo.memberName : '未登陆'}}</span>
+          </router-link>
         </div>
       </div>
 
@@ -28,22 +23,25 @@
           <router-link to="/user/order/1">
             <van-col span="6">
               <van-icon name="pending-payment">
-                <van-info :info="orderStatusCount.nonPayment" />
+                <van-info :info="orderStatusCount.nonPayment==0?'':orderStatusCount.nonPayment" />
               </van-icon>
               <div>待付款</div>
             </van-col>
           </router-link>
-          <router-link to="/user/order/2">
+          <router-link to="/user/order/3">
             <van-col span="6">
               <van-icon name="logistics">
-                <van-info :info="orderStatusCount.nonSign" />
+                <van-info :info="orderStatusCount.nonSign==0?'':orderStatusCount.nonSign" />
               </van-icon>
               <div>待收货</div>
             </van-col>
           </router-link>
           <router-link to="/commentCentre">
             <van-col span="6">
-              <van-icon name="chat-o" :info="orderStatusCount.nonComment"></van-icon>
+              <van-icon
+                name="chat-o"
+                :info="orderStatusCount.nonComment==0?'':orderStatusCount.nonComment"
+              ></van-icon>
               <div>待评价</div>
             </van-col>
           </router-link>
@@ -81,7 +79,7 @@
           </router-link>
           <router-link to="/chat">
             <van-col span="6">
-              <van-icon name="service-o" />
+              <van-icon name="service-o" :info="unreadMessage==0?'':unreadMessage" />
               <div>客服</div>
             </van-col>
           </router-link>
@@ -113,22 +111,35 @@
 import { Cell, CellGroup, Icon, Row, Col, Info, PullRefresh } from "vant";
 import { getOrderCount } from "api/order.js";
 import { getUserInfo } from "api/user.js";
+import { mapMutations, mapGetters } from "vuex";
+//监听 返回事件
+import { listenBack } from "common/js/app.js";
 
+var defaultAvatar = require("./logo.png");
 export default {
   name: "user",
   data() {
     return {
       data: {},
       user: undefined,
+      noNum: -1,
       showList: true,
       isLoading: false,
       orderStatusCount: {},
-      userInfo: {}
+      userInfo: {},
+      defaultAvatar: defaultAvatar
     };
   },
   created() {
     this._getOrderCount();
     this._getUserInfo();
+    listenBack();
+  },
+  computed: {
+    ...mapGetters({
+      getUserInfo: "userInfo",
+      unreadMessage: "UnreadMessage"
+    })
   },
   components: {
     [Cell.name]: Cell,
@@ -143,35 +154,44 @@ export default {
     logout: function() {
       // 清空本地 token
       clearLoginToken();
-      // TODO 芋艿，后面最好处理下 token
-      // 跳转到登陆
-      this.$router.push("/login");
+      this.$router.replace("/login");
     },
     onRefresh() {
       this._getOrderCount(() => {
         this.isLoading = false;
       });
+      this._getUserInfo();
     },
     _getOrderCount(callback) {
-      getOrderCount().then(res => {
+      getOrderCount()
+        .then(res => {
+          if (res.code === 0) {
+            this.orderStatusCount = res.data;
+          }
+          if (callback) {
+            callback();
+          }
+        })
+        .catch(err => {
+          if (callback) {
+            callback();
+          }
+        });
+    },
+    _getUserInfo() {
+      /* let params = {
+        memberId: "1"
+      }; */
+      getUserInfo().then(res => {
         if (res.code === 0) {
-          this.orderStatusCount = res.data;
-        }
-        if (callback) {
-          callback();
+          this.userInfo = res.data;
+          this.setUserInfo(this.userInfo);
         }
       });
     },
-    _getUserInfo() {
-      let params = {
-        memberId: "146601"
-      };
-      getUserInfo(params).then(res => {
-        if (res.code === 0) {
-          this.userInfo = res.data;
-        }
-      });
-    }
+    ...mapMutations({
+      setUserInfo: "SET_USER_INFO"
+    })
   },
   mounted() {
     /* if (getAccessToken()) { // 存在

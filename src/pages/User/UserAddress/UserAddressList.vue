@@ -1,19 +1,15 @@
 <template>
   <div class="address-list">
     <nav-bar title="地址列表" @back="back"></nav-bar>
-
-    <Scroll class="address-list-wrapper">
-      <van-address-list
-        v-model="chosenAddressId"
-        :list="getAddressList"
-        :class="isSelect?'':'hideselect'"
-        @edit="onEdit"
-        @select="onSelect"
-        ref="addrList"
-      ></van-address-list>
-
-      <van-button type="danger" size="large" class="addAddress" @click="onAdd">添加地址</van-button>
-    </Scroll>
+    <van-address-list
+      v-model="chosenAddressId"
+      :list="getAddressList"
+      :class="isSelect?'':'hideselect'"
+      @edit="onEdit"
+      @select="onSelect"
+      ref="addrList"
+    ></van-address-list>
+    <van-button type="danger" size="large" class="addAddress" @click="onAdd">添加地址</van-button>
   </div>
 </template>
 <script>
@@ -83,11 +79,11 @@ export default {
       this.$router.push({
         path: "/user/addAddress"
       });
-      Toast("新增地址");
+      //Toast("新增地址");
     },
     onEdit(item, index) {
       console.log(typeof index);
-      Toast("编辑地址:" + index);
+      //Toast("编辑地址:" + index);
       this.$router.push({
         path: "/user/addAddress",
         query: {
@@ -114,10 +110,10 @@ export default {
       tmp.appendChild(default_addr_dom);
     },
     _getAddressList() {
-      let params = {
-        memberId: 146000
-      };
-      getUserAddressList(params).then(res => {
+      /* let params = {
+        memberId: 1
+      }; */
+      getUserAddressList().then(res => {
         console.log(res);
         if (res.code === 0) {
           res.data.list.forEach(addr => {
@@ -170,59 +166,47 @@ export default {
   z-index: 20;
   background: $color-background;
 
-  .address-list-wrapper {
-    position: fixed;
-    top: 46px;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+  .default-addr {
+    position: absolute;
+    left: 175px;
+    top: 14px;
+    z-index: 30;
+  }
 
-    .default-addr {
-      position: absolute;
-      left: 175px;
-      top: 14px;
-      z-index: 30;
-    }
+  .van-address-list {
+    height: auto;
 
-    .van-address-list {
-      height: auto;
+    &.hideselect {
+      &>.van-radio-group {
+        color: red;
 
-      &.hideselect {
-        &>.van-radio-group {
-          color: red;
+        &>.van-cell {
+          color: black;
 
-          &>.van-cell {
-            color: black;
+          &>.van-cell__value {
+            color: green;
 
-            &>.van-cell__value {
-              color: green;
+            &>.van-radio {
+              color: orange;
 
-              &>.van-radio {
-                color: orange;
-
-                &>.van-radio__icon {
-                  display: none;
-                  color: pink;
-                }
+              &>.van-radio__icon {
+                display: none;
+                color: pink;
               }
             }
           }
         }
       }
-
-      .van-address-list__add {
-        display: none;
-      }
     }
-
-    .addAddress {
-      position: fixed;
-      bottom: 0;
-      left: 0;
+    .van-address-list__add {
+      display: none;
     }
+  }
+
+  .addAddress {
+    position: fixed;
+    bottom: 0;
+    left: 0;
   }
 }
 </style>

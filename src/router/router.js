@@ -43,7 +43,7 @@ let routes = [
     path: '/shopcart',
     name: 'shopcart',
     component: () => import('pages/ShopCart/ShopCart.vue'), meta: {
-      //requireAuth: true,
+      requireAuth: true,
     },
     children: [
       {
@@ -57,7 +57,7 @@ let routes = [
     path: '/user',
     name: 'user',
     component: () => import('pages/User/User.vue'), meta: {
-      //requireAuth: true,
+      requireAuth: true,
     },
     children: [
       {
@@ -166,6 +166,11 @@ let routes = [
         path: 'register',
         name: 'register',
         component: () => import('pages/User/UserAccount/Register.vue')
+      },
+      {
+        path: 'relevancy',
+        name: 'relevancy',
+        component: () => import('pages/User/UserAccount/Relevancy.vue')
       }
     ]
   },

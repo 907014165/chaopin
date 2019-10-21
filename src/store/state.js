@@ -4,14 +4,20 @@ const state = {
     currentAddressIndex: 0,
     searchHistory: loadSearch(),
     token: getToken(),
-    shopCart:[],
-    shopCartList:[],
-    isAddShopCart:false,
-    currentCommentList:[],
-    currentOrderDetail:{},
-    isByGoods:false,
-    currentRefundGoods:{},
-    inPayment:{}
+    shopCart: [],
+    shopCartList: [],
+    isAddShopCart: false,
+    currentCommentList: [],
+    currentOrderDetail: {},
+    isByGoods: false,
+    currentRefundGoods: {},
+    inPayment: {},
+    userInfo: {
+        //merberId: '18065855907'
+    },
+    socket: null,
+    UnreadMessage: 0,
+    ThirdloginInfo: null
 }
 
 export default state

@@ -5,7 +5,7 @@
       <van-card
         :desc="getcurrentRefundGoods.goods.desc"
         :title="getcurrentRefundGoods.goods.title"
-        :thumb="`http://192.168.1.53:9092/${getcurrentRefundGoods.goods.thumb}`"
+        :thumb="getcurrentRefundGoods.goods.thumb"
       />
     </template>
 
@@ -175,7 +175,7 @@ export default {
     _fileUpload(file) {
       fileUpload(file).then(res => {
         console.log(res);
-        this.imgList.push(res.data);
+        this.imgList.push(res.data.image);
       });
     },
     _applyRefund(params) {
@@ -183,9 +183,9 @@ export default {
         if (res.code === 0) {
           Toast.success({
             message: "提交申请成功",
-            duration:1000,
+            duration:800,
             onClose: () => {
-              this.$router.push({
+              this.$router.replace({
                 name: "userAfterSale"
               });
             }
@@ -193,7 +193,7 @@ export default {
         } else {
           Toast.fail({
             message: res.message,
-            duration:1000,
+            duration:800,
             onClose: () => {
               this.$router.back();
             }

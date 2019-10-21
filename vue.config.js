@@ -162,6 +162,14 @@ module.exports = {
                     '^/order': '/'
                 }
             },
+            '/chat':{
+                target: 'http://218.193.110.247:9010/', //对应优订单接口
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/chat': '/'
+                }
+            },
         }
     },
     css: {

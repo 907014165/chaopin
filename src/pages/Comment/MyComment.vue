@@ -4,37 +4,35 @@
       <nav-bar :title="'我的评价'" @back="back"></nav-bar>
       <scroll :data="commentlist" class="my-comment-scroll">
         <div class="rating-wrapper">
-          <ul>
-            <li
-              class="rating-item van-hairline--bottom"
-              v-for="(rating,index) in commentlist"
-              :key="index"
-            >
-              <div class="avatar">
-                <img :src="`http://192.168.1.53:9092/${rating.rating.avatar}`" alt />
+          <li
+            class="rating-item van-hairline--bottom"
+            v-for="(rating,index) in commentlist"
+            :key="index"
+          >
+            <div class="avatar">
+              <img :src="rating.rating.avatar" alt />
+            </div>
+            <div class="content">
+              <h1 class="name">{{ rating.rating.username }}</h1>
+              <div class="star-wrapper">
+                <van-rate v-model="rating.rating.score" readonly color="#f23030" />
               </div>
-              <div class="content">
-                <h1 class="name">{{ rating.rating.username }}</h1>
-                <div class="star-wrapper">
-                  <van-rate v-model="rating.rating.score" readonly color="#f23030" />
-                </div>
-                <p class="text">{{ rating.rating.text }}</p>
-                <template v-if="rating.rating.commentImgList.length">
-                  <img
-                    :src="`http://192.168.1.53:9092/${img}`"
-                    alt
-                    v-for="(img,index) in rating.rating.commentImgList"
-                    :key="index"
-                    @click="showImgPreview(rating.rating.commentImgList,index)"
-                  />
-                </template>
-                <div class="time">{{ rating.rating.rateTime|formatDate }}</div>
-                <sku-item :sku="rating.goodsInfo" :is-footer="true">
-                  <div class style="color:#f23030">{{ commentGrade(rating.rating.rateType) }}</div>
-                </sku-item>
-              </div>
-            </li>
-          </ul>
+              <p class="text">{{ rating.rating.text }}</p>
+              <template v-if="rating.rating.commentImgList.length">
+                <img
+                  :src="img"
+                  alt
+                  v-for="(img,index) in rating.rating.commentImgList"
+                  :key="index"
+                  @click="showImgPreview(rating.rating.commentImgList,index)"
+                />
+              </template>
+              <div class="time">{{ rating.rating.rateTime|formatDate }}</div>
+              <sku-item :sku="rating.goodsInfo" :is-footer="true">
+                <div class style="color:#f23030">{{ commentGrade(rating.rating.rateType) }}</div>
+              </sku-item>
+            </div>
+          </li>
         </div>
       </scroll>
     </div>
@@ -98,15 +96,15 @@ export default {
           rateType: ratings.type,
           desc: ratings.spec,
           text: ratings.content,
-          avatar: ratings.avatar,
-          commentImgList: ratings.commentImageList
+          avatar: ratings.fullAvatar,
+          commentImgList: ratings.full
         };
         let goodsInfo = new SkuGoods({
           goodsId: ratings.goodsId,
           title: ratings.goodsName,
           desc: ratings.spec,
           price: ratings.price,
-          thumb: ratings.image
+          thumb: ratings.fullImage
         });
         let comment = {
           rating: rating,

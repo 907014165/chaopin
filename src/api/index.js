@@ -1,8 +1,16 @@
 import axios from 'axios'
-const baseUrl = 'http://192.168.1.53:9090'
+import { URL } from './config'
+/* const baseUrl = 'http://192.168.1.53:9090'
+const baseUrlTwo = 'http://192.168.1.53:9097'
+const baseUrlThree = 'http://192.168.1.101:18051' */
+
+
+const baseUrl = `${URL}:9090`
+const baseUrlTwo = `${URL}:9097`
+const baseUrlThree = `${URL}:18051`
 export function getSlideImages() {
     //const url = '${baseUrl}/getSlideImages'
-    const url = '/jiahao/system/index/carousel'
+    const url = `${baseUrlThree}/system/public/banner`
     //const url = 'api/getImg'
     //const url = 'api/admins/getDo/getImg'
     let params = {}
@@ -27,11 +35,11 @@ export function getRecommendList() {
 export function getGoodsList(params) {
     //const url = '${baseUrl}/member/search/page'
     //let params = {}
-    const url = `${baseUrl}/member/search/page`
+    const url = `${baseUrlTwo}/member/search/page`
     return axios({
         url: url,
         method: 'post',
-        data:params
+        data: params
     }).then(res => {
         return Promise.resolve(res.data)
     })

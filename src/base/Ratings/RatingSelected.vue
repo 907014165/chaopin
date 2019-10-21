@@ -77,6 +77,10 @@ export default {
           mid:"还不错"
         };
       }
+    },
+    goodsCommonId:{
+      type:Number,
+      default:1
     }
   },
   created() {
@@ -122,7 +126,7 @@ export default {
     },
     _getComentTypeNum(){
       let params = {
-        goodsCommonId:1
+        goodsCommonId:this.goodsCommonId
       }
       console.log(params)
       getComentTypeNum(params).then(res=>{

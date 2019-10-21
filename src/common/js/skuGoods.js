@@ -7,7 +7,8 @@ export default class SkuGoods {
         num,
         price,
         thumb,
-        orderGoodsId
+        orderGoodsId,
+        goodsCommonId
     }) {
         this.skuId = skuId
         this.goodsId = goodsId
@@ -17,5 +18,6 @@ export default class SkuGoods {
         this.price = price
         this.thumb = thumb
         this.orderGoodsId = orderGoodsId
+        this.goodsCommonId = goodsCommonId
     }
 }

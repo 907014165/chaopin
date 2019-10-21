@@ -28,6 +28,7 @@
         v-for="(item,index) in seller.skuList"
         :current-index="index"
         :goods-id="item.goodsId"
+        :goods-info="item"
         :key="index"
       ></comment-goods>
       <span class="split"></span>
@@ -120,7 +121,6 @@ export default {
         return;
       }
       console.log("发表评论");
-      /* console.log(this.getCurrentCommentList) */
       let comment = {
         goodsComment: this.getCurrentCommentList,
         storeComment: {
@@ -134,7 +134,20 @@ export default {
       console.log(comment)
       reportComment(comment).then(res=>{
         if(res.data){
-          Toast.success('发表评论成功');
+          let _this = this
+          Toast({
+            type:'success',
+            message:'发表评论成功',
+            duration:800,
+            onClose(){
+              _this.$router.replace({
+                path:'/commentCentre',
+                query:{
+                  initActive:1
+                }
+              })
+            }
+          });
         }
       })
     }

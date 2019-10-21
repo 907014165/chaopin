@@ -1,7 +1,7 @@
 <template>
   <div class="goods-item" @click="selecItem">
     <div class="photo">
-      <img v-lazy="`http://192.168.1.53:9090/${goods.img}`" alt width="100%" />
+      <img v-lazy="goods.img" alt width="100%" />
     </div>
     <div class="text">{{ goods.desc }}</div>
     <div class="info">
@@ -9,7 +9,7 @@
         <span class="new_price">￥{{ goods.price }}</span>
         <span class="old_price"></span>
       </div>
-      <div class="discount">{{ goods.discount * 10 }}折</div>
+      <div class="discount">{{ goods.discount }}折</div>
     </div>
   </div>
 </template>

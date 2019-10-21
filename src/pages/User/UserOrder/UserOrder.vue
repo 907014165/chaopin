@@ -3,217 +3,252 @@
     <nav-bar title="我的订单" @back="back"></nav-bar>
     <van-tabs v-model="active" swipeable>
       <van-tab title="全部">
-        <scroll
-          class="wrapper"
-          :data="orderList"
-          v-show="orderList.length"
-          :has-more="hasMore"
-          @load="loadMore"
-          :pull-up="true" 
-        >
-          <sku-group
-            :seller="seller"
-            v-for="(seller,index) in orderList"
-            :key="index"
-            :is-shop-cart="true"
-            :is-order="true"
-            @cancelOrder="cancelOrder(seller.orderId)"
-            @clickOrder="clickOrder(seller.orderId,index)"
-            @delOrder="delOrder(seller.orderId)"
-            @confirmGoods="confirmGoods(seller.orderId)"
-            @toPay="toPay(seller)"
-            @SeeComment="seeComment"
+        <van-pull-refresh v-model="isLoading" :disabled="disabled" @refresh="onRefresh">
+          <scroll
+            class="wrapper"
+            :data="orderList"
+            v-show="orderList.length"
+            :has-more="hasMore"
+            @load="loadMore"
+            :pull-up="true"
+            :listen-scroll="true"
+            @scroll="scroll"
           >
-            <div slot="order-price" class="order-price">
-              <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
-              <span>合计:￥{{ seller.orderAmount }}</span>
-            </div>
-          </sku-group>
-        </scroll>
-        <div class="loading-wrapper" v-show="isLoading">
-          <van-loading size="24px" vertical>加载中...</van-loading>
-        </div>
+            <sku-group
+              :seller="seller"
+              v-for="(seller,index) in orderList"
+              :key="index"
+              :is-shop-cart="true"
+              :is-order="true"
+              @cancelOrder="cancelOrder(seller.orderId)"
+              @clickOrder="clickOrder(seller.orderId,index)"
+              @delOrder="delOrder(seller.orderId)"
+              @confirmGoods="confirmGoods(seller.orderId)"
+              @toPay="toPay(seller)"
+              @lookLogistics="lookLogistics(seller.orderId)"
+              @SeeComment="seeComment"
+              @comment="comment(index)"
+              @warnSend="warnSend"
+            >
+              <div slot="order-price" class="order-price">
+                <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
+                <span>合计:￥{{ seller.orderAmount }}</span>
+              </div>
+            </sku-group>
+          </scroll>
+          <div class="loading-wrapper" v-show="isLoading">
+            <van-loading size="24px" vertical>加载中...</van-loading>
+          </div>
+        </van-pull-refresh>
       </van-tab>
       <van-tab title="待付款">
-        <scroll
-          class="wrapper"
-          :data="orderList"
-          v-show="orderList.length"
-          :has-more="hasMore"
-          @load="loadMore"
-          :pull-up="true"
-        >
-          <sku-group
-            :seller="seller"
-            v-for="(seller,index) in orderList"
-            :key="index"
-            :is-shop-cart="true"
-            :is-order="true"
-            @cancelOrder="cancelOrder(seller.orderId)"
-            @clickOrder="clickOrder(seller.orderId,index)"
-            @delOrder="delOrder(seller.orderId)"
-            @confirmGoods="confirmGoods(seller.orderId)"
+        <van-pull-refresh v-model="isLoading" :disabled="disabled" @refresh="onRefresh">
+          <scroll
+            class="wrapper"
+            :data="orderList"
+            v-show="orderList.length"
+            :has-more="hasMore"
+            @load="loadMore"
+            :pull-up="true"
+            :listen-scroll="true"
+            @scroll="scroll"
           >
-            <div slot="order-price" class="order-price">
-              <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
-              <span>合计:￥{{ seller.orderAmount }}</span>
-            </div>
-          </sku-group>
-        </scroll>
-        <div class="loading-wrapper" v-show="isLoading">
-          <van-loading size="24px" vertical>加载中...</van-loading>
-        </div>
+            <sku-group
+              :seller="seller"
+              v-for="(seller,index) in orderList"
+              :key="index"
+              :is-shop-cart="true"
+              :is-order="true"
+              @cancelOrder="cancelOrder(seller.orderId)"
+              @clickOrder="clickOrder(seller.orderId,index)"
+              @delOrder="delOrder(seller.orderId)"
+              @confirmGoods="confirmGoods(seller.orderId)"
+              @toPay="toPay(seller)"
+            >
+              <div slot="order-price" class="order-price">
+                <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
+                <span>合计:￥{{ seller.orderAmount }}</span>
+              </div>
+            </sku-group>
+          </scroll>
+          <div class="loading-wrapper" v-show="isLoading">
+            <van-loading size="24px" vertical>加载中...</van-loading>
+          </div>
+        </van-pull-refresh>
       </van-tab>
       <van-tab title="待发货">
-        <scroll
-          class="wrapper"
-          :data="orderList"
-          v-show="orderList.length"
-          :has-more="hasMore"
-          @load="loadMore"
-          :pull-up="true"
-        >
-          <sku-group
-            :seller="seller"
-            v-for="(seller,index) in orderList"
-            :key="index"
-            :is-shop-cart="true"
-            :is-order="true"
-            @cancelOrder="cancelOrder(seller.orderId)"
-            @clickOrder="clickOrder(seller.orderId,index)"
-            @delOrder="delOrder(seller.orderId)"
-            @confirmGoods="confirmGoods(seller.orderId)"
+        <van-pull-refresh v-model="isLoading" :disabled="disabled" @refresh="onRefresh">
+          <scroll
+            class="wrapper"
+            :data="orderList"
+            v-show="orderList.length"
+            :has-more="hasMore"
+            @load="loadMore"
+            :pull-up="true"
+            :listen-scroll="true"
+            @scroll="scroll"
           >
-            <div slot="order-price" class="order-price">
-              <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
-              <span>合计:￥{{ seller.orderAmount }}</span>
-            </div>
-          </sku-group>
-        </scroll>
-        <div class="loading-wrapper" v-show="isLoading">
-          <van-loading size="24px" vertical>加载中...</van-loading>
-        </div>
+            <sku-group
+              :seller="seller"
+              v-for="(seller,index) in orderList"
+              :key="index"
+              :is-shop-cart="true"
+              :is-order="true"
+              @cancelOrder="cancelOrder(seller.orderId)"
+              @clickOrder="clickOrder(seller.orderId,index)"
+              @delOrder="delOrder(seller.orderId)"
+              @confirmGoods="confirmGoods(seller.orderId)"
+              @warnSend="warnSend"
+            >
+              <div slot="order-price" class="order-price">
+                <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
+                <span>合计:￥{{ seller.orderAmount }}</span>
+              </div>
+            </sku-group>
+          </scroll>
+          <div class="loading-wrapper" v-show="isLoading">
+            <van-loading size="24px" vertical>加载中...</van-loading>
+          </div>
+        </van-pull-refresh>
       </van-tab>
       <van-tab title="待收货">
-        <scroll
-          class="wrapper"
-          :data="orderList"
-          v-show="orderList.length"
-          :has-more="hasMore"
-          @load="loadMore"
-          :pull-up="true"
-        >
-          <sku-group
-            :seller="seller"
-            v-for="(seller,index) in orderList"
-            :key="index"
-            :is-shop-cart="true"
-            :is-order="true"
-            @cancelOrder="cancelOrder(seller.orderId)"
-            @clickOrder="clickOrder(seller.orderId,index)"
-            @delOrder="delOrder(seller.orderId)"
-            @confirmGoods="confirmGoods(seller.orderId)"
+        <van-pull-refresh v-model="isLoading" :disabled="disabled" @refresh="onRefresh">
+          <scroll
+            class="wrapper"
+            :data="orderList"
+            v-show="orderList.length"
+            :has-more="hasMore"
+            @load="loadMore"
+            :pull-up="true"
+            :listen-scroll="true"
+            @scroll="scroll"
           >
-            <div slot="order-price" class="order-price">
-              <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
-              <span>合计:￥{{ seller.orderAmount }}</span>
-            </div>
-          </sku-group>
-        </scroll>
-        <div class="loading-wrapper" v-show="isLoading">
-          <van-loading size="24px" vertical>加载中...</van-loading>
-        </div>
+            <sku-group
+              :seller="seller"
+              v-for="(seller,index) in orderList"
+              :key="index"
+              :is-shop-cart="true"
+              :is-order="true"
+              @cancelOrder="cancelOrder(seller.orderId)"
+              @clickOrder="clickOrder(seller.orderId,index)"
+              @delOrder="delOrder(seller.orderId)"
+              @confirmGoods="confirmGoods(seller.orderId)"
+              @lookLogistics="lookLogistics(seller.orderId)"
+            >
+              <div slot="order-price" class="order-price">
+                <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
+                <span>合计:￥{{ seller.orderAmount }}</span>
+              </div>
+            </sku-group>
+          </scroll>
+          <div class="loading-wrapper" v-show="isLoading">
+            <van-loading size="24px" vertical>加载中...</van-loading>
+          </div>
+        </van-pull-refresh>
       </van-tab>
       <van-tab title="已完成">
-        <scroll
-          class="wrapper"
-          :data="orderList"
-          v-show="orderList.length"
-          :has-more="hasMore"
-          @load="loadMore"
-          :pull-up="true"
-        >
-          <sku-group
-            :seller="seller"
-            v-for="(seller,index) in orderList"
-            :key="index"
-            :is-shop-cart="true"
-            :is-order="true"
-            @cancelOrder="cancelOrder(seller.orderId)"
-            @clickOrder="clickOrder(seller.orderId,index)"
-            @delOrder="delOrder(seller.orderId)"
-            @confirmGoods="confirmGoods(seller.orderId)"
+        <van-pull-refresh v-model="isLoading" :disabled="disabled" @refresh="onRefresh">
+          <scroll
+            class="wrapper"
+            :data="orderList"
+            v-show="orderList.length"
+            :has-more="hasMore"
+            @load="loadMore"
+            :pull-up="true"
+            :listen-scroll="true"
+            @scroll="scroll"
           >
-            <div slot="order-price" class="order-price">
-              <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
-              <span>合计:￥{{ seller.orderAmount }}</span>
-            </div>
-          </sku-group>
-        </scroll>
-        <div class="loading-wrapper" v-show="isLoading">
-          <van-loading size="24px" vertical>加载中...</van-loading>
-        </div>
+            <sku-group
+              :seller="seller"
+              v-for="(seller,index) in orderList"
+              :key="index"
+              :is-shop-cart="true"
+              :is-order="true"
+              @cancelOrder="cancelOrder(seller.orderId)"
+              @clickOrder="clickOrder(seller.orderId,index)"
+              @delOrder="delOrder(seller.orderId)"
+              @confirmGoods="confirmGoods(seller.orderId)"
+              @comment="comment(index)"
+            >
+              <div slot="order-price" class="order-price">
+                <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
+                <span>合计:￥{{ seller.orderAmount }}</span>
+              </div>
+            </sku-group>
+          </scroll>
+          <div class="loading-wrapper" v-show="isLoading">
+            <van-loading size="24px" vertical>加载中...</van-loading>
+          </div>
+        </van-pull-refresh>
       </van-tab>
       <van-tab title="已取消">
-        <scroll
-          class="wrapper"
-          :data="orderList"
-          v-show="orderList.length"
-          :has-more="hasMore"
-          @load="loadMore"
-          :pull-up="true"
-        >
-          <sku-group
-            :seller="seller"
-            v-for="(seller,index) in orderList"
-            :key="index"
-            :is-shop-cart="true"
-            :is-order="true"
-            @cancelOrder="cancelOrder(seller.orderId)"
-            @clickOrder="clickOrder(seller.orderId,index)"
-            @delOrder="delOrder(seller.orderId)"
-            @confirmGoods="confirmGoods(seller.orderId)"
+        <van-pull-refresh v-model="isLoading" :disabled="disabled" @refresh="onRefresh">
+          <scroll
+            class="wrapper"
+            :data="orderList"
+            v-show="orderList.length"
+            :has-more="hasMore"
+            @load="loadMore"
+            :pull-up="true"
+            :listen-scroll="true"
+            @scroll="scroll"
           >
-            <div slot="order-price" class="order-price">
-              <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
-              <span>合计:￥{{ seller.orderAmount }}</span>
-            </div>
-          </sku-group>
-        </scroll>
-        <div class="loading-wrapper" v-show="isLoading">
-          <van-loading size="24px" vertical>加载中...</van-loading>
-        </div>
+            <sku-group
+              :seller="seller"
+              v-for="(seller,index) in orderList"
+              :key="index"
+              :is-shop-cart="true"
+              :is-order="true"
+              @cancelOrder="cancelOrder(seller.orderId)"
+              @clickOrder="clickOrder(seller.orderId,index)"
+              @delOrder="delOrder(seller.orderId)"
+              @confirmGoods="confirmGoods(seller.orderId)"
+            >
+              <div slot="order-price" class="order-price">
+                <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
+                <span>合计:￥{{ seller.orderAmount }}</span>
+              </div>
+            </sku-group>
+          </scroll>
+          <div class="loading-wrapper" v-show="isLoading">
+            <van-loading size="24px" vertical>加载中...</van-loading>
+          </div>
+        </van-pull-refresh>
       </van-tab>
       <van-tab title="已评价">
-        <scroll
-          class="wrapper"
-          :data="orderList"
-          v-show="orderList.length"
-          :has-more="hasMore"
-          @load="loadMore"
-          :pull-up="true"
-        >
-          <sku-group
-            :seller="seller"
-            v-for="(seller,index) in orderList"
-            :key="index"
-            :is-shop-cart="true"
-            :is-order="true"
-            @cancelOrder="cancelOrder(seller.orderId)"
-            @clickOrder="clickOrder(seller.orderId,index)"
-            @delOrder="delOrder(seller.orderId)"
-            @confirmGoods="confirmGoods(seller.orderId)"
-            @SeeComment="seeComment"
+        <van-pull-refresh v-model="isLoading" :disabled="disabled" @refresh="onRefresh">
+          <scroll
+            class="wrapper"
+            :data="orderList"
+            v-show="orderList.length"
+            :has-more="hasMore"
+            @load="loadMore"
+            :pull-up="true"
+            :listen-scroll="true"
+            @scroll="scroll"
           >
-            <div slot="order-price" class="order-price">
-              <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
-              <span>合计:￥{{ seller.orderAmount }}</span>
-            </div>
-          </sku-group>
-        </scroll>
-        <div class="loading-wrapper" v-show="isLoading">
-          <van-loading size="24px" vertical>加载中...</van-loading>
-        </div>
+            <sku-group
+              :seller="seller"
+              v-for="(seller,index) in orderList"
+              :key="index"
+              :is-shop-cart="true"
+              :is-order="true"
+              @cancelOrder="cancelOrder(seller.orderId)"
+              @clickOrder="clickOrder(seller.orderId,index)"
+              @delOrder="delOrder(seller.orderId)"
+              @confirmGoods="confirmGoods(seller.orderId)"
+              @SeeComment="seeComment"
+            >
+              <div slot="order-price" class="order-price">
+                <span>共{{ getCuttentOrderNum(seller.skuList) }}件商品</span>
+                <span>合计:￥{{ seller.orderAmount }}</span>
+              </div>
+            </sku-group>
+          </scroll>
+          <div class="loading-wrapper" v-show="isLoading">
+            <van-loading size="24px" vertical>加载中...</van-loading>
+          </div>
+        </van-pull-refresh>
       </van-tab>
     </van-tabs>
     <transition name="van-slide-right">
@@ -269,12 +304,15 @@ export default {
       isLoading: true, //是否正在加载数据
       orderList: [],
       hasMore: true,
-      currentPage: 1
+      currentPage: 1,
+      scrollY: 0,
+      disabled: true
     };
   },
   created() {
     //this._getUserOrder(1);
     //this._getUserAllOrder();
+
     this.getOrderListByStatus(this.active);
     //this._deleteOrder()
   },
@@ -285,14 +323,36 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.push({
+        path: "/user"
+      });
+    },
+    //监听scroll事件
+    scroll(pos) {
+      this.scrollY = pos.y;
+      if (pos.y >= -10) {
+        this.disabled = false;
+      } else {
+        this.disabled = true;
+      }
+    },
+    //提醒发货
+    warnSend() {
+      Toast.success({
+        message: "已提醒卖家尽快发货",
+        duration: 800
+      });
     },
     //刷新
     onRefresh() {
-      setTimeout(() => {
-        Toast.success("刷新成功");
+      this.orderList.splice(0);
+      this.currentPage = 1;
+      this.hasMore = true;
+      this.isLoading = true;
+      this.scrollY = 0;
+      this.getOrderListByStatus(this.active, () => {
         this.isLoading = false;
-      }, 500);
+      });
     },
     //加载更多数据
     loadMore(callback) {
@@ -302,6 +362,26 @@ export default {
       this.currentPage++;
       this.getOrderListByStatus(this.active, callback);
     },
+    //评论
+    comment(index) {
+      console.log("点击了评论按钮" + index);
+      console.log(this.orderList[index]);
+      this.$router.push({
+        path: "/testComment",
+        query: {
+          seller: this.orderList[index]
+        }
+      });
+    },
+    //查看物流
+    lookLogistics(orderId) {
+      this.$router.push({
+        path: "/logisticsDetail",
+        query: {
+          orderId: orderId
+        }
+      });
+    },
     //查看评论
     seeComment() {
       console.log("查看评论");
@@ -310,16 +390,16 @@ export default {
       });
     },
     //去支付
-    toPay(order){
-      console.log(order)
+    toPay(order) {
+      console.log(order);
       let inPaying = {
-        ordersId:[order.orderId],
-        num:order.orderAmount
-      }
-      this.setInPayMent(inPaying)
-      this.$router.push({
-        name:'toPay'
-      })
+        orderIds: [order.orderId],
+        sum: order.orderAmount
+      };
+      this.setInPayMent(inPaying);
+      this.$router.replace({
+        name: "toPay"
+      });
     },
     //取消订单
     cancelOrder(orderId) {
@@ -328,58 +408,66 @@ export default {
       //   orderId:orderId
       // }
       Dialog.confirm({
-        title: "确定,取消订单?"
-      })
-        .then(() => {
-          let params = new FormData();
-          params.append("orderId", orderId);
-          this._cancelOrder(params, () => {
-            this.orderList = [];
-            this.currentPage = 1;
-            this.getOrderListByStatus(this.active);
-          });
-        })
-        .catch(() => {
-          // on cancel
-        });
+        title: "确定,取消订单?",
+        beforeClose: (action, done) => {
+          if (action === "confirm") {
+            let params = new FormData();
+            params.append("orderId", orderId);
+            this._cancelOrder(params, () => {
+              this.orderList = [];
+              this.currentPage = 1;
+              this.getOrderListByStatus(this.active);
+              done();
+            });
+          } else {
+            done();
+          }
+        }
+      });
     },
     //删除用户订单
     delOrder(orderId) {
       console.log(orderId);
+
       Dialog.confirm({
-        title: "确定,删除订单？"
-      })
-        .then(() => {
-          let params = {
-            orderId: orderId
-          };
-          this._deleteOrder(params, () => {
-            this.orderList = [];
-            this.currentPage = 1;
-            this.getOrderListByStatus(this.active);
-          });
-        })
-        .catch(() => {
-          // on cancel
-        });
+        title: "确定,删除订单？",
+        beforeClose: (action, done) => {
+          if (action === "confirm") {
+            let params = {
+              orderId: orderId
+            };
+            this._deleteOrder(params, () => {
+              this.orderList = [];
+              this.currentPage = 1;
+              this.isLoading = true;
+              this.getOrderListByStatus(this.active);
+              done();
+            });
+          } else {
+            done();
+          }
+        }
+      });
     },
     //用户确认收货
     confirmGoods(orderId) {
       Dialog.confirm({
-        title: "确认收货？"
-      })
-        .then(() => {
-          let params = new FormData();
-          params.append("orderId", orderId);
-          this._signOrder(params, () => {
-            this.orderList = [];
-            this.currentPage = 1;
-            this.getOrderListByStatus(this.active);
-          });
-        })
-        .catch(() => {
-          // on cancel
-        });
+        title: "确认收货？",
+        beforeClose: (action, done) => {
+          if (action === "confirm") {
+            let params = new FormData();
+            params.append("orderId", orderId);
+            this._signOrder(params, () => {
+              this.orderList = [];
+              this.currentPage = 1;
+              this.getOrderListByStatus(this.active);
+              done();
+            });
+          } else {
+            done();
+          }
+        }
+      });
     },
     //点击订单进入订单详情
     clickOrder(orderId, index) {
@@ -468,22 +556,31 @@ export default {
           orderAmount: order.orderBO.orderAmount,
           orderId: order.orderBO.orderId,
           orderNo: order.orderBO.orderNo,
+          createTime: order.orderBO.createTime,
+          payTime: order.orderBO.payTime,
+          sendTime: order.orderBO.sendTime,
+          maxDelTime: order.orderBO.maxDelTime,
+          dealTime: order.orderBO.dealTime,
           addr: addr,
           skuList: []
         };
         order.orderGoodsList.forEach(ordergoods => {
           let skugoods = new SkuGoods({
             goodsId: ordergoods.goodsId,
+            goodsCommonId: ordergoods.goodsCommonId,
             orderGoodsId: ordergoods.orderGoodsId,
             title: ordergoods.goodsName,
             desc: spec(ordergoods.spec),
             num: ordergoods.buyNum,
             price: ordergoods.price,
-            thumb: ordergoods.image
+            thumb: ordergoods.full
           });
           obj.skuList.push(skugoods);
         });
         this.orderList.push(obj);
+      });
+      this.$nextTick(() => {
+        this.orderList = this.orderList.slice(0);
       });
     },
     //根据状态获取用户订单(请求)
@@ -560,7 +657,17 @@ export default {
       this.currentPage = 1;
       this.hasMore = true;
       this.isLoading = true;
+      this.scrollY = 0;
+      this.disabled = true;
       this.getOrderListByStatus(newval);
+    },
+    $route(to, from) {
+      //如果是支付页面过来的特别处理 解决支付页面跳转不能跳转相应的页面的bug
+      if (from.name === "userorder") {
+        if (this.$route.params.id) {
+          this.active = parseInt(this.$route.params.id);
+        }
+      }
     }
   },
   components: {
@@ -600,6 +707,14 @@ export default {
       height: 100%;
       padding-top: -8px;
       overflow: hidden;
+
+      .van-pull-refresh {
+        height: 100%;
+
+        .van-pull-refresh__track {
+          height: 100%;
+        }
+      }
 
       .loading-wrapper {
         position: absolute;

@@ -64,7 +64,6 @@ export default {
           cityId: address.areaCode.substring(0, 4) + "00",
           consignee: address.name,
           isDefault: address.isDefault,
-          memberId: 146000,
           mobile: address.tel,
           pcaInfo: address.province + " " + address.city + " " + address.county,
           provinceId: address.areaCode.substring(0, 2) + "0000",
@@ -78,13 +77,11 @@ export default {
       } else {
         this.addAdress(address);
         let params = {
-          
           address: address.addressDetail,
           areaId: address.areaCode,
           cityId: address.areaCode.substring(0, 4) + "00",
           consignee: address.name,
           isDefault: address.isDefault,
-          memberId: 146000,
           mobile: address.tel,
           pcaInfo: address.province + " " + address.city + " " + address.county,
           provinceId: address.areaCode.substring(0, 2) + "0000",

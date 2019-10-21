@@ -48,27 +48,27 @@ const mutations = {
         removeToken()
     },
     //设置选中的购物车内容
-    [types.SET_SHOP_CART](state,params){
+    [types.SET_SHOP_CART](state, params) {
         console.log(params)
-        let index = state.shopCart.findIndex((item)=>{  
+        let index = state.shopCart.findIndex((item) => {
             console.log(item)
             return item.sellerId === params.sellerId
         })
-        if(index>=0){
+        if (index >= 0) {
             //如果 这个存在 但是里面的skulist为空 那么就删除它
-            if(params.skuList.length>0){
-                state.shopCart.splice(index,1,params)
-            }else{
-                state.shopCart.splice(index,1)
+            if (params.skuList.length > 0) {
+                state.shopCart.splice(index, 1, params)
+            } else {
+                state.shopCart.splice(index, 1)
             }
-        }else{
-            if(params.skuList.length>0){
+        } else {
+            if (params.skuList.length > 0) {
                 state.shopCart.push(params)
             }
         }
     },
     //删除被选中国的商城购物车商品
-    [types.DEL_SLECT_SHOP_CART_ITEM](state){
+    [types.DEL_SLECT_SHOP_CART_ITEM](state) {
         //console.log('delete')
         state.shopCart.splice(0)
 
@@ -81,35 +81,52 @@ const mutations = {
                 item.skuList.splice(0)
             }
         }) */
-        
+
     },
     //设置购物车列表
-    [types.SET_SHOP_CART_LIST](state,list){
+    [types.SET_SHOP_CART_LIST](state, list) {
         state.shopCartList = list
     },
     //设置是否 已经有添加购物车的动作
-    [types.SET_IS_SHOP_CART](state,status){
+    [types.SET_IS_SHOP_CART](state, status) {
         state.isAddShopCart = status
     },
     //？？？ 当前即将评论的 商品列表
-    [types.SET_CURRENT_COMMENT_LIST](state,params){
-        state.currentCommentList.splice(params.index,1,params.comment)
+    [types.SET_CURRENT_COMMENT_LIST](state, params) {
+        state.currentCommentList.splice(params.index, 1, params.comment)
     },
     //当前订单详情
-    [types.SET_CURRENT_ORDER_DETAIL](state,currentOrderDetail){
-        state.currentOrderDetail = Object.assign({},currentOrderDetail)
+    [types.SET_CURRENT_ORDER_DETAIL](state, currentOrderDetail) {
+        state.currentOrderDetail = Object.assign({}, currentOrderDetail)
     },
     //设置是否有 从购物车购买商品的动作
-    [types.SET_IS_BUY_GOODS](state,status){
+    [types.SET_IS_BUY_GOODS](state, status) {
         state.isByGoods = status
     },
     //设置当前退款的商品
-    [types.SET_CURRENT_REFUND_GOODS](state,currentRefundGoods){
+    [types.SET_CURRENT_REFUND_GOODS](state, currentRefundGoods) {
         state.currentRefundGoods = currentRefundGoods
     },
     //设置单前购买的商品数据
-    [types.SET_IN_PAYMENT](state,inPayment){
+    [types.SET_IN_PAYMENT](state, inPayment) {
         state.inPayment = inPayment
+    },
+    //设置用户信息
+    [types.SET_USER_INFO](state, userinfo) {
+        state.userInfo = userinfo
+    },
+    //设置未读下次
+    [types.SET_UNREAD_MESSAGE](state) {
+        state.UnreadMessage++
+    },
+    [types.REMOVE_UNREAD_MESSAGE](state) {
+        state.UnreadMessage = 0
+    },
+    [types.SET_THIRD_LOGIN_INFO](state, info) {
+        state.ThirdloginInfo = info
+    },
+    [types.REMOVE_THIRD_LOGIN_INFO](state) {
+        state.ThirdloginInfo = null
     }
 }
 

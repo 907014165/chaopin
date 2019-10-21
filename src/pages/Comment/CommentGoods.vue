@@ -1,7 +1,7 @@
 <template>
   <div class="comment-goods">
     <div class="comment-header">
-      <img :src="`https://img.yzcdn.cn/vant/t-thirt.jpg`" class="goods-img" alt />
+      <img :src="goodsInfo.thumb" class="goods-img" alt />
       <span class="related-desc">描述相符</span>
       <van-rate v-model="rateGoods" color="#f23030" @change="changeRate" />
     </div>
@@ -48,6 +48,14 @@ export default {
     goodsId: {
       type: Number,
       default: 11
+    },
+    goodsInfo: {
+      type: Object,
+      default() {
+        return {
+
+        };
+      }
     }
   },
   computed: {
@@ -98,7 +106,7 @@ export default {
     _fileUpload(file) {
       fileUpload(file).then(res => {
         console.log(res);
-        this.imgList.push(res.data);
+        this.imgList.push(res.data.image);
         let params = {
           index: this.currentIndex,
           comment: this.comment

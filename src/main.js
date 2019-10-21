@@ -8,14 +8,15 @@ import VueLazyload from 'vue-lazyload'
 import './common/css/iconfont.css'
 import moment from 'moment'
 
+
 //定义全局 时间格式过滤器
-Vue.filter('dateFormat',function(dateStr,pattern="YYYY-MM-DD HH:mm:ss"){
+Vue.filter('dateFormat', function (dateStr, pattern = "YYYY-MM-DD HH:mm:ss") {
   return moment(dateStr).format(pattern)
 })
 
 
-Vue.use(VueLazyload,{
-  loading:require('common/image/default.png')
+Vue.use(VueLazyload, {
+  loading: require('common/image/default.png')
 })
 
 

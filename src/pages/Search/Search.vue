@@ -16,8 +16,13 @@
         <div class="hot-key">
           <h1 class="title">热门搜索</h1>
           <ul>
-            <li v-for="(item,index) in hotKeys" class="item" :key="index" @click="setQuery(item.k)">
-              <span>{{ item.k }}</span>
+            <li
+              v-for="(item,index) in hotKeys"
+              class="item"
+              :key="index"
+              @click="setQuery(item.keyword)"
+            >
+              <span>{{ item.keyword }}</span>
             </li>
           </ul>
         </div>
@@ -55,32 +60,35 @@
         @shapeChanged="shapeChanged"
         @sortChanged="sortChanged"
       ></goods-filter>
-      <Scroll
-        class="scroll-wrapper"
-        v-show="!toggleShow&&!isSearchIng"
-        :data="goodsList"
-        ref="scroll"
-        @load="loadMore"
-        :has-more="hasMore"
-        :pull-up="true"
-      >
-        <div class="content-wrapper">
-          <goods-list
-            :goods-list="goodsList"
-            :shape-type="showShape"
-            v-if="!toggleShow"
-            @selected="selectGoods"
-          ></goods-list>
-          <!-- <div class="pullup-wrapper">
+      <transition name="van-fade">
+        <Scroll
+          class="scroll-wrapper"
+          v-show="!toggleShow&&!isSearchIng"
+          :data="goodsList"
+          ref="scroll"
+          @load="loadMore"
+          :has-more="hasMore"
+          :pull-up="true"
+        >
+          <div class="content-wrapper">
+            <goods-list
+              :goods-list="goodsList"
+              :shape-type="showShape"
+              v-if="!toggleShow"
+              @selected="selectGoods"
+            ></goods-list>
+            <!-- <div class="pullup-wrapper">
             <div v-if="!isPullUpLoad" class="before-trigger">
               <span class="pullup-txt">{{ pullUpText }}</span>
             </div>
             <div v-else class="after-trigger">
               <van-loading size="24px">加载中...</van-loading>
             </div>
-          </div>-->
-        </div>
-      </Scroll>
+            </div>-->
+          </div>
+        </Scroll>
+      </transition>
+
       <div class="loading-wrapper" v-show="isSearchIng">
         <van-loading size="24px" vertical>加载中...</van-loading>
       </div>
@@ -113,6 +121,7 @@ export default {
       goodsList: [], //搜索结果列表
       goodsShow: false, //true 为focus false为blur focus显示热词 有点恶心 后期想想怎么优化
       isPullUpLoad: false, //上拉时 是否正在加载数据
+      hasResult: true,
       hasMore: true,
       sortMap: ["byDefault", "bySaleNum", "byPrice", "byDiscount"],
       sortIndex: 1,
@@ -223,7 +232,7 @@ export default {
             this.goodsList.push(
               new Goods({
                 goodsId: item.goodsCommonId,
-                desc: item.body,
+                desc: item.goodsName,
                 imgUrl: item.image,
                 price: item.sellPrice,
                 oldPrice: item.costPrice,
@@ -233,6 +242,9 @@ export default {
           });
           this.isSearchIng = false;
         }
+        this.$nextTick(() => {
+          this.goodsList = this.goodsList.slice(0);
+        });
       });
     },
     _getMoreGoodsList(callback) {
@@ -241,34 +253,48 @@ export default {
         keyWord: this.value,
         current: this.currentPage
       };
-      getGoodsListByKeyWords(params).then(res => {
-        if (res.code === 0) {
-          if (res.data.list.length === 0) {
-            this.hasMore = false;
-          }
-          res.data.list.forEach(item => {
-            this.goodsList.push(
-              new Goods({
-                goodsId: item.goodsCommonId,
-                desc: item.body,
-                imgUrl: item.image,
-                price: item.sellPrice,
-                oldPrice: item.costPrice,
-                discount: item.discount
-              })
-            );
-          });
-          /* //结束上拉刷新动作
+      getGoodsListByKeyWords(params)
+        .then(res => {
+          if (res.code === 0) {
+            if (res.data.list.length === 0) {
+              this.hasMore = false;
+            }
+            res.data.list.forEach(item => {
+              this.goodsList.push(
+                new Goods({
+                  goodsId: item.goodsCommonId,
+                  desc: item.goodsName,
+                  imgUrl: item.image,
+                  price: item.sellPrice,
+                  oldPrice: item.costPrice,
+                  discount: item.discount
+                })
+              );
+            });
+            /* //结束上拉刷新动作
           this.$refs.scroll.finishPullUp();
           //让scroll 刷新 重新计算dom高度
           this.$refs.scroll.refresh();
           //结束上拉刷新（控制显示提示字段）
           this.isPullUpLoad = false; */
-          this.$nextTick(() => {
-            callback();
-          });
-        }
-      });
+            this.$nextTick(() => {
+              this.goodsList = this.goodsList.slice(0);
+            });
+            if (callback) {
+              this.$nextTick(() => {
+                callback();
+              });
+            }
+          }
+          if (callback) {
+            this.$nextTick(() => {
+              callback();
+            });
+          }
+        })
+        .catch(err => {
+          callback();
+        });
     },
     ...mapMutations({
       setSearchHistory: "SET_SEARCH_HISTORY",

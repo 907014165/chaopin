@@ -3,9 +3,7 @@
     <div class="img"></div>
     <div class="content">
       <van-skeleton title :row="2" />
-      <div class="favorite">
-
-        </div>
+      <div class="favorite"></div>
     </div>
     <div class="content">
       <van-skeleton title :row="3" />
@@ -16,9 +14,9 @@
 <script>
 import { Skeleton } from "vant";
 export default {
-    components: {
-        [Skeleton.name]:Skeleton
-    }
+  components: {
+    [Skeleton.name]: Skeleton
+  }
 };
 </script>
 <style lang="stylus">
@@ -40,19 +38,21 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
+  z-index: 100;
   background: $color-background-w;
 
   .content {
     margin: 10px 0 20px 0;
-    position relative
+    position: relative;
+
     .favorite {
-        position absolute 
-        right 20px
-        top 0
-        width 20px
-        height 20px
-        background #F3F4F6
-      }
+      position: absolute;
+      right: 20px;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      background: #F3F4F6;
+    }
   }
 
   .img {

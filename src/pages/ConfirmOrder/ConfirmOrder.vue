@@ -10,7 +10,7 @@
       @edit="edit"
     ></address-card>
     <sku-group :has-footer="hasFooter" :is-seller="isSeller" v-if="order">
-      <sku-item :sku="order"></sku-item>
+      <sku-item :sku="sku"></sku-item>
     </sku-group>
     <template v-if="seller">
       <sku-group
@@ -43,12 +43,17 @@
         </van-cell>
       </van-cell-group>
     </van-radio-group>-->
-    <van-submit-bar :price="totlePrice" button-text="提交订单" @submit="onSubmit" />
+    <van-submit-bar
+      class="comfir-submit"
+      :price="totlePriceWithCoupon===0?totlePrice:totlePriceWithCoupon*100"
+      button-text="提交订单"
+      @submit="onSubmit"
+    />
     <van-popup v-model="showList" position="bottom">
       <van-coupon-list
         :coupons="coupons"
         :chosen-coupon="chosenCoupon"
-        :disabled-coupons="disabledCoupons"
+        :show-exchange-bar="false"
         @change="onChange"
         @exchange="onExchange"
       />
@@ -60,7 +65,12 @@ import NavBar from "base/NavBar/NavBar";
 import SkuItem from "components/SkuItem/SkuItem";
 import SkuGroup from "components/SkuGroup/SkuGroup";
 import AddressCard from "base/AddressCard/AddressCard";
-import { createOrderImmediately, createOrderByShopCart } from "api/order.js";
+import {
+  createOrderImmediately,
+  createOrderByShopCart,
+  getOrderPrice
+} from "api/order.js";
+import { getUsefulCoupon } from "api/coupon.js";
 import { getDefaultAddr } from "api/user.js";
 import AddressInfo from "common/js/addressInfo.js";
 import {
@@ -77,18 +87,6 @@ import {
 } from "vant";
 import { mapGetters, mapMutations } from "vuex";
 
-const coupon = {
-  available: 1,
-  condition: "无使用门槛\n最多优惠12元",
-  reason: "",
-  value: 150,
-  name: "优惠券名称",
-  startAt: 1489104000,
-  endAt: 1514592000,
-  valueDesc: "1.5",
-  unitDesc: "元"
-};
-
 export default {
   data() {
     return {
@@ -99,27 +97,88 @@ export default {
       hasFooter: false,
       isSeller: false,
       showList: false,
-      coupons: [coupon],
-      disabledCoupons: [coupon],
+      coupons: [],
+      currentCouponsId: -1,
+      disabledCoupons: [],
+      couponsDescPrice: 0,
+      totlePriceWithCoupon: 0,
       list: [1, 2],
       radio: "1"
     };
   },
   created() {
+    //listenBack();
     this._getDefaultAddr();
+  },
+  mounted() {
+    this._getUsefulCoupon();
+    this.errBack();
   },
   computed: {
     totlePrice() {
+      //从商品详情过来的商品价格是分
       if (this.order) {
-        return this.order.price * this.order.num;
+        return this.order.price * this.order.num - this.couponsDescPrice;
       } else {
         let price = 0;
         this.seller.forEach(seller => {
           seller.skuList.forEach(sku => {
-            price += sku.price;
+            price += sku.price * sku.num;
           });
         });
-        return price;
+        return (price - this.couponsDescPrice / 100) * 100;
+      }
+    },
+    CouponParams() {
+      if (this.order) {
+        let couponInfoList = [
+          {
+            buyNum: this.order.num,
+            goodsId: this.order.skuId
+          }
+        ];
+        return couponInfoList;
+      } else {
+        let couponInfoList = [];
+        this.seller.forEach(seller => {
+          seller.skuList.forEach(sku => {
+            couponInfoList.push({
+              buyNum: sku.num,
+              goodsId: sku.goodsId
+            });
+          });
+        });
+        return couponInfoList;
+      }
+    },
+    orderPriceParams() {
+      if (this.order) {
+        let params = {
+          couponId: this.currentCouponsId
+        };
+        let couponInfoList = [
+          {
+            buyNum: this.order.num,
+            goodsId: this.order.skuId
+          }
+        ];
+        params["orderCouponDTOs"] = couponInfoList;
+        return params;
+      } else {
+        let params = {
+          couponId: this.currentCouponsId
+        };
+        let couponInfoList = [];
+        this.seller.forEach(seller => {
+          seller.skuList.forEach(sku => {
+            couponInfoList.push({
+              buyNum: sku.num,
+              goodsId: sku.goodsId
+            });
+          });
+        });
+        params["orderCouponDTOs"] = couponInfoList;
+        return params;
       }
     },
     seller() {
@@ -129,8 +188,23 @@ export default {
         return null;
       }
     },
+    sku() {
+      return {
+        skuId: this.order.skuId,
+        goodsId: this.order.goodsId,
+        title: this.order.title,
+        desc: this.order.desc,
+        price: this.order.price / 100,
+        num: this.order.num,
+        thumb: this.order.thumb
+      };
+    },
     addr() {
-      return this.defaultAddr ? this.defaultAddr : this.getCurrentAddr;
+      return this.getCurrentAddr
+        ? this.getCurrentAddr
+        : this.defaultAddr
+        ? this.defaultAddr
+        : {};
     },
     ...mapGetters({
       getCurrentAddr: "getCurrentAddress",
@@ -141,17 +215,33 @@ export default {
     back() {
       this.$router.back();
     },
+    errBack() {
+      if (!this.order && !this.seller) {
+        this.$router.back();
+      }
+    },
     onChange(index) {
       this.showList = false;
       this.chosenCoupon = index;
+      this.couponsDescPrice = this.coupons[index].value;
+      this.currentCouponsId = this.coupons[index].id;
+      this._getOrderPrice();
     },
-    onExchange(code) {
+    onExchange(coupon) {
       this.coupons.push(coupon);
+      console.log(coupon);
     },
     onSubmit() {
-      Toast.success("暂无后续逻辑");
       console.log(this.order);
       console.log(this.$route);
+      if (!this.addr.id) {
+        Toast({
+          type: "fail",
+          message: "请选择收货地址",
+          duration: 800
+        });
+        return;
+      }
       //用户立即股买
       if (this.order) {
         let params = {
@@ -167,7 +257,7 @@ export default {
         createOrderImmediately(params).then(res => {
           if (res.code === 0) {
             let inpayment = res.data;
-            console.log(inpayment)
+            console.log(inpayment);
             this.setInPayMent(inpayment);
             this.$router.push({
               name: "toPay"
@@ -194,7 +284,7 @@ export default {
               cartIds: cartIdArr[0],
               couponId: null,
               freightType: "fast",
-              remark: "我就是个gaygay"
+              remark: this.message
             }
           ]
         };
@@ -202,6 +292,12 @@ export default {
         createOrderByShopCart(params).then(res => {
           if (res.data) {
             console.log(res);
+            let inpayment = res.data;
+            console.log(inpayment);
+            this.setInPayMent(inpayment);
+            this.$router.push({
+              name: "toPay"
+            });
             this.setIsBuyGoods(true);
           }
         });
@@ -219,11 +315,27 @@ export default {
         }
       });
     },
+    init(res) {
+      res.data.forEach(item => {
+        this.coupons.push({
+          id: item.couponId,
+          name: item.name,
+          condition: item.condition,
+          startAt: item.startAt,
+          endAt: item.endAt,
+          description: item.description,
+          reason: item.reason,
+          value: item.value,
+          valueDesc: item.valueDesc,
+          unitDesc: item.unitDesc
+        });
+      });
+    },
     _getDefaultAddr() {
-      let params = {
-        memberId: "146000"
-      };
-      getDefaultAddr(params).then(res => {
+      /* let params = {
+        memberId: "1"
+      }; */
+      getDefaultAddr().then(res => {
         console.log(res);
         if (res.code === 0) {
           this.defaultAddr = new AddressInfo({
@@ -238,6 +350,23 @@ export default {
             postalCode: res.data.zipCode,
             isDefault: res.data.isDefault
           });
+        }
+      });
+    },
+    //获取有用的优惠券列表
+    _getUsefulCoupon() {
+      getUsefulCoupon(this.CouponParams).then(res => {
+        console.log(res);
+        if (res.code === 0) {
+          this.init(res);
+        }
+      });
+    },
+    //获取订单价格
+    _getOrderPrice() {
+      getOrderPrice(this.orderPriceParams).then(res => {
+        if (res.code === 0) {
+          this.totlePriceWithCoupon = res.data;
         }
       });
     },
@@ -276,6 +405,10 @@ export default {
   z-index: 3000;
   background: $color-background;
 
+  .van-submit-bar {
+    bottom: 0;
+  }
+
   .van-radio-group {
     .van-cell-group {
       .van-icon-alipay {
@@ -288,6 +421,11 @@ export default {
         color: #52BD33;
       }
     }
+  }
+
+  .comfir-submit {
+    position: absolute;
+    bottom: 0;
   }
 }
 </style>

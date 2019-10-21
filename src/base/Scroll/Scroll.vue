@@ -1,6 +1,17 @@
 <template>
   <div ref="wrapper" class="scroll-wrapper-zujian">
     <div class="scroll-content-s">
+      <div class="pulldown-wrapper">
+        <div class="before-trigger" v-show="posy>0&&beforePullDown">释放即可刷新...</div>
+        <div v-show="!beforePullDown">
+          <div v-show="isPullingDown">
+            <van-loading size="24px">更新中...</van-loading>
+          </div>
+          <div v-show="!isPullingDown" class="loading-success">
+            <span>刷新成功</span>
+          </div>
+        </div>
+      </div>
       <slot></slot>
       <template v-if="hasPllupTxt">
         <div class="pullup-wrapper" v-if="pullUp">
@@ -24,14 +35,27 @@ import { Loading } from "vant";
 BScroll.use(Pullup)
   .use(PullDown)
   .use(ObserveDom);
+
+const TIME_BOUNCE = 800;
+const TIME_STOP = 300;
+const THRESHOLD = 30;
+const STOP = 24;
+let STEP = 0;
 export default {
   data() {
     return {
       isPullUpLoad: false, //是否正在上拉刷新
+      isPullingDown: false, //是否正在上拉刷新
+      beforePullDown: true,
       pullUpText: "上拉加载更多...", //上拉刷新开启时 底部提示文案
-      scroll: null,
-      hasPllupTxt: true //判断是否有上拉的提示文字（当内容小于scroll的高度 则不用提示文字）
+      posy: 0,
+      hasMore1: this.hasMore,
+      hasPllupTxt: false //判断是否有上拉的提示文字（当内容小于scroll的高度 则不用提示文字）
     };
+  },
+  created() {
+    this.scroll = null;
+    this.hasMore1 = true;
   },
   props: {
     probeType: {
@@ -50,7 +74,9 @@ export default {
     },
     data: {
       type: Array,
-      default: null
+      default() {
+        return [];
+      }
     },
     refreshDelay: {
       type: Number,
@@ -73,6 +99,12 @@ export default {
     hasMore: {
       type: Boolean,
       default: true
+    },
+    imgList: {
+      type: Array,
+      default() {
+        return [];
+      }
     }
   },
   mounted() {
@@ -87,6 +119,7 @@ export default {
       this.scroll = new BScroll(this.$refs.wrapper, {
         probeType: this.probeType,
         click: this.click,
+        scrollY: true,
         observeDom: true,
         pullUpLoad: this.pullUp,
         bounce: {
@@ -94,14 +127,20 @@ export default {
           bottom: true,
           left: true,
           right: true
+        },
+        pullDownRefresh: {
+          threshold: THRESHOLD,
+          stop: STOP
         }
       });
       //监听滚动事件
-      if (this.listenScroll) {
+      if (this.listenScroll || this.pullDown) {
         //let me = this;
         //console.log('test')
         this.scroll.on("scroll", pos => {
           //console.log(pos)
+          this.posy = pos.y;
+          //console.log(this.posy);
           this.$emit("scroll", pos);
         });
       }
@@ -111,12 +150,16 @@ export default {
         this.scroll.on("pullingUp", () => {
           console.log("调用上拉刷新");
           //console.log(this.hasMore);
-          if (this.hasMore) {
+          if (!this.hasMore) {
+            console.log("粗错啦");
+          } else {
             _this.isPullUpLoad = true;
             _this.$emit("load", () => {
               console.log("上拉刷新回调函数");
               _this.scroll.finishPullUp();
-              _this.scroll.refresh();
+              this.$nextTick(() => {
+                _this.scroll.refresh();
+              });
               _this.isPullUpLoad = false;
               //console.log(_this.isPullUpLoad);
             });
@@ -127,9 +170,29 @@ export default {
       //下拉刷新
       if (this.pullDown) {
         this.scroll.on("pullingDown", () => {
-          this.$emit("pull-down-handler");
+          console.log("调用下拉刷新");
+          this.beforePullDown = false;
+          this.isPullingDown = true;
+          this.$emit("pull-down-handler", () => {
+            console.log("下拉刷新回调");
+            this.isPullingDown = false;
+            this.finishPullDown();
+          });
         });
       }
+    },
+    async finishPullDown() {
+      const stopTime = TIME_STOP;
+      await new Promise(resolve => {
+        setTimeout(() => {
+          this.scroll.finishPullDown();
+          resolve();
+        }, stopTime);
+      });
+      setTimeout(() => {
+        this.beforePullDown = true;
+        this.scroll.refresh();
+      }, TIME_BOUNCE);
     },
     disable() {
       this.scroll && this.scroll.disable();
@@ -139,8 +202,10 @@ export default {
     },
     //刷新
     refresh() {
-      //console.log('我刷新啦')
-      this.scroll && this.scroll.refresh();
+      console.log("我刷新啦");
+      this.$nextTick(() => {
+        this.scroll && this.scroll.refresh();
+      });
     },
     //结束上拉刷新
     finishPullUp() {
@@ -148,6 +213,7 @@ export default {
     },
     //滚动到指定位置
     scrollTo() {
+      console.log("无法");
       this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments);
     },
     //滚动到底部
@@ -164,25 +230,49 @@ export default {
   },
   //监听 data的变化 让scroll 刷新
   watch: {
-    data() {
-      setTimeout(() => {
+    data(newval, old) {
+      /* //this.refresh();
+      let _this = this;
+      console.log(newval);
+      //this.hasPllupTxt = newval.length === 0 ? false : true;
+      //console.log(_this.$refs.wrapper.offsetHeight);
+      this.$nextTick(() => {
+        setTimeout(() => {
+          //判断是否可以滚动
+          _this.refresh();
+          //console.log(_this.scroll.maxScrollY);
+          console.log(_this.$refs.wrapper.offsetHeight);
+          let maxY = -parseInt(_this.scroll.maxScrollY);
+          console.log(maxY);
+          if (!_this.scroll.maxScrollY) {
+            this.hasPllupTxt = false;
+          } else {
+            this.hasPllupTxt = true;
+          }
+        }, this.refreshDelay);
+      }); */
+      this.$nextTick(() => {
+        /* setTimeout(() => { */
         this.refresh();
         //判断是否可以滚动
-        console.log(this.scroll.maxScrollY)
+        console.log(this.scroll.maxScrollY);
         if (!this.scroll.maxScrollY) {
           this.hasPllupTxt = false;
+          console.log(this.hasPllupTxt);
         } else {
           this.hasPllupTxt = true;
         }
-      }, this.refreshDelay);
+        /* }, this.refreshDelay); */
+      });
     },
     hasMore() {
-      console.log(this.hasMore)
+      console.log(this.hasMore);
       if (!this.hasMore) {
         this.pullUpText = "别拉了,到底了...";
-      }else{
-        this._initBScroll()
-        this.pullUpText = '上拉加载更多...'
+      } else {
+        //this._initBScroll();
+        this.scroll.openPullUp(true);
+        this.pullUpText = "上拉加载更多...";
       }
     }
   }
@@ -193,9 +283,24 @@ export default {
 
 .scroll-wrapper-zujian {
   .scroll-content-s {
+    .pulldown-wrapper {
+      text-align: center;
+      line-height: 24px;
+      color: $color-text-gray;
+
+      .before-trigger {
+        font-size: 14px;
+      }
+
+      .loading-success {
+        font-size: 14px;
+      }
+    }
+
     .pullup-wrapper {
       text-align: center;
       line-height: 24px;
+      color: $color-text-gray;
 
       .before-trigger {
         text-align: center;

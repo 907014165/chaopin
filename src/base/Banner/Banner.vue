@@ -1,17 +1,17 @@
 <template>
-    <div class="banner">
-        <slot></slot>
-    </div>
+  <div class="banner">
+    <slot></slot>
+  </div>
 </template>
 <script>
-export default {
-    
-}
+export default {};
 </script>
 <style lang="stylus">
 .banner {
-    img{
-        width 100%
-    }
+  font-size: 0;
+
+  img {
+    width: 100%;
+  }
 }
 </style>

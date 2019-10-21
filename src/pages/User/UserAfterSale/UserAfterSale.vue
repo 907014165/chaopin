@@ -26,6 +26,9 @@
         </refund-item>
       </template>
     </scroll>
+    <div class="loading-wrapper" v-show="isLoading">
+      <van-loading size="24px" vertical>加载中...</van-loading>
+    </div>
     <transition name="van-slide-right">
       <router-view></router-view>
     </transition>
@@ -36,13 +39,14 @@ import NavBar from "base/NavBar/NavBar";
 import RefundItem from "pages/Refund/RefundItem";
 import Scroll from "base/Scroll/Scroll";
 import { getRefundList } from "api/refund.js";
-import { Card } from "vant";
+import { Card, Loading } from "vant";
 export default {
   data() {
     return {
       refundList: [],
       hasMore: true,
-      currentPage: 1
+      currentPage: 1,
+      isLoading: true
     };
   },
   created() {
@@ -50,8 +54,8 @@ export default {
   },
   methods: {
     back() {
-      this.$router.push({
-        name: "user"
+      this.$router.replace({
+        path: "/user"
       });
     },
     seeDetail(index) {
@@ -83,6 +87,7 @@ export default {
           res.data.forEach(item => {
             this.refundList.push(item);
           });
+          this.isLoading = false;
           this.$nextTick(() => {
             if (callback) {
               callback();
@@ -95,6 +100,7 @@ export default {
   },
   components: {
     [Card.name]: Card,
+    [Loading.name]: Loading,
     NavBar,
     RefundItem,
     Scroll
@@ -119,6 +125,17 @@ export default {
     right: 0;
     bottom: 0;
     left: 0;
+  }
+
+  .loading-wrapper {
+    display: flex;
+    position: absolute;
+    top: 46px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    justify-content: center;
+    align-items: center;
   }
 }
 </style>

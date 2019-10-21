@@ -9,7 +9,9 @@
         ref="scroll"
         :listenScroll="true"
         :probeType="3"
+        :pull-down="true"
         @scroll="onScroll"
+        @pull-down-handler="loadMoreMsg"
       >
         <div class="msg-list" ref="msgList" @click="inputBlur">
           <div class="row" v-for="(row,index) in msgList" :key="index" :id="'msg'+row.id">
@@ -22,18 +24,18 @@
                   <img
                     :src="row.msg.url"
                     @click="showPreviewImg(row.msg.url)"
+                    @load="imgLoad(row.InSending)"
                     alt
-                    :style="{'width': row.msg.w+'px','height': row.msg.h+'px'}"
                   />
                 </div>
               </div>
               <div class="right">
-                <img src="./face.jpg" alt />
+                <img :src="row.face" alt />
               </div>
             </div>
-            <div class="other" v-if="row.uid!=myuid">
+            <div class="other" v-if="row.uid==kefuuid">
               <div class="left">
-                <img src="./logo.png" alt />
+                <img :src="row.face" alt />
               </div>
               <div class="right">
                 <div class="username">
@@ -44,14 +46,12 @@
                   <div v-html="row.msg.content"></div>
                 </div>
                 <div class="bubble img" v-if="row.type=='img'">
-                  <img
-                    :src="`http://192.168.1.52:9010/${row.msg.url}`"
-                    @click="showPreviewImg(row.msg.url)"
-                    alt
-                    :style="{'width': row.msg.w+'px','height': row.msg.h+'px'}"
-                  />
+                  <img :src="row.msg.url" @click="showPreviewImg(row.msg.url)" @load="imgLoad(row.InSending)" alt />
                 </div>
               </div>
+            </div>
+            <div class="goods" v-if="row.uid===goodsuid">
+              <goods-item-single :goods="row.msg"></goods-item-single>
             </div>
           </div>
         </div>
@@ -112,6 +112,10 @@
 import Vue from "vue";
 import NavBar from "base/NavBar/NavBar";
 import Scroll from "base/Scroll/Scroll";
+import GoodsItemSingle from "base/GoodsItemSingle/GoodsItemSingle";
+import { fileUpload, getChatMsgList } from "api/chat.js";
+import { mapGetters, mapMutations } from "vuex";
+import moment from "moment";
 import {
   Swipe,
   SwipeItem,
@@ -122,6 +126,30 @@ import {
   ImagePreview
 } from "vant";
 Vue.use(ImagePreview);
+//客户端 消息 格式
+class ChatMsg {
+  constructor({ id, uid, username, face, time, type, msg, InSending }) {
+    this.id = id;
+    this.uid = uid;
+    this.username = username;
+    this.face = face;
+    this.time = time;
+    this.type = type;
+    this.msg = msg;
+    this.InSending = InSending;
+  }
+}
+//服务端消息格式
+class ChatMsgServer {
+  constructor({ type, avatar, uid, content, from_uid, chat_type }) {
+    this.type = type;
+    this.avatar = avatar;
+    this.uid = uid;
+    this.content = content;
+    this.from_uid = from_uid;
+    this.chat_type = chat_type;
+  }
+}
 export default {
   name: "chat",
   data() {
@@ -138,149 +166,665 @@ export default {
       myuid: 0,
       emojiList: [
         [
-          { url: require("../../common/image/emoji/100.gif"), alt: "[微笑]" },
-          { url: require("../../common/image/emoji/101.gif"), alt: "[伤心]" },
-          { url: require("../../common/image/emoji/102.gif"), alt: "[美女]" },
-          { url: require("../../common/image/emoji/103.gif"), alt: "[发呆]" },
-          { url: require("../../common/image/emoji/104.gif"), alt: "[墨镜]" },
-          { url: require("../../common/image/emoji/105.gif"), alt: "[哭]" },
-          { url: require("../../common/image/emoji/106.gif"), alt: "[羞]" },
-          { url: require("../../common/image/emoji/107.gif"), alt: "[哑]" },
-          { url: require("../../common/image/emoji/108.gif"), alt: "[睡]" },
-          { url: require("../../common/image/emoji/109.gif"), alt: "[哭]" },
-          { url: require("../../common/image/emoji/110.gif"), alt: "[囧]" },
-          { url: require("../../common/image/emoji/111.gif"), alt: "[怒]" },
-          { url: require("../../common/image/emoji/112.gif"), alt: "[调皮]" },
-          { url: require("../../common/image/emoji/113.gif"), alt: "[笑]" },
-          { url: require("../../common/image/emoji/114.gif"), alt: "[惊讶]" },
-          { url: require("../../common/image/emoji/115.gif"), alt: "[难过]" },
-          { url: require("../../common/image/emoji/116.gif"), alt: "[酷]" },
-          { url: require("../../common/image/emoji/117.gif"), alt: "[汗]" },
-          { url: require("../../common/image/emoji/118.gif"), alt: "[抓狂]" },
-          { url: require("../../common/image/emoji/119.gif"), alt: "[吐]" },
-          { url: require("../../common/image/emoji/120.gif"), alt: "[笑]" },
-          { url: require("../../common/image/emoji/121.gif"), alt: "[快乐]" },
-          { url: require("../../common/image/emoji/122.gif"), alt: "[奇]" },
-          { url: require("../../common/image/emoji/123.gif"), alt: "[傲]" }
+          {
+            url: require("../../common/image/emoji/100.gif"),
+            alt: "[微笑]",
+            alias: "1.gif"
+          },
+          {
+            url: require("../../common/image/emoji/101.gif"),
+            alt: "[伤心]",
+            alias: "2.gif"
+          },
+          {
+            url: require("../../common/image/emoji/102.gif"),
+            alt: "[美女]",
+            alias: "3.gif"
+          },
+          {
+            url: require("../../common/image/emoji/103.gif"),
+            alt: "[发呆]",
+            alias: "4.gif"
+          },
+          {
+            url: require("../../common/image/emoji/104.gif"),
+            alt: "[墨镜]",
+            alias: "5.gif"
+          },
+          {
+            url: require("../../common/image/emoji/105.gif"),
+            alt: "[哭]",
+            alias: "6.gif"
+          },
+          {
+            url: require("../../common/image/emoji/106.gif"),
+            alt: "[羞]",
+            alias: "7.gif"
+          },
+          {
+            url: require("../../common/image/emoji/107.gif"),
+            alt: "[哑]",
+            alias: "8.gif"
+          },
+          {
+            url: require("../../common/image/emoji/108.gif"),
+            alt: "[睡]",
+            alias: "9.gif"
+          },
+          {
+            url: require("../../common/image/emoji/109.gif"),
+            alt: "[哭]",
+            alias: "10.gif"
+          },
+          {
+            url: require("../../common/image/emoji/110.gif"),
+            alt: "[囧]",
+            alias: "11gif"
+          },
+          {
+            url: require("../../common/image/emoji/111.gif"),
+            alt: "[怒]",
+            alias: "12.gif"
+          },
+          {
+            url: require("../../common/image/emoji/112.gif"),
+            alt: "[调皮]",
+            alias: "13.gif"
+          },
+          {
+            url: require("../../common/image/emoji/113.gif"),
+            alt: "[笑]",
+            alias: "14.gif"
+          },
+          {
+            url: require("../../common/image/emoji/114.gif"),
+            alt: "[惊讶]",
+            alias: "15.gif"
+          },
+          {
+            url: require("../../common/image/emoji/115.gif"),
+            alt: "[难过]",
+            alias: "16.gif"
+          },
+          {
+            url: require("../../common/image/emoji/116.gif"),
+            alt: "[酷]",
+            alias: "17.gif"
+          },
+          {
+            url: require("../../common/image/emoji/117.gif"),
+            alt: "[汗]",
+            alias: "18.gif"
+          },
+          {
+            url: require("../../common/image/emoji/118.gif"),
+            alt: "[抓狂]",
+            alias: "19.gif"
+          },
+          {
+            url: require("../../common/image/emoji/119.gif"),
+            alt: "[吐]",
+            alias: "20.gif"
+          },
+          {
+            url: require("../../common/image/emoji/120.gif"),
+            alt: "[笑]",
+            alias: "21.gif"
+          },
+          {
+            url: require("../../common/image/emoji/121.gif"),
+            alt: "[快乐]",
+            alias: "22.gif"
+          },
+          {
+            url: require("../../common/image/emoji/122.gif"),
+            alt: "[奇]",
+            alias: "23.gif"
+          },
+          {
+            url: require("../../common/image/emoji/123.gif"),
+            alt: "[傲]",
+            alias: "24.gif"
+          }
         ],
         [
-          { url: require("../../common/image/emoji/124.gif"), alt: "[饿]" },
-          { url: require("../../common/image/emoji/125.gif"), alt: "[累]" },
-          { url: require("../../common/image/emoji/126.gif"), alt: "[吓]" },
-          { url: require("../../common/image/emoji/127.gif"), alt: "[汗]" },
-          { url: require("../../common/image/emoji/128.gif"), alt: "[高兴]" },
-          { url: require("../../common/image/emoji/129.gif"), alt: "[闲]" },
-          { url: require("../../common/image/emoji/130.gif"), alt: "[努力]" },
-          { url: require("../../common/image/emoji/131.gif"), alt: "[骂]" },
-          { url: require("../../common/image/emoji/132.gif"), alt: "[疑问]" },
-          { url: require("../../common/image/emoji/133.gif"), alt: "[秘密]" },
-          { url: require("../../common/image/emoji/134.gif"), alt: "[乱]" },
-          { url: require("../../common/image/emoji/135.gif"), alt: "[疯]" },
-          { url: require("../../common/image/emoji/136.gif"), alt: "[哀]" },
-          { url: require("../../common/image/emoji/137.gif"), alt: "[鬼]" },
-          { url: require("../../common/image/emoji/138.gif"), alt: "[打击]" },
-          { url: require("../../common/image/emoji/139.gif"), alt: "[bye]" },
-          { url: require("../../common/image/emoji/140.gif"), alt: "[汗]" },
-          { url: require("../../common/image/emoji/141.gif"), alt: "[抠]" },
-          { url: require("../../common/image/emoji/142.gif"), alt: "[鼓掌]" },
-          { url: require("../../common/image/emoji/143.gif"), alt: "[糟糕]" },
-          { url: require("../../common/image/emoji/144.gif"), alt: "[恶搞]" },
-          { url: require("../../common/image/emoji/145.gif"), alt: "[什么]" },
-          { url: require("../../common/image/emoji/146.gif"), alt: "[什么]" },
-          { url: require("../../common/image/emoji/147.gif"), alt: "[累]" }
+          {
+            url: require("../../common/image/emoji/124.gif"),
+            alt: "[饿]",
+            alias: "25.gif"
+          },
+          {
+            url: require("../../common/image/emoji/125.gif"),
+            alt: "[累]",
+            alias: "26.gif"
+          },
+          {
+            url: require("../../common/image/emoji/126.gif"),
+            alt: "[吓]",
+            alias: "27.gif"
+          },
+          {
+            url: require("../../common/image/emoji/127.gif"),
+            alt: "[汗]",
+            alias: "28.gif"
+          },
+          {
+            url: require("../../common/image/emoji/128.gif"),
+            alt: "[高兴]",
+            alias: "29.gif"
+          },
+          {
+            url: require("../../common/image/emoji/129.gif"),
+            alt: "[闲]",
+            alias: "30.gif"
+          },
+          {
+            url: require("../../common/image/emoji/130.gif"),
+            alt: "[努力]",
+            alias: "31.gif"
+          },
+          {
+            url: require("../../common/image/emoji/131.gif"),
+            alt: "[骂]",
+            alias: "32.gif"
+          },
+          {
+            url: require("../../common/image/emoji/132.gif"),
+            alt: "[疑问]",
+            alias: "33.gif"
+          },
+          {
+            url: require("../../common/image/emoji/133.gif"),
+            alt: "[秘密]",
+            alias: "34.gif"
+          },
+          {
+            url: require("../../common/image/emoji/134.gif"),
+            alt: "[乱]",
+            alias: "35.gif"
+          },
+          {
+            url: require("../../common/image/emoji/135.gif"),
+            alt: "[疯]",
+            alias: "36.gif"
+          },
+          {
+            url: require("../../common/image/emoji/136.gif"),
+            alt: "[哀]",
+            alias: "37.gif"
+          },
+          {
+            url: require("../../common/image/emoji/137.gif"),
+            alt: "[鬼]",
+            alias: "38.gif"
+          },
+          {
+            url: require("../../common/image/emoji/138.gif"),
+            alt: "[打击]",
+            alias: "39.gif"
+          },
+          {
+            url: require("../../common/image/emoji/139.gif"),
+            alt: "[bye]",
+            alias: "40.gif"
+          },
+          {
+            url: require("../../common/image/emoji/140.gif"),
+            alt: "[汗]",
+            alias: "41.gif"
+          },
+          {
+            url: require("../../common/image/emoji/141.gif"),
+            alt: "[抠]",
+            alias: "42.gif"
+          },
+          {
+            url: require("../../common/image/emoji/142.gif"),
+            alt: "[鼓掌]",
+            alias: "43.gif"
+          },
+          {
+            url: require("../../common/image/emoji/143.gif"),
+            alt: "[糟糕]",
+            alias: "44.gif"
+          },
+          {
+            url: require("../../common/image/emoji/144.gif"),
+            alt: "[恶搞]",
+            alias: "45.gif"
+          },
+          {
+            url: require("../../common/image/emoji/145.gif"),
+            alt: "[什么]",
+            alias: "46.gif"
+          },
+          {
+            url: require("../../common/image/emoji/146.gif"),
+            alt: "[什么]",
+            alias: "47.gif"
+          },
+          {
+            url: require("../../common/image/emoji/147.gif"),
+            alt: "[累]",
+            alias: "48.gif"
+          }
         ],
         [
-          { url: require("../../common/image/emoji/148.gif"), alt: "[看]" },
-          { url: require("../../common/image/emoji/149.gif"), alt: "[难过]" },
-          { url: require("../../common/image/emoji/150.gif"), alt: "[难过]" },
-          { url: require("../../common/image/emoji/151.gif"), alt: "[坏]" },
-          { url: require("../../common/image/emoji/152.gif"), alt: "[亲]" },
-          { url: require("../../common/image/emoji/153.gif"), alt: "[吓]" },
-          { url: require("../../common/image/emoji/154.gif"), alt: "[可怜]" },
-          { url: require("../../common/image/emoji/155.gif"), alt: "[刀]" },
-          { url: require("../../common/image/emoji/156.gif"), alt: "[水果]" },
-          { url: require("../../common/image/emoji/157.gif"), alt: "[酒]" },
-          { url: require("../../common/image/emoji/158.gif"), alt: "[篮球]" },
-          { url: require("../../common/image/emoji/159.gif"), alt: "[乒乓]" },
-          { url: require("../../common/image/emoji/160.gif"), alt: "[咖啡]" },
-          { url: require("../../common/image/emoji/161.gif"), alt: "[美食]" },
-          { url: require("../../common/image/emoji/162.gif"), alt: "[动物]" },
-          { url: require("../../common/image/emoji/163.gif"), alt: "[鲜花]" },
-          { url: require("../../common/image/emoji/164.gif"), alt: "[枯]" },
-          { url: require("../../common/image/emoji/165.gif"), alt: "[唇]" },
-          { url: require("../../common/image/emoji/166.gif"), alt: "[爱]" },
-          { url: require("../../common/image/emoji/167.gif"), alt: "[分手]" },
-          { url: require("../../common/image/emoji/168.gif"), alt: "[生日]" },
-          { url: require("../../common/image/emoji/169.gif"), alt: "[电]" },
-          { url: require("../../common/image/emoji/170.gif"), alt: "[炸弹]" },
-          { url: require("../../common/image/emoji/171.gif"), alt: "[刀子]" }
+          {
+            url: require("../../common/image/emoji/148.gif"),
+            alt: "[看]",
+            alias: "49.gif"
+          },
+          {
+            url: require("../../common/image/emoji/149.gif"),
+            alt: "[难过]",
+            alias: "50.gif"
+          },
+          {
+            url: require("../../common/image/emoji/150.gif"),
+            alt: "[难过]",
+            alias: "51.gif"
+          },
+          {
+            url: require("../../common/image/emoji/151.gif"),
+            alt: "[坏]",
+            alias: "52.gif"
+          },
+          {
+            url: require("../../common/image/emoji/152.gif"),
+            alt: "[亲]",
+            alias: "53.gif"
+          },
+          {
+            url: require("../../common/image/emoji/153.gif"),
+            alt: "[吓]",
+            alias: "54.gif"
+          },
+          {
+            url: require("../../common/image/emoji/154.gif"),
+            alt: "[可怜]",
+            alias: "55.gif"
+          },
+          {
+            url: require("../../common/image/emoji/155.gif"),
+            alt: "[刀]",
+            alias: "56.gif"
+          },
+          {
+            url: require("../../common/image/emoji/156.gif"),
+            alt: "[水果]",
+            alias: "57.gif"
+          },
+          {
+            url: require("../../common/image/emoji/157.gif"),
+            alt: "[酒]",
+            alias: "58.gif"
+          },
+          {
+            url: require("../../common/image/emoji/158.gif"),
+            alt: "[篮球]",
+            alias: "59.gif"
+          },
+          {
+            url: require("../../common/image/emoji/159.gif"),
+            alt: "[乒乓]",
+            alias: "60.gif"
+          },
+          {
+            url: require("../../common/image/emoji/160.gif"),
+            alt: "[咖啡]",
+            alias: "61.gif"
+          },
+          {
+            url: require("../../common/image/emoji/161.gif"),
+            alt: "[美食]",
+            alias: "62.gif"
+          },
+          {
+            url: require("../../common/image/emoji/162.gif"),
+            alt: "[动物]",
+            alias: "63.gif"
+          },
+          {
+            url: require("../../common/image/emoji/163.gif"),
+            alt: "[鲜花]",
+            alias: "64.gif"
+          },
+          {
+            url: require("../../common/image/emoji/164.gif"),
+            alt: "[枯]",
+            alias: "65.gif"
+          },
+          {
+            url: require("../../common/image/emoji/165.gif"),
+            alt: "[唇]",
+            alias: "66.gif"
+          },
+          {
+            url: require("../../common/image/emoji/166.gif"),
+            alt: "[爱]",
+            alias: "67.gif"
+          },
+          {
+            url: require("../../common/image/emoji/167.gif"),
+            alt: "[分手]",
+            alias: "68.gif"
+          },
+          {
+            url: require("../../common/image/emoji/168.gif"),
+            alt: "[生日]",
+            alias: "69.gif"
+          },
+          {
+            url: require("../../common/image/emoji/169.gif"),
+            alt: "[电]",
+            alias: "70.gif"
+          },
+          {
+            url: require("../../common/image/emoji/170.gif"),
+            alt: "[炸弹]",
+            alias: "71.gif"
+          },
+          {
+            url: require("../../common/image/emoji/171.gif"),
+            alt: "[刀子]",
+            alias: "72.gif"
+          }
         ],
         [
-          { url: require("../../common/image/emoji/172.gif"), alt: "[足球]" },
-          { url: require("../../common/image/emoji/173.gif"), alt: "[瓢虫]" },
-          { url: require("../../common/image/emoji/174.gif"), alt: "[翔]" },
-          { url: require("../../common/image/emoji/175.gif"), alt: "[月亮]" },
-          { url: require("../../common/image/emoji/176.gif"), alt: "[太阳]" },
-          { url: require("../../common/image/emoji/177.gif"), alt: "[礼物]" },
-          { url: require("../../common/image/emoji/178.gif"), alt: "[抱抱]" },
-          { url: require("../../common/image/emoji/179.gif"), alt: "[拇指]" },
-          { url: require("../../common/image/emoji/180.gif"), alt: "[贬低]" },
-          { url: require("../../common/image/emoji/181.gif"), alt: "[握手]" },
-          { url: require("../../common/image/emoji/182.gif"), alt: "[剪刀手]" },
-          { url: require("../../common/image/emoji/183.gif"), alt: "[抱拳]" },
-          { url: require("../../common/image/emoji/184.gif"), alt: "[勾引]" },
-          { url: require("../../common/image/emoji/185.gif"), alt: "[拳头]" },
-          { url: require("../../common/image/emoji/186.gif"), alt: "[小拇指]" },
-          { url: require("../../common/image/emoji/187.gif"), alt: "[拇指八]" },
-          { url: require("../../common/image/emoji/188.gif"), alt: "[食指]" },
-          { url: require("../../common/image/emoji/189.gif"), alt: "[ok]" },
-          { url: require("../../common/image/emoji/190.gif"), alt: "[情侣]" },
-          { url: require("../../common/image/emoji/191.gif"), alt: "[爱心]" },
-          { url: require("../../common/image/emoji/192.gif"), alt: "[蹦哒]" },
-          { url: require("../../common/image/emoji/193.gif"), alt: "[颤抖]" },
-          { url: require("../../common/image/emoji/194.gif"), alt: "[怄气]" },
-          { url: require("../../common/image/emoji/195.gif"), alt: "[跳舞]" }
+          {
+            url: require("../../common/image/emoji/172.gif"),
+            alt: "[足球]",
+            alias: "73.gif"
+          },
+          {
+            url: require("../../common/image/emoji/173.gif"),
+            alt: "[瓢虫]",
+            alias: "74.gif"
+          },
+          {
+            url: require("../../common/image/emoji/174.gif"),
+            alt: "[翔]",
+            alias: "75.gif"
+          },
+          {
+            url: require("../../common/image/emoji/175.gif"),
+            alt: "[月亮]",
+            alias: "76.gif"
+          },
+          {
+            url: require("../../common/image/emoji/176.gif"),
+            alt: "[太阳]",
+            alias: "77.gif"
+          },
+          {
+            url: require("../../common/image/emoji/177.gif"),
+            alt: "[礼物]",
+            alias: "78.gif"
+          },
+          {
+            url: require("../../common/image/emoji/178.gif"),
+            alt: "[抱抱]",
+            alias: "79.gif"
+          },
+          {
+            url: require("../../common/image/emoji/179.gif"),
+            alt: "[拇指]",
+            alias: "80.gif"
+          },
+          {
+            url: require("../../common/image/emoji/180.gif"),
+            alt: "[贬低]",
+            alias: "81.gif"
+          },
+          {
+            url: require("../../common/image/emoji/181.gif"),
+            alt: "[握手]",
+            alias: "82.gif"
+          },
+          {
+            url: require("../../common/image/emoji/182.gif"),
+            alt: "[剪刀手]",
+            alias: "83.gif"
+          },
+          {
+            url: require("../../common/image/emoji/183.gif"),
+            alt: "[抱拳]",
+            alias: "84.gif"
+          },
+          {
+            url: require("../../common/image/emoji/184.gif"),
+            alt: "[勾引]",
+            alias: "85.gif"
+          },
+          {
+            url: require("../../common/image/emoji/185.gif"),
+            alt: "[拳头]",
+            alias: "86.gif"
+          },
+          {
+            url: require("../../common/image/emoji/186.gif"),
+            alt: "[小拇指]",
+            alias: "87.gif"
+          },
+          {
+            url: require("../../common/image/emoji/187.gif"),
+            alt: "[拇指八]",
+            alias: "88.gif"
+          },
+          {
+            url: require("../../common/image/emoji/188.gif"),
+            alt: "[食指]",
+            alias: "89.gif"
+          },
+          {
+            url: require("../../common/image/emoji/189.gif"),
+            alt: "[ok]",
+            alias: "90.gif"
+          },
+          {
+            url: require("../../common/image/emoji/190.gif"),
+            alt: "[情侣]",
+            alias: "91.gif"
+          },
+          {
+            url: require("../../common/image/emoji/191.gif"),
+            alt: "[爱心]",
+            alias: "92.gif"
+          },
+          {
+            url: require("../../common/image/emoji/192.gif"),
+            alt: "[蹦哒]",
+            alias: "93.gif"
+          },
+          {
+            url: require("../../common/image/emoji/193.gif"),
+            alt: "[颤抖]",
+            alias: "94.gif"
+          },
+          {
+            url: require("../../common/image/emoji/194.gif"),
+            alt: "[怄气]",
+            alias: "95.gif"
+          },
+          {
+            url: require("../../common/image/emoji/195.gif"),
+            alt: "[跳舞]",
+            alias: "96.gif"
+          }
         ],
         [
-          { url: require("../../common/image/emoji/196.gif"), alt: "[发呆]" },
-          { url: require("../../common/image/emoji/197.gif"), alt: "[背着]" },
-          { url: require("../../common/image/emoji/198.gif"), alt: "[伸手]" },
-          { url: require("../../common/image/emoji/199.gif"), alt: "[耍帅]" },
-          { url: require("../../common/image/emoji/200.png"), alt: "[微笑]" },
-          { url: require("../../common/image/emoji/201.png"), alt: "[生病]" },
-          { url: require("../../common/image/emoji/202.png"), alt: "[哭泣]" },
-          { url: require("../../common/image/emoji/203.png"), alt: "[吐舌]" },
-          { url: require("../../common/image/emoji/204.png"), alt: "[迷糊]" },
-          { url: require("../../common/image/emoji/205.png"), alt: "[瞪眼]" },
-          { url: require("../../common/image/emoji/206.png"), alt: "[恐怖]" },
-          { url: require("../../common/image/emoji/207.png"), alt: "[忧愁]" },
-          { url: require("../../common/image/emoji/208.png"), alt: "[眨眉]" },
-          { url: require("../../common/image/emoji/209.png"), alt: "[闭眼]" },
-          { url: require("../../common/image/emoji/210.png"), alt: "[鄙视]" },
-          { url: require("../../common/image/emoji/211.png"), alt: "[阴暗]" },
-          { url: require("../../common/image/emoji/212.png"), alt: "[小鬼]" },
-          { url: require("../../common/image/emoji/213.png"), alt: "[礼物]" },
-          { url: require("../../common/image/emoji/214.png"), alt: "[拜佛]" },
-          { url: require("../../common/image/emoji/215.png"), alt: "[力量]" },
-          { url: require("../../common/image/emoji/216.png"), alt: "[金钱]" },
-          { url: require("../../common/image/emoji/217.png"), alt: "[蛋糕]" },
-          { url: require("../../common/image/emoji/218.png"), alt: "[彩带]" },
-          { url: require("../../common/image/emoji/219.png"), alt: "[礼物]" }
+          {
+            url: require("../../common/image/emoji/196.gif"),
+            alt: "[发呆]",
+            alias: "97.gif"
+          },
+          {
+            url: require("../../common/image/emoji/197.gif"),
+            alt: "[背着]",
+            alias: "98.gif"
+          },
+          {
+            url: require("../../common/image/emoji/198.gif"),
+            alt: "[伸手]",
+            alias: "99.gif"
+          },
+          {
+            url: require("../../common/image/emoji/199.gif"),
+            alt: "[耍帅]",
+            alias: "100.gif"
+          },
+          {
+            url: require("../../common/image/emoji/200.png"),
+            alt: "[微笑]",
+            alias: "101.png"
+          },
+          {
+            url: require("../../common/image/emoji/201.png"),
+            alt: "[生病]",
+            alias: "102.png"
+          },
+          {
+            url: require("../../common/image/emoji/202.png"),
+            alt: "[哭泣]",
+            alias: "103.png"
+          },
+          {
+            url: require("../../common/image/emoji/203.png"),
+            alt: "[吐舌]",
+            alias: "104.png"
+          },
+          {
+            url: require("../../common/image/emoji/204.png"),
+            alt: "[迷糊]",
+            alias: "105.png"
+          },
+          {
+            url: require("../../common/image/emoji/205.png"),
+            alt: "[瞪眼]",
+            alias: "106.png"
+          },
+          {
+            url: require("../../common/image/emoji/206.png"),
+            alt: "[恐怖]",
+            alias: "107.png"
+          },
+          {
+            url: require("../../common/image/emoji/207.png"),
+            alt: "[忧愁]",
+            alias: "108.png"
+          },
+          {
+            url: require("../../common/image/emoji/208.png"),
+            alt: "[眨眉]",
+            alias: "109.png"
+          },
+          {
+            url: require("../../common/image/emoji/209.png"),
+            alt: "[闭眼]",
+            alias: "110.png"
+          },
+          {
+            url: require("../../common/image/emoji/210.png"),
+            alt: "[鄙视]",
+            alias: "111.png"
+          },
+          {
+            url: require("../../common/image/emoji/211.png"),
+            alt: "[阴暗]",
+            alias: "112.png"
+          },
+          {
+            url: require("../../common/image/emoji/212.png"),
+            alt: "[小鬼]",
+            alias: "113.png"
+          },
+          {
+            url: require("../../common/image/emoji/213.png"),
+            alt: "[礼物]",
+            alias: "114.png"
+          },
+          {
+            url: require("../../common/image/emoji/214.png"),
+            alt: "[拜佛]",
+            alias: "115.png"
+          },
+          {
+            url: require("../../common/image/emoji/215.png"),
+            alt: "[力量]",
+            alias: "116.png"
+          },
+          {
+            url: require("../../common/image/emoji/216.png"),
+            alt: "[金钱]",
+            alias: "117.png"
+          },
+          {
+            url: require("../../common/image/emoji/217.png"),
+            alt: "[蛋糕]",
+            alias: "118.png"
+          },
+          {
+            url: require("../../common/image/emoji/218.png"),
+            alt: "[彩带]",
+            alias: "119.png"
+          },
+          {
+            url: require("../../common/image/emoji/219.png"),
+            alt: "[礼物]",
+            alias: "120.png"
+          }
         ]
       ],
       showEmji: "",
       isFocus: false,
-      socket: null
+      socket: null,
+      goodsInfo: this.$route.query.goodsInfo,
+      goodsuid: 3,
+      kefuuid: 1,
+      currentPage: 1,
+      pageSize: 15,
+      avatar: ""
     };
   },
+  beforeRouteLeave(to, from, next) {
+    console.log("离开聊天界面");
+    this.removeUnreadMessage();
+    next();
+  },
   created() {
-    this.getMsgList();
-    this._connect();
+    //this.getMsgList();
+    setTimeout(() => {
+      this._connect();
+      this._getChatMsgList(() => {
+        this.$nextTick(() => {
+          this.scrollEnd();
+        });
+      });
+    }, 20);
+  },
+  mounted() {},
+  computed: {
+    ...mapGetters({
+      getSocket: "socket",
+      getUserInfo: "userInfo"
+    })
   },
   methods: {
     back() {
       this.$router.back();
     },
+    //图片加载时 重新计算 scroll 组件的高度
+    imgLoad(inSending) {
+      this.$refs.scroll.refresh();
+      console.log(inSending)
+      //insending 是否是正在发送的消息
+      if (inSending) {
+        console.log(inSending)
+        this.scrollEnd();
+      }
+    },
+    //聊天图片预览
     showPreviewImg(imgUrl) {
       let index = this.msgImgList.findIndex(item => {
         return item === imgUrl;
@@ -304,10 +848,24 @@ export default {
     afterRead(file) {
       // 此时可以自行将文件上传至服务器
       console.log(file);
+      let formdata = new FormData();
+      formdata.append("file", file.file, file.file.name);
       let msg = { url: file.content, w: 500, h: 500 };
-      this.sendMsg(msg, "img");
+      //对应刘莉老师的图片上床接口
+      fileUpload(formdata)
+        .then(res => {
+          //处理 上传图片后的数据 然后 将消息发送
+          console.log(res);
+          msg.url = `http://218.193.110.247:9010${res.path}`;
+          console.log(msg);
+          this.sendMsg(msg, "img");
+        })
+        .catch(err => {
+          console.log("err");
+          this.sendMsg(msg, "img");
+        });
     },
-    //相机拍照
+    //相机拍照（没用到）
     captureImage() {
       let _this = this;
       var cmr = plus.camera.getCamera();
@@ -338,7 +896,7 @@ export default {
         function(err) {}
       );
     },
-    //相册中选取
+    //相册中选取（没用到）
     galleryImg() {
       let _this = this;
       plus.gallery.pick(
@@ -430,6 +988,7 @@ export default {
       this.show = !this.show;
       console.log("xuan 图");
     },
+    addFile() {},
     //让消息输入框聚焦
     inputFoucs() {
       //console.log('test')
@@ -447,8 +1006,9 @@ export default {
     },
     //滚动到底部
     scrollEnd() {
+      console.log("滚动到底部");
       let clientHeight = this.$refs.msgList.clientHeight;
-      this.$refs.scroll.scrollTo(0, -clientHeight, 1000);
+      this.$refs.scroll.scrollTo(0, -clientHeight, 1);
     },
     //点击输入框的表情触发回调函数
     chooseEmoji() {
@@ -477,8 +1037,8 @@ export default {
     },
     //接受消息(筛选处理)
     screenMsg(msg) {
-      //从长连接处转发给这个方法，进行筛选处理
       console.log(msg);
+      //处理 客户端
       switch (msg.type) {
         case "text":
           this.addTextMsg(msg);
@@ -493,8 +1053,6 @@ export default {
       //滚动到底部
       this.$nextTick(function() {
         this.scrollEnd();
-        //this.$refs.scroll.scrollTo(0, -clientHeight, 1000);
-        //console.log(clientHeight)
       });
     },
     //发送消息
@@ -504,14 +1062,7 @@ export default {
       }
 
       //构造消息
-      let msg11 = {
-        type: "private",
-        uid: "潮品客服",
-        content: this.textMsg,
-        from_uid: "251525",
-        chat_type: "text"
-      };
-      this.socket.emit("message", msg11);
+
       let content = this.replaceEmoji(this.textMsg);
       let msg = { content: content };
       this.sendMsg(msg, "text");
@@ -520,7 +1071,7 @@ export default {
         this.inputFoucs();
       }
     },
-    //替换表情符号为图片
+    //替换表情符号为图片 返回的是个dom 字符串
     replaceEmoji(str) {
       let replacedStr = str.replace(/\[([^(\]|\[)]*)\]/g, (item, index) => {
         console.log("item: " + item);
@@ -533,8 +1084,8 @@ export default {
               //在线表情路径，图文混排必须使用网络路径
               //let onlinePath = "https://s2.ax1x.com/2019/04/12/";
               console.log(EM);
-              //let imgstr = `<img src="${EM.url}">`;
-              let imgstr = `<img src="http://192.168.1.50:9010/emoji/dist/img/qq/39.gif">`;
+              /* let imgstr = `<img src="${EM.url}">`; */
+              let imgstr = `<img src="http://218.193.110.247:9010/emoji/dist/img/qq/${EM.alias}">`;
               console.log("imgstr: " + imgstr);
               return imgstr;
             }
@@ -546,52 +1097,48 @@ export default {
     // 发送消息
     sendMsg(content, type) {
       //实际应用中，此处应该提交长连接，模板仅做本地处理。
-      if (type === "img") {
-        if (content.width == 0 || content.height == 0) {
-          let img = document.createElement("img");
-          img.src = tmpPath;
-          content.w = img.width;
-          content.h = img.height;
-        }
+      switch (type) {
+        case "text":
+          console.log(content);
+          let msgTxt = new ChatMsgServer({
+            type: "private",
+            avatar: this.getUserInfo.avatar,
+            uid: "潮品客服",
+            content: content.content,
+            from_uid: this.getUserInfo.mobile,
+            chat_type: "text"
+          });
+          this.getSocket.emit("message", msgTxt);
+          break;
+        case "img":
+          let msgImg = new ChatMsgServer({
+            type: "private",
+            avatar: this.getUserInfo.avatar,
+            uid: "潮品客服",
+            content: content.url,
+            from_uid: this.getUserInfo.mobile,
+            chat_type: "image"
+          });
+          console.log(msgImg);
+          this.getSocket.emit("message", msgImg);
+          break;
       }
-
-      /* let msg11 = {
-        type: "private",
-        uid: "潮品客服",
-        content: content,
-        from_uid: "251525",
-        chat_type: "text"
-      };
-      this.socket.emit("message", msg11); */
       var nowDate = new Date();
       let lastid = this.msgList[this.msgList.length - 1].id;
       lastid++;
-      let msg = {
+      let msg = new ChatMsg({
         id: lastid,
         uid: 0,
         username: "大黑哥",
-        face: "/static/img/face.jpg",
+        face: this.getUserInfo.avatar,
         time:
           nowDate.getHours() + ":" + nowDate.getMinutes() + "".padStart(2, "0"),
         type: type,
-        msg: content
-      };
+        msg: content,
+        InSending: true
+      });
+      console.log(msg);
       this.screenMsg(msg);
-      // 定时器模拟对方回复,三秒
-      setTimeout(() => {
-        lastid = this.msgList[this.msgList.length - 1].id;
-        lastid++;
-        msg = {
-          id: lastid,
-          uid: 1,
-          username: "售后客服008",
-          face: "/static/img/im/face/face_2.jpg",
-          time: nowDate.getHours() + ":" + nowDate.getMinutes(),
-          type: type,
-          msg: content
-        };
-        this.screenMsg(msg);
-      }, 3000);
     },
     // 处理文字消息
     addTextMsg(msg) {
@@ -730,6 +1277,7 @@ export default {
         }
       ];
       this.msgList = list;
+      //如果消息是图片消息 特别处理
       for (let i = 0; i < list.length; i++) {
         if (list[i].type == "img") {
           list[i] = this.setPicSize(list[i]);
@@ -737,40 +1285,163 @@ export default {
           this.msgImgList.push(list[i].msg.url);
         }
       }
+      //如果 有来自商品详情的 客户 需要带上 他当前浏览的商品信息
+      if (this.goodsInfo) {
+        let goods = {
+          desc: this.goodsInfo.goodsName,
+          img: this.goodsInfo.sellPrice,
+          price: this.goodsInfo.sellPrice
+        };
+        let msg = {
+          id: 0,
+          uid: 3,
+          time: "12:56",
+          type: "goods",
+          msg: goods
+        };
+        this.msgList.push(msg);
+      }
     },
-    _connect() {
-      console.log("test");
-
-      this.socket = require("socket.io-client")("http://192.168.1.52:9010", {
-        transports: ["websocket", "polling"]
-      });
-      let msg = {
-        uid: "251525"
+    //获取更多的聊天记录
+    loadMoreMsg(finishPullDown) {
+      this.currentPage++;
+      let params = {
+        uid: this.getUserInfo.mobile,
+        page: this.currentPage,
+        size: this.pageSize
       };
-      //客户端上线
-      this.socket.emit("login", msg);
+      getChatMsgList(params).then(res => {
+        //console.log(res);
+        finishPullDown && finishPullDown();
+        if (res.code === 200) {
+          let msglist = this.initMsg(res.data);
+          msglist.forEach(msg => {
+            this.msgList.unshift(msg);
+          });
+          console.log(msglist);
+        }
 
-      //服务端连接
-      this.socket.on("message", msg => {
-        console.log(msg);
-        let msg1 = {
-          id: 6,
-          uid: 1,
-          username: "大黑哥",
-          face: "/static/img/face.jpg",
-          time: "",
+        //this.msgList = this.initMsg(res.data);
+      });
+    },
+    formatDate(time) {
+      if (!time) {
+        let date = new Date();
+        return moment(date).format("YYYY-MM-DD HH:mm:ss");
+      }
+      let date = new Date(time);
+      return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    },
+    //根据服务器的消息类型判断是服务端数据还是自己的数据（恶心的代码都是我写 我很不服）
+    fromUid(from_uid) {
+      return from_uid === "潮品客服" ? 1 : 0;
+    },
+    //获取img都没 的src
+    getImgSrc(arg) {
+      let img = this.parseDom(arg);
+      return img[0].attributes.src.value;
+    },
+    //将服务器来的消息转化为我所需要的消息结构
+    formatMsg(msg) {
+      let chatmsg = null;
+      if (msg.chat_type === "image") {
+        chatmsg = new ChatMsg({
+          id: msg.id,
+          uid: this.fromUid(msg.from_uid ? msg.from_uid : msg.uid),
+          username: msg.from_uid ? msg.from_uid : msg.uid,
+          face: msg.avatar,
+          time: this.formatDate(msg.time),
+          type: "img",
+          msg: {
+            url: msg.content,
+            w: 175,
+            h: 175
+          }
+        });
+        this.msgImgList.unshift(msg.content);
+      } else {
+        chatmsg = new ChatMsg({
+          id: msg.id,
+          uid: this.fromUid(msg.from_uid ? msg.from_uid : msg.uid),
+          username: msg.from_uid ? msg.from_uid : msg.uid,
+          face: msg.avatar,
+          time: this.formatDate(msg.time),
           type: msg.chat_type,
           msg: {
             content: msg.content
           }
-        };
-        this.screenMsg(msg1);
+        });
+      }
+      return chatmsg;
+    },
+    //将dom字符串转dom结点
+    parseDom(arg) {
+      var objE = document.createElement("div");
+      objE.innerHTML = arg;
+      return objE.childNodes;
+    },
+    initMsg(data) {
+      let msgList = [];
+      data.forEach(msg => {
+        msgList.push(this.formatMsg(msg));
       });
-    }
+      return msgList;
+    },
+    _connect() {
+      console.log("test");
+
+      /* this.socket = require("socket.io-client")("http://218.193.110.247:9010", {
+        transports: ["websocket", "polling"]
+      });
+      //客户端上线所需要的数据
+      let msg = {
+        uid: this.getUserInfo.mobile
+        //头像
+        //id
+      };
+      //客户端上线
+      //this.socket.emit("login", msg);
+      this.socket.on("connect", () => {
+        this.socket.emit("login", msg);
+      }); */
+      //从vuex 获取socket
+      /* 
+        this.getSocket.on()
+      */
+      //服务端连接 处理服务端过来的数据
+      this.getSocket.on("message", msg => {
+        console.log(msg);
+        //msg 是老师传递过来的消息数据
+        let msgServer = this.formatMsg(msg);
+        console.log(msgServer);
+        this.screenMsg(msgServer);
+      });
+    },
+    _getChatMsgList(successCallBack) {
+      let params = {
+        uid: this.getUserInfo.mobile,
+        page: this.currentPage,
+        size: this.pageSize
+      };
+      getChatMsgList(params).then(res => {
+        console.log(res);
+        let msglist = this.initMsg(res.data);
+        msglist.forEach(msg => {
+          this.msgList.unshift(msg);
+        });
+        this.$nextTick(() => {
+          successCallBack && successCallBack();
+        });
+      });
+    },
+    ...mapMutations({
+      removeUnreadMessage: "REMOVE_UNREAD_MESSAGE"
+    })
   },
   components: {
     NavBar,
     Scroll,
+    GoodsItemSingle,
     [Swipe.name]: Swipe,
     [SwipeItem.name]: SwipeItem,
     [Icon.name]: Icon,
@@ -859,8 +1530,13 @@ export default {
               background-color: transparent;
               padding: 0;
               overflow: hidden;
+              object-fit: cover;
               max-width: 175px;
               max-height: 175px;
+
+              img {
+                width: 100%;
+              }
             }
           }
         }
@@ -1004,17 +1680,15 @@ export default {
       flex: 1;
       background-color: #fff;
       border-radius: 20px;
-      height: 35px;
       align-self: center;
       align-items: center;
-      overflow: hidden;
 
       .box {
         width: 100%;
         padding-left: 15px;
-        height: 35px;
         display: flex;
         align-items: center;
+        height: 32px;
 
         textarea {
           width: 100%;

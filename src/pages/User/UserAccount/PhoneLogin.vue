@@ -15,7 +15,16 @@
           @blur="checkMobileNumber"
         />
         <van-field v-model="code" center clearable placeholder="请输入短信验证码" :maxlength="6">
-          <van-button slot="button" size="small" type="primary" @click="SendAuthenticode">发送验证码</van-button>
+          <van-button
+            slot="button"
+            size="small"
+            type="primary"
+            @click="SendAuthenticode"
+            :disabled="codeDisabled"
+          >
+            <span v-if="!codeDisabled">发送验证码</span>
+            <van-count-down :time="time" format="ss 秒" v-if="codeDisabled" @finish="finish" />
+          </van-button>
         </van-field>
       </van-cell-group>
       <div class="login-btn">
@@ -30,17 +39,28 @@
 import { Dialog } from 'vant';
 import { setLoginToken } from '../../utils/cache'; */
 
-import { Dialog, Button, CellGroup, Field, Cell, Icon, Toast } from "vant";
+import {
+  Dialog,
+  Button,
+  CellGroup,
+  Field,
+  Cell,
+  Icon,
+  Toast,
+  CountDown
+} from "vant";
 import { getCode, register } from "api/login.js";
 import { smLogin } from "api/login.js";
-import { mapMutations } from 'vuex'
+import { mapMutations } from "vuex";
 
 export default {
   data() {
     return {
       mobile: "",
       code: "",
-      errorMobile: ""
+      errorMobile: "",
+      codeDisabled: false,
+      time: 60 * 1000
     };
   },
   computed: {
@@ -69,14 +89,23 @@ export default {
         });
       });
     },
+    finish() {
+      this.codeDisabled = false;
+    },
     SendAuthenticode() {
       console.log("发送验证码");
+      Toast({
+        type: "loading",
+        mask: true,
+        message: "发送中"
+      });
       let params = new FormData();
       params.append("mobile", this.mobile);
-      console.log(params.get("mobile"));
+      //console.log(params.get("mobile"));
       getCode(params).then(res => {
         if (res.code == 0) {
           Toast.success("发送成功");
+          this.codeDisabled = true;
         }
         console.log(res);
       });
@@ -105,15 +134,26 @@ export default {
         mobile: this.mobile
       };
       console.log(params);
-      smLogin(params).then(res => {
-        if(res.code === 0){
-          console.log(res)
-          //this.setToken(res.data.token)
-        }
-      });
+      smLogin(params)
+        .then(res => {
+          if (res.code === 0) {
+            console.log(res);
+            //Toast(res.message);
+            this.setToken(res.data);
+            let redirect = this.$route.query.redirect || "/home";
+            this.$router.replace({
+              path: redirect
+            });
+          } else {
+            Toast(res.message);
+          }
+        })
+        .catch(err => {
+          Toast("服务端出现了问题");
+        });
     },
     ...mapMutations({
-      setToken:'SET_TOKEN'
+      setToken: "SET_TOKEN"
     })
   },
   components: {
@@ -123,7 +163,8 @@ export default {
     [Field.name]: Field,
     [Cell.name]: Cell,
     [Icon.name]: Icon,
-    [Toast.name]: Toast
+    [Toast.name]: Toast,
+    [CountDown.name]: CountDown
   }
 };
 </script>

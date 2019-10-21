@@ -2,49 +2,49 @@
   <transition name="van-slide-right">
     <div class="content-wrapper-category">
       <nav-bar :title="title" @back="back"></nav-bar>
-      <scroll
-        class="search-category-wrapper"
-        :data="goodsList"
-        @load="loadMore"
-        :has-more="hasMore"
-        :pull-up="true"
-        ref="scroll"
-        :listen-scroll="true"
-        :probe-type="3"
-        v-show="this.goodsList.length"
-        @scroll="scroll"
-      >
-        <div class="search-category">
-          <banner ref="banner">
-            <img :src="`http://192.168.1.53:9090/${bannerImg}`" alt />
-          </banner>
-          <goods-filter
-            @shapeChanged="shapeChanged"
-            @sortChanged="sortChanged"
-            :shape-type="currentShape"
-          ></goods-filter>
-          <goods-list
-            :goods-list="goodsList"
-            @sortChanged="sortChanged"
-            :shape-type="currentShape"
-            @selected="selectGoods"
-          ></goods-list>
-          <!-- <div class="pullup-wrapper">
+      <transition name="van-fade">
+        <scroll
+          class="search-category-wrapper"
+          :data="goodsList"
+          @load="loadMore"
+          :has-more="hasMore"
+          :pull-up="true"
+          ref="scroll"
+          :listen-scroll="true"
+          :probe-type="3"
+          v-show="this.goodsList.length"
+          @scroll="scroll"
+        >
+          <div class="search-category">
+            <banner ref="banner">
+              <img :src="bannerImg" alt />
+            </banner>
+            <goods-filter
+              @shapeChanged="shapeChanged"
+              @sortChanged="sortChanged"
+              :shape-type="currentShape"
+              :key="1"
+            ></goods-filter>
+            <goods-list :goods-list="goodsList" :shape-type="currentShape" @selected="selectGoods"></goods-list>
+            <!-- <div class="pullup-wrapper">
             <div v-if="!isPullUpLoad" class="before-trigger">
               <span class="pullup-txt">{{ pullUpText }}</span>
             </div>
             <div v-else class="after-trigger">
               <van-loading size="24px">加载中...</van-loading>
             </div>
-          </div>-->
-        </div>
-        <div class="fixed-title" v-show="showFixedTitle">
-          <goods-filter @shapeChanged="shapeChanged"></goods-filter>
-        </div>
-      </scroll>
+            </div>-->
+          </div>
+        </scroll>
+      </transition>
+
+      <!-- <div class="fixed-title" v-show="showFixedTitle">
+        <goods-filter @shapeChanged="shapeChanged" :key="2"></goods-filter>
+      </div>-->
       <div class="loading-wrapper" v-show="showLoading">
         <van-loading size="24px" vertical>加载中...</van-loading>
       </div>
+
       <transition name="van-slide-right">
         <router-view></router-view>
       </transition>
@@ -136,7 +136,8 @@ export default {
       this.sortOrder = data.order;
       this.currentPage = 1;
       this.hasMore = true;
-      this.goodsList.splice(0);
+      this.goodsList = [];
+      console.log("change");
       this._getSearchGoodsList();
     },
     shapeChanged(currentShape) {
@@ -153,44 +154,55 @@ export default {
       });
     },
     loadMore(callback) {
-      console.log(this.hasMore);
+      /* this.isPullUpLoad = true; */
       if (!this.hasMore) {
+        callback();
         return;
       }
-      /* this.isPullUpLoad = true; */
+      this.currentPage++;
       this._getMoreGoodsList(callback);
     },
     _getMoreGoodsList(callback) {
-      this.currentPage++;
       let params = {
         goodsClassId: this.$route.query.goodsClassId,
         current: this.currentPage
       };
       params[this.sortMap[this.sortIndex]] = this.sortOrder;
       console.log(params);
-      getSearchGoodsList(params).then(res => {
-        if (res.code === 0) {
-          if (res.data.list.length === 0) {
-            this.hasMore = false;
-          }
-          res.data.list.forEach(item => {
-            this.goodsList.push(
-              new Goods({
-                goodsId: item.goodsCommonId,
-                desc: item.body,
-                imgUrl: item.image,
-                price: item.sellPrice,
-                oldPrice: item.costPrice,
-                discount: item.discount
-              })
-            );
-          });
-          /* this.$refs.scroll.finishPullUp();
+      getSearchGoodsList(params)
+        .then(res => {
+          if (res.code === 0) {
+            if (res.data.list.length === 0) {
+              this.hasMore = false;
+            }
+            res.data.list.forEach(item => {
+              this.goodsList.push(
+                new Goods({
+                  goodsId: item.goodsCommonId,
+                  desc: item.body,
+                  imgUrl: item.image,
+                  price: item.sellPrice,
+                  oldPrice: item.costPrice,
+                  discount: item.discount
+                })
+              );
+            });
+            this.$nextTick(() => {
+              this.goodsList = this.goodsList.slice(0);
+            });
+            /* this.$refs.scroll.finishPullUp();
           this.$refs.scroll.refresh();
           this.isPullUpLoad = false; */
+            if (callback) {
+              this.$nextTick(() => {
+                callback();
+              });
+            }
+          }
+        })
+        .catch(res => {
           callback();
-        }
-      });
+        });
     },
     _getGoodsList() {
       getRecommendList().then(res => {
@@ -210,19 +222,23 @@ export default {
       console.log(params);
       getSearchGoodsList(params).then(res => {
         if (res.code === 0) {
+          console.log(res);
           this.hasResult = res.data.list.length === 0 ? false : true;
-          this.bannerImg = res.data.image;
+          this.bannerImg = res.data.fullImage;
           res.data.list.forEach(item => {
             this.goodsList.push(
               new Goods({
                 goodsId: item.goodsCommonId,
-                desc: item.body,
-                imgUrl: item.image,
+                desc: item.goodsName,
+                imgUrl: item.fullImage,
                 price: item.sellPrice,
                 oldPrice: item.costPrice,
                 discount: item.discount
               })
             );
+          });
+          this.$nextTick(() => {
+            this.goodsList = this.goodsList.slice(0);
           });
         }
       });
@@ -264,14 +280,14 @@ export default {
     overflow: hidden;
     background: $color-background;
 
-    .fixed-title {
-      position: fixed;
-      left: 0;
-      right: 0;
-      top: 46px;
-    }
-
     .search-category {
+      .fixed-title {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 46px;
+      }
+
       .pullup-wrapper {
         text-align: center;
 

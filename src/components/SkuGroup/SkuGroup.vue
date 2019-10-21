@@ -36,6 +36,7 @@
               :sku="item"
               @change-num="changeNum"
               :is-order="isOrder"
+              :max-num="item.storageNum"
               @clickOrder="clickOrder"
             ></sku-item>
           </van-checkbox>
@@ -103,11 +104,11 @@ export default {
             type: "default",
             text: "评论",
             btnType: "comment"
-          },
+          } /* ,
           {
             type: "danger",
             text: "申请退款"
-          }
+          } */
         ],
         50: [
           {
@@ -132,7 +133,7 @@ export default {
       result: [],
       isSelectAll: this.SelectAll,
       skuList: this.seller.skuList,
-      selectAllShow: false //负责全选按钮的样式
+      selectAllShow: false, //负责全选按钮的样式
     };
   },
   props: {
@@ -255,6 +256,7 @@ export default {
       let params = {
         sellerId: this.seller.sellerId,
         isSelectAll: this.selectAllShow,
+        name: this.seller.name,
         skuList: this.result
       };
       this.setShopCart(params);
@@ -270,6 +272,7 @@ export default {
       let seller = {
         sellerId: this.seller.sellerId,
         isSelectAll: this.selectAllShow,
+        name: this.seller.name,
         skuList: this.result
       };
       this.setShopCart(seller);

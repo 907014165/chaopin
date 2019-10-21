@@ -9,11 +9,11 @@
     >
       <span class="text-df" v-if="item.filterType!=2">{{ item.title }}</span>
       <span class="text-df" v-else>{{ activeOption && activeOption.name || item.title }}</span>
-      <van-icon name="arrow-down" v-if="item.filterType==2"/>
+      <van-icon name="arrow-down" v-if="item.filterType==2" />
       <template v-if="item.filterType!=0">
-        <img src="./sort0.png" alt="排序0" v-if="activeIndex!=index">
-        <img src="./sort2.png" alt="排序2" v-else-if="activeIndex==index && activeAscState">
-        <img src="./sort1.png" alt="排序1" v-else-if="activeIndex==index">
+        <img src="./sort0.png" alt="排序0" v-if="activeIndex!=index" />
+        <img src="./sort2.png" alt="排序2" v-else-if="activeIndex==index && activeAscState" />
+        <img src="./sort1.png" alt="排序1" v-else-if="activeIndex==index" />
       </template>
     </div>
     <div class="shape">
@@ -51,9 +51,9 @@ export default {
   },
   methods: {
     changeSort(event, index) {
-      console.log(index)
+      console.log(index);
       let curActiveItem = this.filters[index];
-      console.log(curActiveItem.value)
+      console.log(curActiveItem.value);
       let filterType = curActiveItem.filterType || 0;
 
       this.activeIndex = index;
@@ -61,7 +61,7 @@ export default {
       // 点击索引等于自身
       if (this.activeIndex == index) {
         //禁用升降序，则直接返回无需处理
-       /*  if (filterType == 0) return; */
+        if (filterType == 0) return;
       }
 
       // 升降序
@@ -80,9 +80,9 @@ export default {
       console.log(data);
       this.$emit("sortChanged", data);
     },
-    changeShape(){
-      this.curShapeValue = !this.curShapeValue
-      this.$emit("shapeChanged",this.curShapeValue)
+    changeShape() {
+      this.curShapeValue = !this.curShapeValue;
+      this.$emit("shapeChanged", this.curShapeValue);
     }
   },
   components: {

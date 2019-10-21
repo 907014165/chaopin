@@ -19,3 +19,11 @@ export const isByGoods = state => state.isByGoods
 export const currentRefundGoods = state => state.currentRefundGoods
 
 export const inPayment = state => state.inPayment
+
+export const userInfo = state => state.userInfo
+
+export const socket = state => state.socket
+
+export const UnreadMessage = state => state.UnreadMessage
+
+export const ThirdloginInfo = state => state.ThirdloginInfo

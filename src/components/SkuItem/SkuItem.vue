@@ -8,7 +8,7 @@
       :thumb="sku.thumb"
     >
       <div slot="num" v-if="isShowStepper" @click.stop>
-        <van-stepper v-model="num" button-size="20px" @change="changeNum" />
+        <van-stepper v-model="num" button-size="20px" :max="maxNum" @change="changeNum" />
       </div>
       <div slot="footer" v-if="isFooter">
         <slot></slot>
@@ -104,6 +104,10 @@ export default {
     isOrder: {
       type: Boolean,
       default: false
+    },
+    maxNum: {
+      type:Number,
+      default:1
     }
   },
   computed: {
@@ -127,9 +131,9 @@ export default {
         this.$emit("clickOrder");
       } else {
         this.$router.push({
-          path: `/home/goodsDetail/${this.sku.goodsCommonId}`,
+          path: `/search/goodsDetail/${this.sku.goodsCommonId}`,
           query: {
-            ParentPath: "home"
+            ParentPath: "search"
           }
         });
       }

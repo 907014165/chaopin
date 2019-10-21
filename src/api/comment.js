@@ -1,13 +1,15 @@
 import axios from 'axios'
-const baseUrl = "http://192.168.1.53:9092"
-export function fileUpload(params){
-    const url = `${baseUrl}/member/file/add`
-    return axios.post(url,params).then(res=>{
+import { URL } from './config'
+//const baseUrl = "http://192.168.1.53:9092"
+const baseUrl = `${URL}:9092`
+export function fileUpload(params) {
+    const url = `${baseUrl}/member/file/img/comment`
+    return axios.post(url, params).then(res => {
         return Promise.resolve(res.data)
     })
 }
 
-export function reportComment(params){
+export function reportComment(params) {
     console.log(params)
     const url = `${baseUrl}/member/comment/add`
     return axios({
@@ -19,7 +21,7 @@ export function reportComment(params){
     })
 }
 
-export function getComments(params){
+export function getComments(params) {
     console.log(params)
     const url = `${baseUrl}/member/comment/page`
     return axios({
@@ -31,16 +33,16 @@ export function getComments(params){
     })
 }
 
-export function getComentTypeNum(params){
+export function getComentTypeNum(params) {
     const url = `${baseUrl}/member/comment/getNum`
-    return axios.get(url,{
+    return axios.get(url, {
         params
-    }).then(res=>{
+    }).then(res => {
         return Promise.resolve(res.data)
     })
 }
 
-export function getCompleteComments(params){
+export function getCompleteComments(params) {
     console.log(params)
     const url = `${baseUrl}/member/comment/list`
     return axios({
@@ -53,9 +55,9 @@ export function getCompleteComments(params){
 }
 
 
-export function fileUpload22(params){
+export function fileUpload22(params) {
     const url = 'http://192.168.1.52:9010/upload'
-    return axios.post(url,params).then(res=>{
+    return axios.post(url, params).then(res => {
         return Promise.resolve(res.data)
     })
 }

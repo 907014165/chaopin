@@ -1,12 +1,13 @@
 <template>
   <div class="goods-item-single" @click="selecItem" @click.stop>
     <div class="goods-photo">
-      <img v-lazy="`http://192.168.1.53:9090/${goods.img}`" alt class="photo" />
+      <img v-lazy="goods.img" alt class="photo" />
     </div>
     <div class="goods-info van-hairline--bottom">
       <div class="goods-info-title">{{ goods.desc }}</div>
       <div class="goods-info-content">
         <span class="goods-info-price">￥{{ goods.price }}</span>
+        <!-- <span class="goods-info-discount">￥{{ goods.discount }}</span> -->
         <!-- <div class="goods-add-cart" @click.stop="addShopCart">
           <van-icon name="cart-circle-o" />
         </div> -->
@@ -55,6 +56,7 @@ export default {
 .goods-item-single {
   display: flex;
   margin: 5px 0;
+  
 
   .goods-photo {
     flex: 0 0 120px;

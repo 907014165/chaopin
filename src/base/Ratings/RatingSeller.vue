@@ -2,47 +2,59 @@
   <transition name="van-slide-right">
     <div class="rating-seller">
       <nav-bar :title="'商品评论'" @back="back()" v-if="isAllRatings"></nav-bar>
-      <rating-selected
-        :ratings="ratings"
-        :select-type="selectType"
-        :onlyContent="onlyContent"
-        @toggle-only="toggleOnly"
-        @change-all="changeAll"
-        @change-positive="changePositive"
-        @change-negative="changeNegative"
-        @change-mid="changeMid"
-        v-if="isAllRatings"
-      ></rating-selected>
-      <div class="rating-wrapper">
-        <ul>
-          <li
-            class="rating-item van-hairline--bottom"
-            v-for="(rating,index) in selectRating"
-            :key="index"
-          >
-            <div class="avatar">
-              <img :src="rating.avatar" alt />
-            </div>
-            <div class="content">
-              <h1 class="name">{{ rating.username }}</h1>
-              <div class="star-wrapper">
-                <van-rate v-model="rating.score" readonly color="#f23030" />
+      <scroll
+        :class="isAllRatings?'rating-seller-scroll':''"
+        :data="selectRating"
+        :has-more="hasMore"
+        :pull-up="true"
+        @load="loadMore"
+        ref="scroll"
+      >
+        <rating-selected
+          :ratings="ratings"
+          :select-type="selectedType"
+          :goods-common-id="goodsCommonId1"
+          :onlyContent="onlyContent"
+          @toggle-only="toggleOnly"
+          @change-all="changeAll"
+          @change-positive="changePositive"
+          @change-negative="changeNegative"
+          @change-mid="changeMid"
+          v-if="isAllRatings"
+        ></rating-selected>
+        <transition name="van-fade">
+          <div class="rating-wrapper" v-show="ratings.length">
+            <li
+              class="rating-item van-hairline--bottom"
+              v-for="(rating,index) in selectRating"
+              :key="index"
+            >
+              <div class="avatar">
+                <img v-lazy="rating.avatar" alt />
               </div>
-              <p class="text">{{ rating.text }}</p>
-              <template v-if="rating.commentImgList.length">
-                <img
-                  :src="`http://192.168.1.53:9092/${img}`"
-                  alt
-                  v-for="(img,index) in rating.commentImgList"
-                  :key="index"
-                  @click="showImgPreview(rating.commentImgList,index)"
-                />
-              </template>
-              <div class="time">{{ rating.rateTime|formatDate }}</div>
-            </div>
-          </li>
-        </ul>
-      </div>
+              <div class="content">
+                <h1 class="name">{{ rating.username }}</h1>
+                <div class="star-wrapper">
+                  <van-rate v-model="rating.score" readonly color="#f23030" />
+                </div>
+                <p class="text">{{ rating.text }}</p>
+                <template v-if="rating.commentImgList.length">
+                  <img
+                    v-lazy="img"
+                    alt
+                    v-for="(img,index) in rating.commentImgList"
+                    :key="index"
+                    @click="showImgPreview(rating.commentImgList,index)"
+                  />
+                </template>
+                <div class="sku-spec">{{ rating.desc }}</div>
+                <div class="time">{{ rating.rateTime|formatDate }}</div>
+              </div>
+            </li>
+          </div>
+        </transition>
+      </scroll>
+      <div class="no-rating" v-show="!ratings.length">暂无评论...</div>
     </div>
   </transition>
 </template>
@@ -51,7 +63,7 @@ import Vue from "vue";
 import RatingSelected from "./RatingSelected";
 import { Rate, ImagePreview } from "vant";
 import NavBar from "base/NavBar/NavBar";
-import Scroll from 'base/Scroll/Scroll'
+import Scroll from "base/Scroll/Scroll";
 import moment from "moment";
 import { getRatings } from "api/goods.js";
 import { getComments } from "api/comment.js";
@@ -63,12 +75,17 @@ const POSITIVE = 0; //好评
 const NEGATIVE = 2; //差评
 const MID = 1; //中评
 export default {
+  name: "ratings",
   data() {
     return {
       selectedType: this.selectType,
       onlycontent: this.onlyContent,
-      ratings: [], //评论列表
-      currentPage: 1
+      ratings: [1, 2], //评论列表
+      currentPage: 1,
+      hasMore: true,
+      goodsCommonId1: this.$route.query.goodsCommonId
+        ? parseInt(this.$route.query.goodsCommonId)
+        : this.goodsCommonId
     };
   },
   props: {
@@ -90,15 +107,22 @@ export default {
       type: Boolean,
       default: true
     },
-    goodsCommonId:{
-      type:Number,
-      default:1
+    goodsCommonId: {
+      type: Number,
+      default: 1
     }
   },
   created() {
     //this._getRatings();
-    this._getComments();
+    this.ratings.splice(0);
+    this._getComments(null, () => {
+      setTimeout(() => {
+        console.log("update");
+        this.ratings = this.ratings.slice(0);
+      }, 300);
+    });
   },
+  mounted() {},
   computed: {
     //当前选中的评论类型
     selectRating() {
@@ -168,37 +192,60 @@ export default {
         }
       });
     },
-    _getComments(){
-      this.currentPage = 1;
+    loadMore(finishPullup) {
+      this.currentPage++;
+      this._getComments(finishPullup, () => {
+        setTimeout(() => {
+          this.ratings = this.ratings.slice(0);
+        }, 300);
+      });
+    },
+    _getComments(finishPullup, scrollCallBack) {
       let params = {
         current: this.currentPage,
-        goodsCommonId:this.goodsCommonId,
-        type:this.selectedType===ALL?null:this.selectedType
+        goodsCommonId: this.goodsCommonId1,
+        type: this.selectedType === ALL ? null : this.selectedType
       };
-      this.ratings.splice(0);
-      getComments(params).then(res=>{
-        console.log(res)
-        res.data.forEach(comment=>{
-          let commentImgList = comment.commentImageList
-          let goodsComment = new GoodsComment({
-            username:comment.nickname,
-            rateTime:comment.createTime,
-            score:comment.scores,
-            rateType:comment.type,
-            desc:comment.spec,
-            text:comment.content,
-            avatar:comment.avatar,
-            commentImgList:commentImgList
-          })
-          this.ratings.push(goodsComment)
-        })
-      })
+      getComments(params).then(res => {
+        console.log(res);
+        if (res.code === 0) {
+          if (!res.data.length) {
+            this.hasMore = false;
+          }
+          //let tmp = this.ratings.slice(0);
+          res.data.forEach(comment => {
+            let commentImgList = comment.commentImageList;
+            let goodsComment = new GoodsComment({
+              username: comment.nickname,
+              rateTime: comment.createTime,
+              score: comment.scores,
+              rateType: comment.type,
+              desc: comment.spec,
+              text: comment.content,
+              avatar: comment.fullAvatar,
+              commentImgList: comment.full
+            });
+            this.ratings.push(goodsComment);
+          });
+          //this.ratings = tmp;
+        }
+
+        if (finishPullup) {
+          console.log("33");
+          this.$nextTick(() => {
+            finishPullup();
+          });
+        }
+        this.$nextTick(() => {
+          scrollCallBack && scrollCallBack();
+        });
+      });
     }
   },
   filters: {
     formatDate(time) {
       let date = new Date(time);
-      return moment(date).format("YYYY-MM-DD HH:mm:ss");
+      return moment(date).format("YYYY-MM-DD");
     }
   },
   watch: {
@@ -206,17 +253,27 @@ export default {
     ratings() {
       setTimeout(() => {
         this.$emit("refresh");
-      }, 20);
+        //this.$refs.scroll.refresh();
+      }, 30);
     },
     //监听selectedType 的变化根据不同的selectedType 请求对应的数据
     selectedType() {
-      this._getComments()
+      this.currentPage = 1;
+      this.hasMore = true;
+      this.ratings.splice(0);
+      this._getComments(null, () => {
+        setTimeout(() => {
+          console.log("dd");
+          this.ratings = this.ratings.slice(0);
+        }, 300);
+      });
     }
   },
   components: {
     [Rate.name]: Rate,
     RatingSelected,
-    NavBar
+    NavBar,
+    Scroll
   }
 };
 </script>
@@ -225,6 +282,15 @@ export default {
 
 .rating-seller {
   background: $color-background-w;
+
+  .rating-seller-scroll {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 46px;
+    background: $color-background-w;
+  }
 
   .rating-wrapper {
     padding: 0 18px;
@@ -285,6 +351,11 @@ export default {
           font-size: 12px;
         }
 
+        .sku-spec {
+          font-size: 12px;
+          color: rgb(147, 153, 159);
+        }
+
         .recommend {
           line-height: 16px;
 
@@ -317,6 +388,12 @@ export default {
         }
       }
     }
+  }
+
+  .no-rating {
+    text-align: center;
+    font-size: 14px;
+    color: $color-text-gray;
   }
 }
 </style>

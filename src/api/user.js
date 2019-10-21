@@ -1,7 +1,12 @@
 import axios from './config'
 //获得用户收藏列表
-const baseUrl = 'http://192.168.1.53:9090'
-const baseUrl1 = '/rongbin'
+import { URL } from './config'
+
+/* const baseUrl = 'http://192.168.1.53:9090'
+const baseUrl1 = 'http://192.168.1.66:21002' */
+
+const baseUrl = `${URL}:9090`
+const baseUrl1 = `${URL}:21002`
 //用户收藏列表
 export function getCollectList() {
     const url = `${baseUrl}/member/favorite/list`
@@ -103,7 +108,7 @@ export function deleteUserAddressList(params) {
 
 //用户信息
 
-export function getUserInfo(params){
+export function getUserInfo(params) {
     const url = `${baseUrl1}/member-api/member/selectMemberlist`
     return axios.get(url, {
         params
@@ -111,81 +116,27 @@ export function getUserInfo(params){
         return Promise.resolve(res.data)
     })
 }
-/* //获取用户订单列表
-export function getUserOrder(params) {
-    //0:已取消 1:全部 10:未付款 20:已收货 30:已发货 40:已完成 50:已评价
-    let urlMap = {
-        0: '/api/getOderCancel',
-        1: '/api/getOderAll',
-        10: '/api/getOderPendingPay',
-        20: '/api/getUserOder',
-        30: '/api/getOderLogistics',
-        40: '/api/getOderComplete'
-    }
-    const url = urlMap[params.status]
+//更新 用户信息
+export function updateUserInfo(params) {
+    const url = `${baseUrl1}/member-api/member/updateMember`
     return axios({
         url: url,
-        method: 'get',
-        params: params
+        method: 'post',
+        data: params
     }).then(res => {
         return Promise.resolve(res.data)
     })
 }
 
-//获取用户单个订单的详情
-export function getUserOrderDetail(params) {
-    console.log(params)
-    const url = 'http://192.168.1.101:9092/order/member/purchase/list'
+//更新 用户头像
+
+export function updateAvatar(params) {
+    const url = `${baseUrl1}/member-api/member/updateAvatar`
     return axios({
         url: url,
-        method: 'get',
-        params: params
-    }).then(res => {
-        return Promise.resolve(res.data)
-    })
-}
-//获取用户所有订单
-export function getUserAllOrder(params) {
-    console.log(params)
-    const url = 'http://192.168.1.101:9092/order/member/purchase/list'
-    return axios({
-        url: url,
-        method: 'get',
-        params: params
-    }).then(res => {
-        return Promise.resolve(res.data)
-    })
-}
-//根据状态获取用户订单
-export function getUserOrderByStatus(params) {
-    console.log(params)
-    const url = 'http://192.168.1.101:9092/order/member/purchase/list/status'
-    return axios({
-        url: url,
-        method: 'get',
-        params: params
-    }).then(res => {
-        return Promise.resolve(res.data)
-    })
-}
-//删除用户订单
-export function deleteOrder(params) {
-    const url = 'http://192.168.1.101:9092/order/member/purchase/delete'
-    return axios.delete(url, {
-        params
-    }).then(res => {
-        return Promise.resolve(res.data)
-    })
-}
-//取消用户订单
-export function cancelOrder(params) {
-    const url = 'http://192.168.1.101:9092/order/member/purchase/cancel'
-    console.log(params)
-    return axios({
-        url: url,
-        method: 'put',
+        method: 'post',
         data: params
     }).then(res => {
         return Promise.resolve(res.data)
     })
-} */
+}

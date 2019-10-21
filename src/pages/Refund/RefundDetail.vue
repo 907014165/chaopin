@@ -5,7 +5,7 @@
       <div class="header van-hairline--bottom">
         <div class="order-info">
           <div class="order-staus">{{ refundState }}</div>
-          <div class="order-desc">还剩3天20时自动确认</div>
+          <div class="order-desc"></div>
         </div>
       </div>
     </template>
@@ -160,18 +160,18 @@ export default {
       }
     },
     refundState1() {
-      if(this.refundInfo.refundType===1){
+      if (this.refundInfo.refundType === 1) {
         return this.refundInfo.sellerState === 1
-        ? "请等待商家处理"
-        : this.refundInfo.sellerState===2
-        ?"商家已同意，请耐心等待"
-        :"商家已拒绝"
-      }else{
+          ? "请等待商家处理"
+          : this.refundInfo.sellerState === 2
+          ? "商家已同意，请耐心等待"
+          : "商家已拒绝";
+      } else {
         return this.refundInfo.sellerState === 1
-        ? "请等待商家处理"
-        : this.refundInfo.sellerState===2
-        ?"商家已同意退款申请,请填写快递单号"
-        :"商家已拒绝"
+          ? "请等待商家处理"
+          : this.refundInfo.sellerState === 2
+          ? "商家已同意退款申请,请填写快递单号"
+          : "商家已拒绝";
       }
     }
   },
@@ -180,7 +180,9 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.replace({
+        path:'/user/aftersale'
+      });
     },
     toggleShow() {
       this.show = !this.show;
@@ -192,7 +194,13 @@ export default {
         reInvoiceNo: this.expressNo,
         refundId: this.refundInfo.refundId
       };
-      this._subRefundExpNo(params);
+      this._subRefundExpNo(params, () => {
+        Toast({
+          type: "success",
+          message: "提交成功",
+          duration: 800
+        });
+      });
       console.log(params);
     },
     onSelect(item) {
@@ -233,9 +241,25 @@ export default {
           // on cancel
         });
     },
-    _subRefundExpNo(params) {
+    _subRefundExpNo(params, successCb) {
       subRefundExpNo(params).then(res => {
-        console.log(res);
+        if (res.code === 0) {
+          if (res.data) {
+            successCb();
+          } else {
+            Toast({
+              type: "fail",
+              message: "提交失败",
+              duration: 800
+            });
+          }
+        } else {
+          Toast({
+            type: "fail",
+            message: "提交失败",
+            duration: 800
+          });
+        }
       });
     },
     _getRefundDetail() {
@@ -264,15 +288,23 @@ export default {
       getExpressCompany(params).then(res => {
         console.log(res);
         let express = JSON.parse(res.data);
+        console.log(express);
         if (res.code === 0) {
-          express.showapi_res_body.data.forEach(item => {
-            this.actions.push({
-              name: item.expName,
-              simpleName: item.simpleName
+          if (express.showapi_res_body.ret_code === 0) {
+            express.showapi_res_body.data.forEach(item => {
+              this.actions.push({
+                name: item.expName,
+                simpleName: item.simpleName
+              });
             });
-          });
-          this.expStep = 2;
-          console.log(express);
+            this.expStep = 2;
+          } else {
+            Toast.fail({
+              message: express.showapi_res_body.msg
+            });
+          }
+
+          
         } else {
           Toast.fail({
             message: express.showapi_res_body.msg
@@ -347,7 +379,7 @@ export default {
   .header {
     height: 100px;
     display: flex;
-    background: linear-gradient(to right, rgb(255, 144, 0), rgb(255, 80, 0)) center center / cover no-repeat;
+    background: linear-gradient(to right, rgb(255, 0, 0), rgb(220, 20, 60)) center center / cover no-repeat;
 
     .order-info {
       flex: 1;

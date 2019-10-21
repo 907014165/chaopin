@@ -100,6 +100,9 @@ export default {
   }
 
   .content {
+    flex: 1;
+    padding: 0 12px;
+
     .address {
       margin-bottom: 5px;
       font-weight: 700;

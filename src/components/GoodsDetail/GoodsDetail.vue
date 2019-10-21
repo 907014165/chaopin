@@ -8,11 +8,10 @@
           </span>
           <van-swipe class="goods-swipe" :autoplay="3000" @change="onChange" v-if="goods1">
             <van-swipe-item v-for="(thumb,index) in goods1.album" :key="index">
-              <img :src="`http://192.168.1.53:9090/${thumb}`" />
+              <img :src="thumb" />
             </van-swipe-item>
             <div class="custom-indicator" slot="indicator">{{ current + 1 }}/{{goods1.album.length}}</div>
           </van-swipe>
-
           <van-cell-group v-if="goods1">
             <van-cell>
               <div class="sub-title">
@@ -60,16 +59,7 @@
             <van-cell :title="currentSelectSku" is-link @click="toggleShowSku" />
           </van-cell-group>
           <div class="comment-wrapper">
-            <div class="comment-title">
-              <div class="info">
-                <span class="info-text">评价</span>
-                <span class="info-num">65</span>
-              </div>
-              <div class="goods-evaluation" @click="lookMoreComment">
-                <span>96%</span>
-                <van-icon name="arrow" />
-              </div>
-            </div>
+            <rating-header @click="lookMoreComment" :goodsCommonId="goods1.goodsCommonId"></rating-header>
             <rating-seller
               :is-all-ratings="false"
               :goods-common-id="goods1.goodsCommonId"
@@ -86,26 +76,13 @@
               >查看全部评论</van-button>
             </div>
           </div>
+          <div class></div>
+          <van-divider>商品详情展示</van-divider>
+          <!-- 商品图片列表 -->
+          <banner v-for="(imgSrc,index) in imgList" :key="index">
+            <img :src="imgSrc" alt @load="refreshScroll" @click="showImgPreview(index)" />
+          </banner>
         </div>
-
-        <!-- <van-sku
-        ref="sku"
-        v-model="show"
-        :sku="skuData.sku"
-        :goods="skuData.goods_info"
-        :goods-id="skuData.goods_id"
-        :hide-stock="skuData.sku.hide_stock"
-        :quota="skuData.quota"
-        :quota-used="skuData.quota_used"
-        :initial-sku="initialSku"
-        reset-stepper-on-hide
-        reset-selected-sku-on-hide
-        :close-on-click-overlay="closeOnClickOverlay"
-        :custom-sku-validator="customSkuValidator"
-        @sku-selected="currentSelect"
-        @buy-clicked="onBuyClicked"
-        @add-cart="onAddCartClicked"
-        />-->
       </scroll>
       <van-goods-action>
         <van-goods-action-icon icon="chat-o" @click="connectKefu">客服</van-goods-action-icon>
@@ -137,7 +114,9 @@
       <transition name="van-slide-right">
         <router-view></router-view>
       </transition>
-      <skeleton v-if="!goods1"></skeleton>
+      <transition name="van-fade">
+        <skeleton v-if="!goods1"></skeleton>
+      </transition>
     </div>
   </transition>
 </template>
@@ -155,12 +134,17 @@ import {
   GoodsActionIcon,
   GoodsActionButton,
   Sku,
-  Button
+  Button,
+  Divider,
+  ImagePreview
 } from "vant";
+import Vue from "vue";
 import Scroll from "base/Scroll/Scroll";
 import skuData from "./data.js";
 import Skeleton from "base/Skeleton/Skeleton";
 import RatingSeller from "base/Ratings/RatingSeller";
+import RatingHeader from "base/Ratings/RatingHeader";
+import Banner from "base/Banner/Banner";
 import { mapMutations } from "vuex";
 import {
   getSkuById,
@@ -169,6 +153,8 @@ import {
   addShopCart
 } from "api/goods.js";
 import data from "./data.js";
+import { listenBack } from "common/js/app.js";
+Vue.use(ImagePreview);
 export default {
   data() {
     return {
@@ -188,6 +174,7 @@ export default {
           "https://img.yzcdn.cn/public_files/2017/10/24/1791ba14088f9c2be8c610d0a6cc0f93.jpeg"
         ]
       },
+      imgList: [],
       goods1: null,
       selecSkuInfo: "",
       skuData: skuData,
@@ -195,15 +182,13 @@ export default {
       showStepper: false,
       showSoldout: false,
       closeOnClickOverlay: true,
-      initialSku: {
-        s1: 1,
-        s2: 1,
-        selectedNum: 1
-      },
+
       customSkuValidator: () => "请选择商品!"
     };
   },
-  created() {},
+  created() {
+    //listenBack();
+  },
   mounted() {
     this._getSkuById();
     this._getGoodsById();
@@ -226,6 +211,23 @@ export default {
       } else {
         return "";
       }
+    },
+    initialSku() {
+      let initSku = {};
+      if (JSON.stringify(this.sku) != "{}") {
+        let skuList = this.sku.list;
+        for (let i = 0; i < skuList.length; i++) {
+          if (skuList[i].stock_num) {
+            initSku = {
+              s1: skuList[i].s1,
+              s2: skuList[i].s2,
+              selectedNum: 1
+            };
+            break;
+          }
+        }
+      }
+      return initSku;
     }
   },
   methods: {
@@ -233,9 +235,34 @@ export default {
       console.log("scroll refresh");
       this.$refs.scroll.refresh();
     },
+    refreshScroll() {
+      this.$refs.scroll.refresh();
+    },
+    parseDom(arg) {
+      var objE = document.createElement("div");
+      objE.innerHTML = arg;
+      return objE.childNodes;
+    },
+    //获取img都没 的src
+    getImgSrc(arg) {
+      let img = this.parseDom(arg);
+      return img[0].attributes.src.value;
+    },
+    showImgPreview(startIndex) {
+      ImagePreview({
+        images: this.imgList,
+        startPosition: startIndex,
+        onClose() {
+          // do something
+        }
+      });
+    },
     lookMoreComment() {
       this.$router.push({
-        path: "/ratings"
+        path: "/ratings",
+        query: {
+          goodsCommonId: this.$route.params.spuid
+        }
       });
     },
     formatPrice() {
@@ -251,7 +278,10 @@ export default {
     },
     connectKefu() {
       this.$router.push({
-        path: "/chat"
+        path: "/chat",
+        query: {
+          goodsInfo: this.goods1
+        }
       });
     },
     sorry() {
@@ -268,7 +298,7 @@ export default {
       this.show = !this.show;
     },
     back() {
-      this.$router.back();
+      this.$router.go(-1);
     },
     ImgLoad() {
       if (this.checkLoad) {
@@ -277,7 +307,7 @@ export default {
       }
     },
     onBuyClicked(data) {
-      this.$toast("buy:" + JSON.stringify(data));
+      //this.$toast("buy:" + JSON.stringify(data));
       console.log(JSON.stringify(data));
       this.$router.push({
         path: `/${this.$route.query.ParentPath}/goodsDetail/${data.goodsId}/confirmOrder/${data.selectedSkuComb.id}`,
@@ -339,11 +369,13 @@ export default {
 
       //console.log(this.$refs.sku.getSkuData());
     },
+    //当选择的规格发生改变时的回调函数
     currentSelect(data) {
       console.log(data);
-      this.initialSku.s1 = data.selectedSku.s1 ? data.selectedSku.s1 : 1;
-      this.initialSku.s2 = data.selectedSku.s2 ? data.selectedSku.s2 : 1;
+      this.initialSku.s1 = data.selectedSku.s1 /* ? data.selectedSku.s1 : 1 */;
+      this.initialSku.s2 = data.selectedSku.s2 /* ? data.selectedSku.s2 : 1 */;
     },
+    //切换喜欢收藏按钮
     _toggleFavorite() {
       this.isFavorite = !this.isFavorite;
       console.log(this.isFavorite);
@@ -364,6 +396,7 @@ export default {
         });
       }
     },
+    //根据商品id互殴去商品
     _getSkuById() {
       let params = {
         goodsCommonId: this.$route.params.spuid
@@ -374,6 +407,7 @@ export default {
         }
       });
     },
+    //根据商品id 获取商品详情数据
     _getGoodsById() {
       let params = {
         goodsCommonId: this.$route.params.spuid
@@ -382,6 +416,9 @@ export default {
         if (res.code === 0) {
           this.isFavorite = res.data.isFavorite;
           this.goods1 = res.data;
+          res.data.bodyList.forEach(img => {
+            this.imgList.push(this.getImgSrc(img));
+          });
         }
       });
     },
@@ -405,7 +442,7 @@ export default {
       if (from.name === "shopcart") {
         this._getGoodsById();
         this._getSkuById();
-        console.log('fsa')
+        console.log("fsa");
       }
     }
   },
@@ -422,9 +459,12 @@ export default {
     [GoodsActionButton.name]: GoodsActionButton,
     [Sku.name]: Sku,
     [Button.name]: Button,
+    RatingHeader: RatingHeader,
+    [Divider.name]: Divider,
     Scroll,
     Skeleton,
-    RatingSeller
+    RatingSeller,
+    Banner
   }
 };
 </script>

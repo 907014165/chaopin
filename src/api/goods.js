@@ -1,5 +1,7 @@
 import axios from 'axios'
-const baseUrl = 'http://192.168.1.53:9090'
+import { URL } from './config'
+//const baseUrl = 'http://192.168.1.53:9090'
+const baseUrl = `${URL}:9090`
 export function getSkuById(params) {
     const url = `${baseUrl}/member/search/spec`
     return axios.get(url, {

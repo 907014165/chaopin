@@ -9,12 +9,20 @@
         @click="delSku"
       />
     </van-nav-bar>
-    <scroll class="shop-cart-scroll" :data="shopCartList" id="scrolldom">
-      <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
-        <div class="shop-cart" id="shopcartdom">
-          <!-- <no-result desc="暂无商品" size="middle">
+
+    <!-- <scroll
+        class="shop-cart-scroll"
+        :data="shopCartList"
+        id="scrolldom"
+        v-show="shopCartList.length"
+    >-->
+    <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
+      <!-- <div class="shop-cart" id="shopcartdom"> -->
+      <!-- <no-result desc="暂无商品" size="middle">
           <img src="./cart-no-result.png" alt="">
-          </no-result>-->
+      </no-result>-->
+      <transition name="van-fade">
+        <template v-show="shopCartList.length">
           <sku-group
             :has-footer="false"
             :seller="seller"
@@ -25,10 +33,13 @@
             :key="seller.sellerId"
             @change-num="changeNum"
           ></sku-group>
-          <div class="occupation"></div>
-        </div>
-      </van-pull-refresh>
-    </scroll>
+        </template>
+      </transition>
+
+      <div class="occupation"></div>
+      <!--  </div> -->
+    </van-pull-refresh>
+    <!-- </scroll> -->
 
     <van-submit-bar :price="selectPrice*100" button-text="提交订单" @submit="onSubmit">
       <van-checkbox v-model="checked" checked-color="#ee0a24" @click="toggleSelect">全选</van-checkbox>
@@ -49,8 +60,18 @@ import {
   updataShopCartList
 } from "api/shopcart.js";
 import { getTest1 } from "api/index.js";
-import { PullRefresh, NavBar, SubmitBar, Checkbox, Icon, Dialog } from "vant";
+import {
+  PullRefresh,
+  NavBar,
+  SubmitBar,
+  Checkbox,
+  Icon,
+  Dialog,
+  Toast
+} from "vant";
 import { mapGetters, mapMutations } from "vuex";
+import { listenBack } from "common/js/app.js";
+//监听 返回事件
 
 let scrolldom = null;
 let shopcartdom = null;
@@ -184,13 +205,44 @@ export default {
       shopCartList: []
     };
   },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      // 通过 `vm` 访问组件实例
+      if (vm.getIsAddShopCart) {
+        console.log("进入购物车  并且有购买添加购物");
+        vm.isSelectAll = false;
+        vm.checked = false;
+        vm.delShopCartItem();
+        vm.shopCartList.splice(0);
+        vm._getShopCartList();
+        vm.setIsAddShopCart(false);
+      }
+      if (vm.getIsByGoods) {
+        vm.isSelectAll = false;
+        vm.checked = false;
+        vm.delShopCartItem();
+        vm.shopCartList.splice(0);
+        vm._getShopCartList();
+        vm.setIsBuyGoods(false);
+      }
+    });
+  },
+  beforeRouteLeave(to, from, next) {
+    // 导航离开该组件的对应路由时调用
+    // 可以访问组件实例 `this`
+    this._updataShopCartList();
+    next();
+  },
   created() {
     console.log("111");
     this._getShopCartList();
+    listenBack();
   },
   mounted() {
-    //this.observeShopCartDOM();
-    vue_this = this;
+    /* this.$nextTick(() => {
+      this.observeShopCartDOM();
+    });
+    vue_this = this; */
   },
   beforeDestroy() {
     getTest1();
@@ -223,14 +275,16 @@ export default {
       getShopCart: "shopCart",
       getIsAddShopCart: "isAddShopCart",
       getVueShopCartList: "shopCartList",
-      getIsByGoods:'isByGoods'
+      getIsByGoods: "isByGoods"
     })
   },
   methods: {
     //下拉刷新执行的回调
     onRefresh() {
       console.log("下拉刷新");
+      this.shopCartList.splice(0);
       this._updataShopCartList();
+      this._getShopCartList();
       /* this.shopCartList.splice(0)
       this._getShopCartList() */
 
@@ -244,10 +298,18 @@ export default {
     //提交
     onSubmit() {
       console.log(this.getShopCart);
+      if (!this.getShopCart.length) {
+        Toast({
+          type: "fail",
+          message: "请选中想要购买的商品",
+          duration: 800
+        });
+        return;
+      }
       this.$router.push({
         path: "/shopcart/confirmOder",
-        query:{
-          seller:this.getShopCart
+        query: {
+          seller: this.getShopCart
         }
       });
     },
@@ -328,36 +390,40 @@ export default {
     },
     //获取购物车列表
     _getShopCartList() {
-      getShopCartList().then(res => {
-        if (res.code === 0) {
-          console.log(res);
-          res.data.forEach(seller => {
-            let obj = {
-              sellerId: seller.storeId,
-              name: seller.storeName,
-              skuList: []
-            };
-            seller.cartList.forEach(sku => {
-              obj.skuList.push({
-                goodsCommonId:sku.goodsCommonId,
-                goodsId: sku.goodsId,
-                skuId: sku.goodsId,
-                title: sku.goodsName,
-                desc: sku.spec,
-                num: sku.buyNum,
-                price: sku.price,
-                thumb: sku.image,
-                storageNum: sku.storageNum,
-                cartId: sku.cartId
+      getShopCartList()
+        .then(res => {
+          if (res.code === 0) {
+            console.log(res);
+            res.data.forEach(seller => {
+              let obj = {
+                sellerId: seller.storeId,
+                name: seller.storeName,
+                skuList: []
+              };
+              seller.cartList.forEach(sku => {
+                obj.skuList.push({
+                  goodsCommonId: sku.goodsCommonId,
+                  goodsId: sku.goodsId,
+                  skuId: sku.goodsId,
+                  title: sku.goodsName,
+                  desc: sku.spec,
+                  num: sku.buyNum,
+                  price: sku.price,
+                  thumb: sku.fullImage,
+                  storageNum: sku.storageNum,
+                  cartId: sku.cartId
+                });
               });
+              this.shopCartList.push(obj);
             });
-            this.shopCartList.push(obj);
-          });
-        } else {
-          alert(res.message);
-        }
-        this.setShopCartList(this.shopCartList);
-      });
+          } else {
+            alert(res.message);
+          }
+          this.setShopCartList(this.shopCartList);
+        })
+        .catch(err => {
+          this.isLoading = false;
+        });
     },
     //删除购物车列表
     _delShopCartList() {
@@ -388,23 +454,27 @@ export default {
         });
       });
       console.log(params);
-      updataShopCartList(params).then(res => {
-        if (res.code) {
-          if (res.data) {
-            console.log("刷新成功");
+      updataShopCartList(params)
+        .then(res => {
+          if (res.code) {
+            if (res.data) {
+              console.log("刷新成功");
+            } else {
+              console.log("刷新失败");
+            }
           } else {
-            console.log("刷新失败");
           }
-        } else {
-        }
-        this.isLoading = false;
-      });
+          this.isLoading = false;
+        })
+        .catch(err => {
+          this.isLoading = false;
+        });
     },
     ...mapMutations({
       delShopCartItem: "DEL_SLECT_SHOP_CART_ITEM",
       setShopCartList: "SET_SHOP_CART_LIST",
       setIsAddShopCart: "SET_IS_SHOP_CART",
-      setIsBuyGoods:'SET_IS_BUY_GOODS'
+      setIsBuyGoods: "SET_IS_BUY_GOODS"
     })
   },
   watch: {
@@ -430,11 +500,12 @@ export default {
     },
     //监听路由 如果路由发生变化 将购物车数据发给后端
     $route(to, from) {
-      if (to.path === "/shopcart") {
+      /* if (to.path == "/shopcart") {
         console.log("进入购物车");
         //进入购物车时 重新请求购物车数据
         //this._getShopCartList()
         if (this.getIsAddShopCart) {
+          console.log("进入购物车  并且有购买添加购物");
           this.isSelectAll = false;
           this.checked = false;
           this.delShopCartItem();
@@ -442,19 +513,19 @@ export default {
           this._getShopCartList();
           this.setIsAddShopCart(false);
         }
-        if(this.getIsByGoods){
+        if (this.getIsByGoods) {
           this.isSelectAll = false;
           this.checked = false;
           this.delShopCartItem();
           this.shopCartList.splice(0);
           this._getShopCartList();
-          this.setIsBuyGoods(false)
+          this.setIsBuyGoods(false);
         }
       } else {
         console.log("离开购物车");
         //离开购物车时 将购物车数据发给后端数据发给后端
         this._updataShopCartList();
-      }
+      } */
       //console.log("route change");
     },
     shopCartDom() {
@@ -468,6 +539,7 @@ export default {
     [Checkbox.name]: Checkbox,
     [Icon.name]: Icon,
     [Dialog.name]: Dialog,
+    [Toast.name]: Toast,
     NoResult,
     Scroll,
     SkuGroup,
@@ -479,12 +551,27 @@ export default {
 @import '~common/stylus/variable.styl';
 
 .shop-cart-content {
+  .van-pull-refresh {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 46px;
+    bottom: 100px;
+    z-index: 1;
+    overflow-y: scroll;
+
+    .van-pull-refresh__track {
+      height: 100%;
+    }
+  }
+
   .shop-cart-scroll {
     position: fixed;
     left: 0;
     right: 0;
     top: 46px;
     bottom: 100px;
+    z-index: -1;
     overflow: hidden;
 
     .van-pull-refresh {

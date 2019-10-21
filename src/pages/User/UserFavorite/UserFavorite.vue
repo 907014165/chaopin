@@ -91,6 +91,7 @@ export default {
       getCollectList().then(res => {
         if (res.code === ERR_OK) {
           //this.memberId = res.data.list[0].memberId;
+          console.log(res)
           res.data.list.forEach(goods => {
             this.collectList.push(
               new Goods({
@@ -100,7 +101,7 @@ export default {
                 imgUrl: goods.image,
                 price: goods.sellPrice,
                 oldPrice: "",
-                discount: ""
+                discount: goods.discount
               })
             );
           });
