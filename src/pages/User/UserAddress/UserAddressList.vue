@@ -73,7 +73,8 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      //this.$router.back();
+      this.$router.goBack();
     },
     onAdd() {
       this.$router.push({
@@ -198,6 +199,7 @@ export default {
         }
       }
     }
+
     .van-address-list__add {
       display: none;
     }

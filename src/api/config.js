@@ -51,5 +51,5 @@ axios.interceptors.response.use(
     }
 )
 export default axios
-export const URL = 'http://218.193.110.243'
+export const URL = 'http://218.193.110.245'
 export const ERR_OK = 0

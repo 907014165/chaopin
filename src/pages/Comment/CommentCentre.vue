@@ -203,7 +203,7 @@ export default {
         order.orderGoodsList.forEach(ordergoods => {
           let skugoods = new SkuGoods({
             goodsId: ordergoods.goodsId,
-            goodsCommonId:ordergoods.goodsCommonId,
+            goodsCommonId: ordergoods.goodsCommonId,
             title: ordergoods.goodsName,
             desc: spec(ordergoods.spec),
             num: ordergoods.buyNum,
@@ -264,6 +264,7 @@ export default {
   top: 0;
   right: 0;
   bottom: 0;
+  z-index: 41;
   background: $color-background;
 
   .loading-wrapper {

@@ -1,7 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import store from '../store/store'
+Router.prototype.goBack = function (config) {
+  if (!config) {
+    this.isBack = true
+    window.history.go(-1)
+  }
 
+}
 Vue.use(Router)
 
 let routes = [

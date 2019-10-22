@@ -323,9 +323,10 @@ export default {
   },
   methods: {
     back() {
-      this.$router.push({
+      /*  this.$router.push({
         path: "/user"
-      });
+      }); */
+      this.$router.goBack();
     },
     //监听scroll事件
     scroll(pos) {

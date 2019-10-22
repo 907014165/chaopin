@@ -1,6 +1,6 @@
 import axios from 'axios'
-//const baseUrl = 'http://218.193.110.247:9010'
-const baseUrl = '/chat'
+const baseUrl = 'http://218.193.110.247:9010'
+//const baseUrl = '/chat'
 export function fileUpload(params) {
     const url = `${baseUrl}/upload`
     return axios({

@@ -219,7 +219,7 @@ export default {
           {
             url: require("../../common/image/emoji/110.gif"),
             alt: "[囧]",
-            alias: "11gif"
+            alias: "11.gif"
           },
           {
             url: require("../../common/image/emoji/111.gif"),

@@ -41,7 +41,8 @@ export default {
   methods: {
     back() {
       console.log(this.AddressInfo);
-      this.$router.back();
+      //this.$router.back();
+      this.$router.goBack();
     },
     onSave(item) {
       //Toast("save");

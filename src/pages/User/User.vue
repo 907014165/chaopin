@@ -101,8 +101,8 @@
       </van-cell-group>
     </van-pull-refresh>
 
-    <transition name="van-slide-right">
-      <router-view :show-list="showList"></router-view>
+    <transition :name="transitionName">
+      <router-view :show-list="showList" class="child-view"></router-view>
     </transition>
   </div>
 </template>
@@ -127,8 +127,23 @@ export default {
       isLoading: false,
       orderStatusCount: {},
       userInfo: {},
-      defaultAvatar: defaultAvatar
+      defaultAvatar: defaultAvatar,
+      transitionName: "van-right"
     };
+  },
+  beforeRouteUpdate(to, from, next) {
+    let isBack = this.$router.isBack;
+    console.log(isBack);
+    if (isBack) {
+      this.transitionName = "slide-right";
+    } else {
+      this.transitionName = "slide-left";
+    }
+    console.log(this.transitionName);
+    this.$router.isBack = false;
+    this.$nextTick(() => {
+      next();
+    });
   },
   created() {
     this._getOrderCount();
@@ -214,24 +229,70 @@ export default {
   right: 0;
   bottom: 50px;
 
+  .child-view {
+    &.slide-right-enter, &.slide-right-enter-active {
+      animation: bounce-left-in 300ms;
+    }
+
+    &.slide-right-leave-active {
+      animation: bounce-left-out 300ms;
+    }
+
+    &.slide-left-enter, &.slide-left-enter-active {
+      animation: bounce-right-in 300ms;
+    }
+
+    &.slide-left-leave-active {
+      animation: bounce-right-out 300ms;
+    }
+
+    @keyframes bounce-right-in {
+      0% {
+        transform: translate3d(100%, 0, 0);
+      }
+
+      100% {
+        transform: translate3d(0px, 0, 0);
+      }
+    }
+
+    @keyframes bounce-right-out {
+      0% {
+        transform: translate3d(0, 0, 0);
+      }
+
+      100% {
+        transform: translate3d(-100%, 0, 0);
+      }
+    }
+
+    @keyframes bounce-left-in {
+      0% {
+        transform: translate3d(-100%, 0, 0);
+      }
+
+      100% {
+        transform: translate3d(0px, 0, 0);
+      }
+    }
+
+    @keyframes bounce-left-out {
+      0% {
+        transform: translate3d(0, 0, 0);
+      }
+
+      100% {
+        transform: translate3d(100%, 0, 0);
+      }
+    }
+  }
+
   .van-pull-refresh {
     height: 100%;
 
     .van-pull-refresh__track {
       height: 100% !important;
     }
-  }
-
-  .slide-enter-active, .slide-leave-active {
-    transition: all 0.3s;
-  }
-
-  .slide-enter {
-    transform: translate3d(100%, 0, 0);
-  }
-
-  .slide-leave-to {
-    transform: translate3d(-100%, 0, 0);
   }
 
   .iconfont-icon-kanjia {
