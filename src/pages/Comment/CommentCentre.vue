@@ -109,6 +109,10 @@ export default {
       this.$router.replace({
         path: "/user"
       });
+
+      this.$router.isBack = false;
+
+      console.log(this.$router.isBack);
     },
     onRefresh() {
       this.orderList.splice(0);

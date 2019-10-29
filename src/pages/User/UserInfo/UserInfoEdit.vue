@@ -84,13 +84,15 @@ export default {
   },
   methods: {
     onClickLeft() {
-      this.$router.back();
+      this.$router.goBack();
+      this.$router.isBack = true;
       console.log("取消");
     },
     onClickRight() {
       console.log("完成");
       this._updateUserInfo();
-      this.$router.back();
+      this.$router.goBack();
+      this.$router.isBack = true;
     },
     toggleSexSelect() {
       this.show = !this.show;

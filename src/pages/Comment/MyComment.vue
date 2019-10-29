@@ -45,6 +45,7 @@ import SkuItem from "components/SkuItem/SkuItem";
 import Scroll from "base/Scroll/Scroll";
 import { getCompleteComments } from "api/comment.js";
 import moment from "moment";
+import { isAndroid_ios } from "common/js/util.js";
 import { Rate, ImagePreview } from "vant";
 import Vue from "vue";
 Vue.use(ImagePreview);
@@ -59,7 +60,7 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
     },
     showImgPreview(imgList, startIndex) {
       ImagePreview({
@@ -117,6 +118,9 @@ export default {
   filters: {
     formatDate(time) {
       let date = new Date(time);
+      if (isAndroid_ios()) {
+        date.setHours(date.getHours() - 8);
+      }
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     }
   },

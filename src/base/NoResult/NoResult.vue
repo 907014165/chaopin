@@ -1,14 +1,12 @@
 <template>
   <div class="no-result">
-    <div class="img-wrapper" :class="imgCls">
-      <slot></slot>
-    </div>
-    <div>
-      <span class="text">{{ desc }}</span>
-    </div>
+    <van-icon v-if="type===0" class-prefix="iconfont" name="icon-lab-kuqi" />
+    <van-icon v-if="type===1" class-prefix="iconfont" name="icon-wujieguo" />
+    <slot></slot>
   </div>
 </template>
 <script>
+import { Icon } from "vant";
 export default {
   props: {
     desc: {
@@ -18,6 +16,10 @@ export default {
     size: {
       type: String,
       default: "small"
+    },
+    type: {
+      type: [String, Number],
+      default: 0
     }
   },
   computed: {
@@ -30,6 +32,9 @@ export default {
         ? "large"
         : "small";
     }
+  },
+  components: {
+    [Icon.name]: Icon
   }
 };
 </script>
@@ -37,34 +42,15 @@ export default {
 @import '~common/stylus/variable.styl';
 
 .no-result {
-  text-align: center;
-  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  .img-wrapper {
-    &.small {
-      img {
-        height: 32px;
-        width: 32px;
-      }
-    }
-
-    &.middle {
-      img {
-        height: 64px;
-        width: 64px;
-      }
-    }
-
-    &.large {
-      img {
-        height: 128px;
-        width: 128px;
-      }
-    }
+  .iconfont {
+    font-size: 60px;
   }
 
-  .text {
-    font-size: $font-size-small;
-  }
+  font-size: $font-size-medium-x;
+  color: $color-text-gray;
 }
 </style>

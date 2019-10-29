@@ -55,7 +55,7 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
     },
     onLoad() {
       setTimeout(() => {

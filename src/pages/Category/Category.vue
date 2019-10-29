@@ -17,7 +17,7 @@
         </scroll>
 
         <div class="content-right">
-          <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
+          <van-pull-refresh v-model="isLoading" :disabled="true" @refresh="onRefresh">
             <banner v-if="currentCategory">
               <img :src="currentCategory.goodsClass.fullPosterImage" alt />
             </banner>
@@ -57,41 +57,6 @@ import Scroll from "base/Scroll/Scroll";
 import Banner from "base/Banner/Banner";
 import { getCategoryList, getBrands } from "api/category.js";
 import { listenBack } from "common/js/app.js";
-//监听 返回事件
-/* document.addEventListener("plusready", function() {
-  var webview = plus.webview.currentWebview();
-  plus.key.addEventListener("backbutton", function() {
-    webview.canBack(function(e) {
-      if (e.canBack) {
-        webview.back();
-      } else {
-        //webview.close(); //hide,quit
-        //plus.runtime.quit();
-        //首页返回键处理
-        //处理逻辑：1秒内，连续两次按返回键，则退出应用；
-        var first = null;
-        plus.key.addEventListener(
-          "backbutton",
-          function() {
-            //首次按键，提示‘再按一次退出应用’
-            if (!first) {
-              first = new Date().getTime();
-              plus.nativeUI.toast("再按一次退出应用");
-              setTimeout(function() {
-                first = null;
-              }, 1000);
-            } else {
-              if (new Date().getTime() - first < 1500) {
-                plus.runtime.quit();
-              }
-            }
-          },
-          false
-        );
-      }
-    });
-  });
-}); */
 export default {
   name: "category",
   data() {
@@ -236,6 +201,7 @@ export default {
 
           .van-pull-refresh__track {
             height: 100%;
+            overflow-y: scroll;
           }
         }
 
@@ -244,6 +210,9 @@ export default {
 
           .text {
             font-size: $font-size-small;
+            display: block;
+            line-height: 12px;
+            height: 24px;
           }
         }
       }

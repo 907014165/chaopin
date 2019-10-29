@@ -17,6 +17,8 @@ import { Icon } from "vant";
 import { getLogistics } from "api/order.js";
 import { mapGetters } from "vuex";
 import moment from 'moment'
+import { isAndroid_ios } from 'common/js/util.js'
+
 export default {
   data() {
     return {
@@ -43,6 +45,9 @@ export default {
     },
     formatDate(time) {
       let date = new Date(time);
+      if (isAndroid_ios()) {
+        date.setHours(date.getHours() - 8);
+      }
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
     _getLogistics() {

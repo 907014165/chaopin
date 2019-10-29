@@ -174,7 +174,7 @@ export default {
         //console.log(res);
         if (res.code === ERR_OK) {
           this.slideImages = res.data.carousel;
-          console.log(res);
+          //console.log(res);
         }
       });
     },
@@ -191,11 +191,11 @@ export default {
         byDefault: 1,
         current: this.currentPage
       };
-      console.log(params);
+      //console.log(params);
       getGoodsList(params)
         .then(res => {
           if (res.code === 0) {
-            console.log(res);
+            //console.log(res);
             res.data.list.forEach(item => {
               this.goodsList.push(
                 new Goods({
@@ -268,8 +268,8 @@ export default {
             this.goodsList.push(
               new Goods({
                 goodsId: item.goodsCommonId,
-                desc: item.body,
-                imgUrl: item.image,
+                desc: item.goodsName,
+                imgUrl: item.fullImage,
                 price: item.sellPrice,
                 oldPrice: item.costPrice,
                 discount: item.discount

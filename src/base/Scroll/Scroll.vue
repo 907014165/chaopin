@@ -1,6 +1,6 @@
 <template>
   <div ref="wrapper" class="scroll-wrapper-zujian">
-    <div class="scroll-content-s">
+    <div class="scroll-content-s" ref="content" id="content">
       <div class="pulldown-wrapper">
         <div class="before-trigger" v-show="posy>0&&beforePullDown">释放即可刷新...</div>
         <div v-show="!beforePullDown">
@@ -80,7 +80,7 @@ export default {
     },
     refreshDelay: {
       type: Number,
-      default: 20
+      default: 1000
     },
     //是否开启上拉刷新
     pullUp: {
@@ -213,12 +213,19 @@ export default {
     },
     //滚动到指定位置
     scrollTo() {
-      console.log("无法");
+      //console.log("无法");
       this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments);
     },
     //滚动到底部
     scrollEnd() {
-      this.scroll && this.scroll.scrollEnd();
+      this.scroll.refresh();
+      let clientHeight = this.$refs.content.clientHeight;
+      let paramsArr = [0, -clientHeight, 1];
+      this.scroll.scrollTo.apply(this.scroll, paramsArr);
+      let tmp = [0, 1, 1];
+      setTimeout(() => {
+        this.scroll.scrollBy.apply(this.scroll, tmp);
+      }, 20);
     },
     //滚动到指定的dom对象
     scrollToElement() {
@@ -252,17 +259,16 @@ export default {
         }, this.refreshDelay);
       }); */
       this.$nextTick(() => {
-        /* setTimeout(() => { */
         this.refresh();
         //判断是否可以滚动
-        console.log(this.scroll.maxScrollY);
-        if (!this.scroll.maxScrollY) {
+        let wrapperHeight = this.$refs.wrapper.clientHeight;
+        let contentHeight = this.$refs.content.clientHeight;
+        if (contentHeight <= wrapperHeight) {
           this.hasPllupTxt = false;
           console.log(this.hasPllupTxt);
         } else {
           this.hasPllupTxt = true;
         }
-        /* }, this.refreshDelay); */
       });
     },
     hasMore() {

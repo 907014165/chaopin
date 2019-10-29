@@ -2,12 +2,14 @@
   <transition name="van-slide-right">
     <div class="logistics-detail">
       <nav-bar title="物流详情" @back="back"></nav-bar>
-      <van-steps direction="vertical" :active="0">
-        <van-step v-for="(step,index) in expressData" :key="index">
-          <h3>{{ step.context }}</h3>
-          <p>{{ step.time }}</p>
-        </van-step>
-      </van-steps>
+      <transition name="van-fade">
+        <van-steps direction="vertical" :active="0" v-show="expressData.length">
+          <van-step v-for="(step,index) in expressData" :key="index">
+            <h3>{{ step.context }}</h3>
+            <p>{{ step.time }}</p>
+          </van-step>
+        </van-steps>
+      </transition>
     </div>
   </transition>
 </template>
@@ -17,6 +19,7 @@ import { Step, Steps } from "vant";
 import { getLogistics } from "api/order.js";
 import { mapGetters } from "vuex";
 import moment from "moment";
+import { isAndroid_ios } from 'common/js/util.js'
 export default {
   name: "logisticsDetail",
   data() {
@@ -43,6 +46,9 @@ export default {
     },
     formatDate(time) {
       let date = new Date(time);
+      if (isAndroid_ios()) {
+        date.setHours(date.getHours() - 8);
+      }
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
     _getLogistics() {

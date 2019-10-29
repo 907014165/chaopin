@@ -97,7 +97,7 @@ export default {
         hide_stock: false,  // 是否隐藏剩余库存,
     },
     goods_id: '946755',
-    quota: 3, //限购数量 
+    quota: 0, //限购数量 
     quota_used: 0,  //已经购买过的数量
     goods_info: {
         title: '测试商品A',

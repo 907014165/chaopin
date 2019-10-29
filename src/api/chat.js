@@ -9,13 +9,19 @@ export function fileUpload(params) {
         data: params
     }).then(res => {
         return Promise.resolve(res.data)
+    }).catch(err => {
+        let errStr = JSON.stringify(err)
+        console.log(errStr)
     })
 }
 
 //获取聊天记录npm 
 
 export function getChatMsgList(params) {
+    let paramsStr = JSON.stringify(params)
+    console.log(paramsStr)
     const url = `${baseUrl}/message`
+    console.log(url)
     return axios({
         url: url,
         method: 'get',

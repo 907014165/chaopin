@@ -44,13 +44,14 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
+      this.$router.isBack = true;
     },
     //退出登录
     loginOut() {
       this.removeToken();
       this.$router.replace({
-        path: "/login"
+        path: "/home"
       });
     },
     toLogin() {

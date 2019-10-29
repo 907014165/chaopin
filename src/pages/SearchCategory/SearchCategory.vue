@@ -12,7 +12,6 @@
           ref="scroll"
           :listen-scroll="true"
           :probe-type="3"
-          v-show="this.goodsList.length"
           @scroll="scroll"
         >
           <div class="search-category">
@@ -25,7 +24,13 @@
               :shape-type="currentShape"
               :key="1"
             ></goods-filter>
-            <goods-list :goods-list="goodsList" :shape-type="currentShape" @selected="selectGoods"></goods-list>
+            <goods-list
+              :goods-list="goodsList"
+              :shape-type="currentShape"
+              @selected="selectGoods"
+              v-show="this.goodsList.length"
+            ></goods-list>
+            <no-result v-show="!this.goodsList.length">抱歉,该品牌暂无商品</no-result>
             <!-- <div class="pullup-wrapper">
             <div v-if="!isPullUpLoad" class="before-trigger">
               <span class="pullup-txt">{{ pullUpText }}</span>
@@ -58,11 +63,18 @@ import Banner from "base/Banner/Banner";
 import GoodsFilter from "base/GoodsFilter/GoodsFilter";
 import GoodsList from "components/GoodsList/GoodsList";
 import Scroll from "base/Scroll/Scroll";
+import NoResult from "base/NoResult/NoResult";
 import { getRecommendList } from "api/index.js";
 import { getSearchGoodsList } from "api/search.js";
 import Goods from "common/js/goods.js";
 export default {
   name: "searchCategory",
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.title = vm.$route.query.title;
+      vm._getSearchGoodsList();
+    });
+  },
   data() {
     return {
       currentShape: true, //当前列表状态
@@ -93,7 +105,7 @@ export default {
   },
   created() {
     //this._getGoodsList();
-    this._getSearchGoodsList();
+    //this._getSearchGoodsList();
   },
   destroyed() {
     console.log("应用销毁");
@@ -124,7 +136,7 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
     },
     scroll(pos) {
       this.pageY = pos.y;
@@ -147,10 +159,10 @@ export default {
     },
     selectGoods(goodsId) {
       this.$router.push({
-        path: `/searchCategory/goodsDetail/${goodsId}`
-        /* query: {
-          ParentPath: "/searchCategory"
-        } */
+        path: `/searchCategory/goodsDetail/${goodsId}`,
+        query: {
+          ParentPath: "searchCategory"
+        }
       });
     },
     loadMore(callback) {
@@ -179,8 +191,8 @@ export default {
               this.goodsList.push(
                 new Goods({
                   goodsId: item.goodsCommonId,
-                  desc: item.body,
-                  imgUrl: item.image,
+                  desc: item.goodsName,
+                  imgUrl: item.fullImage,
                   price: item.sellPrice,
                   oldPrice: item.costPrice,
                   discount: item.discount
@@ -256,7 +268,8 @@ export default {
     Banner,
     GoodsFilter,
     GoodsList,
-    Scroll
+    Scroll,
+    NoResult
   }
 };
 </script>
@@ -298,11 +311,14 @@ export default {
         }
       }
     }
+  }
 
-    .loading-wrapper {
-      text-align: center;
-      margin: auto;
-    }
+  .loading-wrapper {
+    text-align: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 }
 </style>

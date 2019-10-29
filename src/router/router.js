@@ -4,9 +4,14 @@ import store from '../store/store'
 Router.prototype.goBack = function (config) {
   if (!config) {
     this.isBack = true
-    window.history.go(-1)
+    console.log(this.isBack)
+    this.back()
+  } else {
+    this.isBack = true
+    this.push({
+      path: config.path
+    })
   }
-
 }
 Vue.use(Router)
 
@@ -55,7 +60,14 @@ let routes = [
       {
         path: 'confirmOder',
         name: 'shopCartComfirmOder',
-        component: () => import('pages/ConfirmOrder/ConfirmOrder.vue')
+        component: () => import('pages/ConfirmOrder/ConfirmOrder.vue'),
+        children: [
+          {
+            path: 'pay',
+            name: 'shopCartPay',
+            component: () => import('pages/ConfirmOrder/Pay.vue')
+          }
+        ]
       }
     ]
   },
@@ -147,7 +159,14 @@ let routes = [
         children: [
           {
             path: 'confirmOrder/:skuid',
-            component: () => import('pages/ConfirmOrder/ConfirmOrder.vue')
+            component: () => import('pages/ConfirmOrder/ConfirmOrder.vue'),
+            children: [
+              {
+                path: 'pay',
+                name: 'searchPay',
+                component: () => import('pages/ConfirmOrder/Pay.vue')
+              }
+            ]
           }
         ]
       }
@@ -251,6 +270,11 @@ let routes = [
     path: '/toPay',
     name: 'toPay',
     component: () => import('pages/ConfirmOrder/Pay.vue')
+  },
+  {
+    path: '/shopEnter',
+    name: 'shopEnter',
+    component: () => import('pages/ShopEnter/ShopEnter.vue')
   }
 ]
 
@@ -263,6 +287,8 @@ const router = new Router({
 
 
 router.beforeEach((to, from, next) => {
+
+  //console.log(router.isBack)
   if (to.matched.some(r => r.meta.requireAuth)) {
     if (store.state.token) {
       next();
@@ -277,6 +303,10 @@ router.beforeEach((to, from, next) => {
   else {
     next();
   }
+})
+
+router.afterEach((to, from) => {
+  router.isBack = false
 })
 
 export default router

@@ -49,7 +49,7 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
     },
     edit() {
       this.editText = this.editText === "完成" ? "管理" : "完成";
@@ -98,7 +98,7 @@ export default {
                 goodsId: goods.goodsCommonId,
                 favoriteGoodsId:goods.favoriteGoodsId,
                 desc: goods.goodsName,
-                imgUrl: goods.image,
+                imgUrl: goods.fullImage,
                 price: goods.sellPrice,
                 oldPrice: "",
                 discount: goods.discount

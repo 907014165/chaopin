@@ -26,6 +26,7 @@
         </van-radio-group>
       </div>
       <van-button type="danger" size="large" @click="zhifu">支付</van-button>
+      <!-- <van-button type="danger" size="large" @click="test">返回</van-button> -->
     </div>
   </transition>
 </template>
@@ -237,8 +238,12 @@ export default {
   methods: {
     back() {
       this.$router.replace({
-        path: `/user/order/${0}`
+        path: "/user/order/0"
       });
+      this.$router.isBack = true;
+    },
+    test() {
+      this.finishCb();
     },
     zhifu() {
       let params = this.getInPayMent.orderIds;
@@ -260,7 +265,7 @@ export default {
         message: "支付成功",
         beforeClose: (action, done) => {
           this.$router.replace({
-            path: `/user/order/${0}`
+            path: "/user/order/2"
           });
           done();
         }

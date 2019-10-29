@@ -4,6 +4,8 @@ export const getCurrentAddress = state => state.addressList[state.currentAddress
 
 export const searchHistory = state => state.searchHistory
 
+export const token = state => state.token
+
 export const shopCart = state => state.shopCart
 
 export const shopCartList = state => state.shopCartList

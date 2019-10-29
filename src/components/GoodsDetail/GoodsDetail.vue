@@ -3,9 +3,9 @@
     <div class="goods-detail-wrapper">
       <scroll class="goods-detail" :data="goods1.album" ref="scroll" v-if="goods1">
         <div class="content-wrapper">
-          <span class="back" @click="back">
+          <div class="back" @click="back">
             <van-icon name="arrow-left" />
-          </span>
+          </div>
           <van-swipe class="goods-swipe" :autoplay="3000" @change="onChange" v-if="goods1">
             <van-swipe-item v-for="(thumb,index) in goods1.album" :key="index">
               <img :src="thumb" />
@@ -95,7 +95,7 @@
           ref="sku"
           v-model="show"
           :sku="sku"
-          :goods="skuData.goods_info"
+          :goods="goods_info"
           :goods-id="goods1.goodsCommonId"
           :hide-stock="skuData.sku.hide_stock"
           :quota="skuData.quota"
@@ -145,7 +145,7 @@ import Skeleton from "base/Skeleton/Skeleton";
 import RatingSeller from "base/Ratings/RatingSeller";
 import RatingHeader from "base/Ratings/RatingHeader";
 import Banner from "base/Banner/Banner";
-import { mapMutations } from "vuex";
+import { mapMutations, mapGetters } from "vuex";
 import {
   getSkuById,
   getGoodsById,
@@ -163,6 +163,9 @@ export default {
       checkLoad: true,
       isFavorite: false,
       sku: {},
+      goods_info: {
+        
+      },
       goods: {
         goodsId: 946755,
         title: "美国伽力果（约680g/3个）",
@@ -182,7 +185,6 @@ export default {
       showStepper: false,
       showSoldout: false,
       closeOnClickOverlay: true,
-
       customSkuValidator: () => "请选择商品!"
     };
   },
@@ -196,11 +198,15 @@ export default {
   computed: {
     currentSelectSku() {
       if (JSON.stringify(this.sku) !== "{}") {
-        /* let str = '已选  '
-        for(let i=0;i<this.sku.length;i++){
-          str+=this.sku.tree[i].v[this.initialSku.s1 - 1].name
-        } */
-        return `已选  ${this.sku.tree[0].v[this.initialSku.s1 - 1].name},${this.sku.tree[1].v[this.initialSku.s2 - 1].name}`;
+        let str = "已选  ";
+        for (let i = 0; i < this.sku.tree.length; i++) {
+          //console.log(this.initialSku[`s${i + 1}`]);
+          let s = `s${i + 1}`;
+          console.log(s);
+          str += `${this.sku.tree[i].v[this.initialSku[s] - 1].name} `;
+        }
+        //return `已选  ${this.sku.tree[0].v[this.initialSku.s1 - 1].name},${this.sku.tree[1].v[this.initialSku.s2 - 1].name}`;
+        return str;
       } else {
         return "选择规格";
       }
@@ -228,7 +234,10 @@ export default {
         }
       }
       return initSku;
-    }
+    },
+    ...mapGetters({
+      getToken: "token"
+    })
   },
   methods: {
     scrollRefresh() {
@@ -298,7 +307,7 @@ export default {
       this.show = !this.show;
     },
     back() {
-      this.$router.go(-1);
+      this.$router.goBack();
     },
     ImgLoad() {
       if (this.checkLoad) {
@@ -309,26 +318,17 @@ export default {
     onBuyClicked(data) {
       //this.$toast("buy:" + JSON.stringify(data));
       console.log(JSON.stringify(data));
+      if (!this.getToken) {
+        //console.log('没 token')
+        this.$router.replace({
+          path: "/login"
+        });
+        return;
+      }
       this.$router.push({
         path: `/${this.$route.query.ParentPath}/goodsDetail/${data.goodsId}/confirmOrder/${data.selectedSkuComb.id}`,
         query: {
           id: 33,
-          /* sellerId:,
-          sellerName:, */
-          /* seller: {
-            
-            skuList: [
-              {
-                skuId: data.selectedSkuComb.id,
-                goodsId: data.goodsId,
-                title: this.goods1.goodsName,
-                desc: this.currentSelectSku,
-                price: data.selectedSkuComb.price,
-                num: data.selectedNum,
-                thumb: this.currentSelectSkuImg
-              }
-            ]
-          }, */
           skuGoods: {
             skuId: data.selectedSkuComb.id,
             goodsId: data.goodsId,
@@ -345,6 +345,14 @@ export default {
     onAddCartClicked(data) {
       //this.$toast("add cart:" + JSON.stringify(data));
       //console.log(data);
+      //用户没登录 引导登录
+      if (!this.getToken) {
+        //console.log('没 token')
+        this.$router.replace({
+          path: "/login"
+        });
+        return;
+      }
       let params = {
         storeId: this.goods1.storeId, //店铺id
         goodsId: data.selectedSkuComb.id, //规格id
@@ -504,6 +512,12 @@ export default {
         z-index: 20;
         font-size: $font-size-large-xx;
         color: $color-text-ll;
+
+        .van-icon.van-icon::before {
+          padding: 3px;
+          border-radius: 50%;
+          background: rgba(128, 128, 128, 0.5);
+        }
       }
 
       .goods-swipe {

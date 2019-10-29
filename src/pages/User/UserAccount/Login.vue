@@ -125,7 +125,9 @@ export default {
   },
   methods: {
     close() {
-      this.$router.back();
+      this.$router.goBack({
+        path: "/home"
+      });
     },
     //第三方登录
     thirdLogin(type) {

@@ -20,7 +20,7 @@
           <van-card
             :title="refund.goodsName"
             :desc="``"
-            :thumb="refund.goodsImage"
+            :thumb="refund.full"
             :num="refund.goodsNum"
           />
         </refund-item>
@@ -54,8 +54,11 @@ export default {
   },
   methods: {
     back() {
-      this.$router.replace({
+      /* this.$router.replace({
         path: "/user"
+      }); */
+      this.$router.goBack({
+         path: "/user"
       });
     },
     seeDetail(index) {

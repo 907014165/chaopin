@@ -109,7 +109,7 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
     },
     complete() {
       if (!this.rateLogistics) {

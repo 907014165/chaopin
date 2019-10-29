@@ -88,10 +88,12 @@
           </div>
         </Scroll>
       </transition>
+      <no-result v-show="noResult">抱歉，没找到你想要的商品</no-result>
 
       <div class="loading-wrapper" v-show="isSearchIng">
         <van-loading size="24px" vertical>加载中...</van-loading>
       </div>
+
       <transition name="van-slide-right">
         <router-view></router-view>
       </transition>
@@ -102,6 +104,7 @@
 import SearchBox from "base/SearchBox/SearchBox";
 import GoodsFilter from "base/GoodsFilter/GoodsFilter";
 import GoodsList from "components/GoodsList/GoodsList";
+import NoResult from "base/NoResult/NoResult";
 import Scroll from "base/Scroll/Scroll";
 import Goods from "common/js/goods.js";
 import {
@@ -129,12 +132,17 @@ export default {
       currentPage: 1,
       deleteShow: true, //删除图标显示
       isSearchIng: false, //是否正在搜素
-      pullUpText: "上拉加载更多..."
+      pullUpText: "上拉加载更多...",
+      noResult: false
     };
   },
   computed: {
     toggleShow() {
-      if ((this.goodsShow || !this.goodsList.length) && !this.isSearchIng) {
+      if (
+        (this.goodsShow || !this.goodsList.length) &&
+        !this.isSearchIng &&
+        !this.noResult
+      ) {
         return true;
       } else {
         return false;
@@ -149,10 +157,11 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
     },
     setQuery(key) {
       this.value = key;
+      this._getGoodsListByKeyWords();
     },
     //输入框值发生改变的回调
     changeVal(val) {
@@ -184,11 +193,16 @@ export default {
     },
     focus() {
       this.goodsShow = true;
-      console.log(this.goodsShow);
+      this.isSearchIng = false;
+      this.noResult = false;
+      this.goodsList.splice(0);
+      console.log("focus");
     },
     blur() {
       this.goodsShow = false;
-      console.log(this.goodsShow);
+      //this.isSearchIng = true;
+      //this.noResult = true;
+      console.log("blur");
     },
     loadMore(callback) {
       /* this.isPullUpLoad = true; */
@@ -233,13 +247,14 @@ export default {
               new Goods({
                 goodsId: item.goodsCommonId,
                 desc: item.goodsName,
-                imgUrl: item.image,
+                imgUrl: item.fullImage,
                 price: item.sellPrice,
                 oldPrice: item.costPrice,
                 discount: item.discount
               })
             );
           });
+          this.noResult = res.data.list.length ? false : true;
           this.isSearchIng = false;
         }
         this.$nextTick(() => {
@@ -264,7 +279,7 @@ export default {
                 new Goods({
                   goodsId: item.goodsCommonId,
                   desc: item.goodsName,
-                  imgUrl: item.image,
+                  imgUrl: item.fullImage,
                   price: item.sellPrice,
                   oldPrice: item.costPrice,
                   discount: item.discount
@@ -307,6 +322,7 @@ export default {
     GoodsFilter,
     GoodsList,
     Scroll,
+    NoResult,
     [Icon.name]: Icon,
     [Loading.name]: Loading
   }
@@ -402,6 +418,7 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
+    z-index: -1;
     overflow: hidden;
 
     .content-wrapper {

@@ -17,27 +17,27 @@ export function listenBack() {
                 //处理逻辑：1秒内，连续两次按返回键，则退出应用；
                 var first = null;
                 var tmp = 1
-                /*plus.key.addEventListener(
+                plus.key.addEventListener(
                     "backbutton",
-                    function () { */
-                //首次按键，提示‘再按一次退出应用’
-                if (!first && tmp) {
-                    first = new Date().getTime();
+                    function () {
+                        //首次按键，提示‘再按一次退出应用’
+                        if (!first && tmp) {
+                            first = new Date().getTime();
 
-                    plus.nativeUI.toast("再按一次退出应用");
-                    setTimeout(function () {
-                        first = null;
-                    }, 1000);
+                            plus.nativeUI.toast("再按一次退出应用");
+                            setTimeout(function () {
+                                first = null;
+                            }, 1000);
 
-                } else {
-                    if (new Date().getTime() - first < 1500) {
-                        plus.runtime.quit();
-                    }
-                    tmp = 1
-                }
-                /*  },
-                 false
-             ); */
+                        } else {
+                            if (new Date().getTime() - first < 1500) {
+                                plus.runtime.quit();
+                            }
+                            tmp = 1
+                        }
+                    },
+                    false
+                );
             }
         });
     }, false);

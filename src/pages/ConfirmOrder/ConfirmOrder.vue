@@ -58,6 +58,7 @@
         @exchange="onExchange"
       />
     </van-popup>
+    <router-view></router-view>
   </div>
 </template>
 <script>
@@ -91,6 +92,7 @@ export default {
   data() {
     return {
       order: this.$route.query.skuGoods,
+      seller: this.$route.query.seller,
       defaultAddr: null,
       message: "",
       chosenCoupon: -1,
@@ -181,13 +183,13 @@ export default {
         return params;
       }
     },
-    seller() {
+    /* seller() {
       if (this.$route.query.seller) {
         return [...this.$route.query.seller];
       } else {
-        return null;
+        return [];
       }
-    },
+    }, */
     sku() {
       return {
         skuId: this.order.skuId,
@@ -213,11 +215,11 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
     },
     errBack() {
       if (!this.order && !this.seller) {
-        this.$router.back();
+        this.$router.goBack();
       }
     },
     onChange(index) {

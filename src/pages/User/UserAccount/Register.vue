@@ -22,6 +22,18 @@
             type="primary"
             @click="getIdentiCode"
             :disabled="codeDisabled"
+            v-if="!forgetPwd"
+          >
+            <span v-if="!codeDisabled">发送验证码</span>
+            <van-count-down :time="time" format="ss 秒" v-if="codeDisabled" @finish="finish" />
+          </van-button>
+          <van-button
+            slot="button"
+            size="small"
+            type="primary"
+            @click="getUpdatePwdCode"
+            :disabled="codeDisabled"
+            v-if="forgetPwd"
           >
             <span v-if="!codeDisabled">发送验证码</span>
             <van-count-down :time="time" format="ss 秒" v-if="codeDisabled" @finish="finish" />
@@ -49,7 +61,7 @@
 
 <script>
 import { Field, CellGroup, Button, Icon, Toast, CountDown } from "vant";
-import { getCode, register, updatePwd } from "api/login.js";
+import { getCode, getPwdCode, register, updatePwd } from "api/login.js";
 import { mapGetters } from "vuex";
 export default {
   data() {
@@ -154,8 +166,39 @@ export default {
       });
       let params = new FormData();
       params.append("mobile", this.mobileNumber);
-      console.log(params.get("mobile"));
+      //console.log(params.get("mobile"));
       getCode(params).then(res => {
+        if (res.code == 0) {
+          Toast.success("发送成功");
+          this.codeDisabled = true;
+        } else {
+          Toast.success(res.msg);
+        }
+        console.log(res);
+      });
+    },
+    getUpdatePwdCode() {
+      /* let params = {
+        mobile: this.mobileNumber
+      };
+      console.log(params); */
+      if (this.errorMobile) {
+        Toast({
+          message: "请检查手机号码是否填写正确",
+          duration: 800,
+          type: "fail"
+        });
+        return;
+      }
+      Toast({
+        type: "loading",
+        mask: true,
+        message: "发送中"
+      });
+      let params = new FormData();
+      params.append("mobile", this.mobileNumber);
+      //console.log(params.get("mobile"));
+      getPwdCode(params).then(res => {
         if (res.code == 0) {
           Toast.success("发送成功");
           this.codeDisabled = true;

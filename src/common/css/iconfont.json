@@ -20,11 +20,25 @@
       "unicode_decimal": 59002
     },
     {
+      "icon_id": "2188099",
+      "name": "图标-哭泣",
+      "font_class": "lab-kuqi",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
       "icon_id": "7819256",
       "name": "删 除",
       "font_class": "del",
       "unicode": "e9e1",
       "unicode_decimal": 59873
+    },
+    {
+      "icon_id": "8482336",
+      "name": "无结果",
+      "font_class": "wujieguo",
+      "unicode": "e602",
+      "unicode_decimal": 58882
     },
     {
       "icon_id": "8557273",
@@ -39,6 +53,13 @@
       "font_class": "apps",
       "unicode": "e600",
       "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "10200181",
+      "name": "商家入驻",
+      "font_class": "shangjiaruzhu",
+      "unicode": "e601",
+      "unicode_decimal": 58881
     }
   ]
 }

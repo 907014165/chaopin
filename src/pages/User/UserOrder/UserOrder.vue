@@ -36,6 +36,7 @@
               </div>
             </sku-group>
           </scroll>
+          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -71,6 +72,7 @@
               </div>
             </sku-group>
           </scroll>
+          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -106,6 +108,7 @@
               </div>
             </sku-group>
           </scroll>
+          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -141,6 +144,7 @@
               </div>
             </sku-group>
           </scroll>
+          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -176,6 +180,7 @@
               </div>
             </sku-group>
           </scroll>
+          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -210,6 +215,7 @@
               </div>
             </sku-group>
           </scroll>
+          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -245,6 +251,7 @@
               </div>
             </sku-group>
           </scroll>
+          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -326,7 +333,9 @@ export default {
       /*  this.$router.push({
         path: "/user"
       }); */
-      this.$router.goBack();
+      this.$router.goBack({
+        path: "/user"
+      });
     },
     //监听scroll事件
     scroll(pos) {
@@ -696,6 +705,10 @@ export default {
   left: 0;
   z-index: 9999;
   background: $color-background;
+
+  .no-result {
+    padding-top: 40px;
+  }
 
   .van-tabs__content {
     position: fixed;

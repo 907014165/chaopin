@@ -13,6 +13,28 @@ export function getCode(params) {
     })
 }
 
+export function getLoginCode(params) {
+    const url = `${baseUrl}/member-api/member/getLoginCode`
+    return axios({
+        url: url,
+        method: 'post',
+        data: params
+    }).then(res => {
+        return Promise.resolve(res.data)
+    })
+}
+
+export function getPwdCode(params) {
+    const url = `${baseUrl}/member-api/member/getPwdCode`
+    return axios({
+        url: url,
+        method: 'post',
+        data: params
+    }).then(res => {
+        return Promise.resolve(res.data)
+    })
+}
+
 export function register(params) {
     const url = `${baseUrl}/member-api/member/insert`
     return axios({

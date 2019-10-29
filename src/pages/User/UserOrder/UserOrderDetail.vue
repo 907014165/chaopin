@@ -18,11 +18,7 @@
       ></logistics-card>
     </div>
     <div class="tpl-wrapper">
-      <address-card
-        :addressData="getCurrentOrderDetail.addr"
-        :is-link="false"
-        v-if="showLogisticsCard"
-      ></address-card>
+      <address-card :addressData="getCurrentOrderDetail.addr" :is-link="false"></address-card>
     </div>
     <sku-group :is-shop-cart="true" :has-footer="false">
       <div>
@@ -34,7 +30,8 @@
         >
           <van-button
             type="danger"
-            plain hairline
+            plain
+            hairline
             size="small"
             @click.stop="refund(index)"
             v-if="showReFundBtn"
@@ -87,6 +84,7 @@ import { getRefundStatus } from "api/order.js";
 import { mapGetters, mapMutations } from "vuex";
 import { Button } from "vant";
 import moment from "moment";
+import { isAndroid_ios } from "common/js/util.js";
 
 var imgAc = require("./11.png");
 var imgLogistic = require("./12.png");
@@ -179,7 +177,7 @@ export default {
           txt = "已取消";
           break;
         case PendingPay:
-          txt = "代付款";
+          txt = "待付款";
           break;
         case PendingLogistics:
           txt = "等待卖家发货";
@@ -212,7 +210,7 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
     },
     test() {
       console.log(this.getCurrentOrderDetail);
@@ -281,6 +279,9 @@ export default {
   filters: {
     formatDate(time) {
       let date = new Date(time);
+      if (isAndroid_ios()) {
+        date.setHours(date.getHours() - 8);
+      }
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     }
   },

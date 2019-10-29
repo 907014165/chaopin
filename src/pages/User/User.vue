@@ -91,10 +91,16 @@
               <div>我的评价</div>
             </van-col>
           </router-link>
-          <router-link to="/user/favorite">
+          <!-- <router-link to="/user/favorite">
             <van-col span="6">
               <van-icon class-prefix="iconfont" name="icon-kanjia" />
-              <div>我的砍价</div>
+              <div class="info-text">我的砍价</div>
+            </van-col>
+          </router-link> -->
+          <router-link to="/ShopEnter">
+            <van-col span="6">
+              <van-icon class-prefix="iconfont" name="icon-shangjiaruzhu" />
+              <div class="info-text">商家入驻</div>
             </van-col>
           </router-link>
         </van-row>
@@ -296,7 +302,11 @@ export default {
   }
 
   .iconfont-icon-kanjia {
-    font-size: 24px;
+    font-size: 26px;
+  }
+
+  .iconfont-icon-shangjiaruzhu {
+    font-size: 26px;
   }
 
   &-profile {
@@ -346,6 +356,11 @@ export default {
     .van-cell__value {
       color: #999;
       font-size: 12px;
+    }
+
+    .info-text {
+      padding-top: 1px;
+      margin-top: 1px;
     }
   }
 

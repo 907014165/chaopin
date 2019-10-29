@@ -63,7 +63,7 @@ export default {
       return {
         scores: this.rateGoods,
         content: this.message,
-        isAnonymous: this.isAnonymity ? 1 : 0,
+        isAnonymous: this.isAnonymity ? 0 : 1,
         commentImageList: this.imgList,
         goodsId: this.goodsId
       };
@@ -71,7 +71,7 @@ export default {
   },
   methods: {
     change(value) {
-      if (value) {
+      if (!value) {
         this.anonymityText = "你写的评论将以匿名的方式展现";
       } else {
         this.anonymityText = "公开的评价会展示在个人主页哟";

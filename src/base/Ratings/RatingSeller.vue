@@ -1,5 +1,5 @@
 <template>
-  <transition name="van-slide-right">
+  <transition name="van-fade">
     <div class="rating-seller">
       <nav-bar :title="'商品评论'" @back="back()" v-if="isAllRatings"></nav-bar>
       <scroll
@@ -65,6 +65,7 @@ import { Rate, ImagePreview } from "vant";
 import NavBar from "base/NavBar/NavBar";
 import Scroll from "base/Scroll/Scroll";
 import moment from "moment";
+import { isAndroid_ios } from 'common/js/util.js'
 import { getRatings } from "api/goods.js";
 import { getComments } from "api/comment.js";
 import GoodsComment from "common/js/goodsComment.js";
@@ -245,7 +246,10 @@ export default {
   filters: {
     formatDate(time) {
       let date = new Date(time);
-      return moment(date).format("YYYY-MM-DD");
+      if (isAndroid_ios()) {
+        date.setHours(date.getHours() - 8);
+      }
+      return moment(date).format("YYYY-MM-DD HH:mm:ss");
     }
   },
   watch: {

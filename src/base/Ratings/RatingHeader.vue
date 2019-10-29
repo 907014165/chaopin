@@ -34,7 +34,7 @@ export default {
     goodRate() {
       let rate = this.ratingTypeNum[1] / this.ratingTypeNum[0];
       if (rate) {
-        return rate * 100 + "%";
+        return parseInt(rate * 100) + "%";
       } else {
         return "";
       }

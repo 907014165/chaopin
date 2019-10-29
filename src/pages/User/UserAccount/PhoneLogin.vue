@@ -49,7 +49,7 @@ import {
   Toast,
   CountDown
 } from "vant";
-import { getCode, register } from "api/login.js";
+import { getLoginCode, register } from "api/login.js";
 import { smLogin } from "api/login.js";
 import { mapMutations } from "vuex";
 
@@ -102,12 +102,13 @@ export default {
       let params = new FormData();
       params.append("mobile", this.mobile);
       //console.log(params.get("mobile"));
-      getCode(params).then(res => {
+      getLoginCode(params).then(res => {
         if (res.code == 0) {
           Toast.success("发送成功");
           this.codeDisabled = true;
+        } else {
+          Toast.fail(res.message);
         }
-        console.log(res);
       });
     },
     checkMobileNumber() {

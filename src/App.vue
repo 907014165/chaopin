@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <!-- search,chat,searchCategory,refund,pay,login,logisticsDetail,ratings -->
-    <keep-alive include="home,shopcart,category,user">
+    <keep-alive include="home,shopcart,category,chat,search,searchCategory">
       <router-view></router-view>
     </keep-alive>
     <div class="tabbar-wrapper">
@@ -11,7 +11,8 @@
 </template>
 <script>
 import TabBar from "components/Tabbar/Tabbar";
-import { mapGetters, mapActions } from "vuex";
+import { getUserInfo } from "api/user.js";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 import { listenBack } from "common/js/app.js";
 export default {
   data() {
@@ -21,18 +22,31 @@ export default {
   },
   created() {
     listenBack();
+    this.init();
   },
   components: {
     TabBar
   },
   computed: {
     ...mapGetters({
-      getUserInfo: "userInfo"
+      getUserInfo: "userInfo",
+      getToken: "token"
     })
   },
   methods: {
+    //初始化用户信息
+    init() {
+      if (this.getToken) {
+        getUserInfo().then(res => {
+          this.setUserInfo(res.data);
+        });
+      }
+    },
     ...mapActions({
       connectServer: "CONNECT_SERVER"
+    }),
+    ...mapMutations({
+      setUserInfo: "SET_USER_INFO"
     })
   },
   watch: {

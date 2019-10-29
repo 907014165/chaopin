@@ -130,7 +130,7 @@ module.exports = {
                     '^/rongbin': '/'
                 }
             },
-            '/jiahao':{
+            '/jiahao': {
                 target: 'http://192.168.1.101:18052/', //对应佳豪轮播图的接口
                 changeOrigin: true,
                 ws: true,
@@ -138,7 +138,7 @@ module.exports = {
                     '^/jiahao': '/'
                 }
             },
-            '/coupon':{
+            '/coupon': {
                 target: 'http://192.168.1.53:9093/', //对应优惠券接口
                 changeOrigin: true,
                 ws: true,
@@ -146,7 +146,7 @@ module.exports = {
                     '^/coupon': '/'
                 }
             },
-            '/dindang':{
+            '/dindang': {
                 target: 'http://192.168.1.53:9092/', //对应优惠券接口
                 changeOrigin: true,
                 ws: true,
@@ -154,7 +154,7 @@ module.exports = {
                     '^/dindang': '/'
                 }
             },
-            '/order':{
+            '/order': {
                 target: 'http://192.168.1.101:9092/', //对应优订单接口
                 changeOrigin: true,
                 ws: true,
@@ -162,7 +162,7 @@ module.exports = {
                     '^/order': '/'
                 }
             },
-            '/chat':{
+            '/chat': {
                 target: 'http://218.193.110.247:9010/', //对应优订单接口
                 changeOrigin: true,
                 ws: true,

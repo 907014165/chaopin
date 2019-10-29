@@ -2,6 +2,7 @@
   <transition name="van-slide-right">
     <div class="chat">
       <nav-bar title="联系客服" @back="back"></nav-bar>
+
       <scroll
         class="content"
         :data="msgList"
@@ -13,12 +14,17 @@
         @scroll="onScroll"
         @pull-down-handler="loadMoreMsg"
       >
-        <div class="msg-list" ref="msgList" @click="inputBlur">
+        <div class="msg-list" ref="msgList1" @click="inputBlur">
           <div class="row" v-for="(row,index) in msgList" :key="index" :id="'msg'+row.id">
             <div class="my" v-if="row.uid==myuid">
               <div class="left">
                 <div class="bubble" v-if="row.type=='text'">
-                  <div v-html="row.msg.content"></div>
+                  <div
+                    v-html="row.msg.content"
+                    @touchstart="gtouchstart($event)"
+                    @touchmove="gtouchmove"
+                    @touchend="gtouchend"
+                  ></div>
                 </div>
                 <div class="bubble img" v-if="row.type=='img'">
                   <img
@@ -46,7 +52,12 @@
                   <div v-html="row.msg.content"></div>
                 </div>
                 <div class="bubble img" v-if="row.type=='img'">
-                  <img :src="row.msg.url" @click="showPreviewImg(row.msg.url)" @load="imgLoad(row.InSending)" alt />
+                  <img
+                    :src="row.msg.url"
+                    @click="showPreviewImg(row.msg.url)"
+                    @load="imgLoad(row.InSending)"
+                    alt
+                  />
                 </div>
               </div>
             </div>
@@ -105,6 +116,10 @@
         @change="onChange"
         :start-position="startPosition"
       ></van-image-preview>
+
+      <div class="long-press-dom">
+
+      </div>
     </div>
   </transition>
 </template>
@@ -115,6 +130,7 @@ import Scroll from "base/Scroll/Scroll";
 import GoodsItemSingle from "base/GoodsItemSingle/GoodsItemSingle";
 import { fileUpload, getChatMsgList } from "api/chat.js";
 import { mapGetters, mapMutations } from "vuex";
+import { getServeMsg } from "./chat.js";
 import moment from "moment";
 import {
   Swipe,
@@ -152,6 +168,20 @@ class ChatMsgServer {
 }
 export default {
   name: "chat",
+  beforeRouteEnter(to, from, next) {
+    console.log("进入");
+    next(vm => {
+      vm.msgList.splice(0);
+      vm.msgImgList.splice(0);
+      vm.currentPage = 1;
+      vm.pageSize = 15;
+      vm._getChatMsgList(() => {
+        vm.$nextTick(() => {
+          vm.scrollEnd();
+        });
+      });
+    });
+  },
   data() {
     return {
       show: false,
@@ -784,7 +814,8 @@ export default {
       kefuuid: 1,
       currentPage: 1,
       pageSize: 15,
-      avatar: ""
+      avatar: "",
+      longPressDomShow: false
     };
   },
   beforeRouteLeave(to, from, next) {
@@ -793,15 +824,7 @@ export default {
     next();
   },
   created() {
-    //this.getMsgList();
-    setTimeout(() => {
-      this._connect();
-      this._getChatMsgList(() => {
-        this.$nextTick(() => {
-          this.scrollEnd();
-        });
-      });
-    }, 20);
+    this._connect();
   },
   mounted() {},
   computed: {
@@ -812,15 +835,59 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.goBack();
+    },
+    //开始触摸
+    gtouchstart(event) {
+      this.timeOutEvent = setTimeout(() => {
+        this.longPress(event);
+      }, 600);
+    },
+    //手释放，如果在500毫秒内就释放，则取消长按事件，此时可以执行onclick应该执行的事件
+    gtouchend(item) {
+      clearTimeout(this.timeOutEvent); //清除定时器
+      if (this.timeOutEvent != 0) {
+        //这里写要执行的内容（尤如onclick事件）
+      }
+      return false;
+    },
+    //如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
+    gtouchmove() {
+      clearTimeout(this.timeOutEvent); //清除定时器
+      this.timeOutEvent = 0;
+    },
+
+    //真正长按后应该执行的内容
+    longPress(event) {
+      this.timeOutEvent = 0;
+      this.vibrate();
+      console.log(event);
+      let element = event.target;
+      let offsetLeft = element.offsetLeft;
+      let offsetTop = element.offsetTop;
+      //let offTop = element
+      //执行长按要执行的内容，如弹出菜单
+      //$api.css($api.dom(".Popup"), "display:block");
+    },
+    //设备震动
+    vibrate() {
+      window.plus && plus.device.vibrate(500);
+    },
+    //判断 是什么系统
+    isAndroid_ios() {
+      var u = navigator.userAgent,
+        app = navigator.appVersion;
+      var isAndroid = u.indexOf("Android") > -1 || u.indexOf("Linux") > -1; //android终端或者uc浏览器
+      var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+      return isiOS == true ? true : false;
     },
     //图片加载时 重新计算 scroll 组件的高度
     imgLoad(inSending) {
       this.$refs.scroll.refresh();
-      console.log(inSending)
+      //console.log(inSending);
       //insending 是否是正在发送的消息
       if (inSending) {
-        console.log(inSending)
+        //console.log(inSending);
         this.scrollEnd();
       }
     },
@@ -862,112 +929,10 @@ export default {
         })
         .catch(err => {
           console.log("err");
+          let errStr = JSON.stringify(err);
+          console.log(errStr);
           this.sendMsg(msg, "img");
         });
-    },
-    //相机拍照（没用到）
-    captureImage() {
-      let _this = this;
-      var cmr = plus.camera.getCamera();
-      cmr.captureImage(
-        function(p) {
-          plus.zip.compressImage(
-            {
-              src: p,
-              dst: `_doc/${_this.getUuid()}.jpg`,
-              width: "50%",
-              quality: 50,
-              overwrite: true
-            },
-            function(event) {
-              console.log("压缩成功");
-              console.log(event.target);
-              console.log(event.height);
-              console.log(event.width);
-              //此处应该
-              let msg = { url: event.target, w: event.width, h: event.height };
-              _this.sendMsg(msg, "img");
-            },
-            function(error) {
-              console.log("压缩失败");
-            }
-          );
-        },
-        function(err) {}
-      );
-    },
-    //相册中选取（没用到）
-    galleryImg() {
-      let _this = this;
-      plus.gallery.pick(
-        function(p) {
-          plus.zip.compressImage(
-            {
-              src: p,
-              dst: `_doc/${_this.getUuid()}.jpg`,
-              width: "50%",
-              quality: 50,
-              overwrite: true
-            },
-            function(event) {
-              console.log("压缩成功");
-              console.log(event.target);
-              console.log(event.height);
-              console.log(event.width);
-              let msg = { url: event.target, w: event.width, h: event.height };
-
-              var wt = plus.nativeUI.showWaiting("上传中...");
-              var task = plus.uploader.createUpload(
-                "http://192.168.1.52:9010/upload",
-                { method: "POST" },
-                function(t, status) {
-                  //上传完成
-                  console.log(JSON.stringify(t));
-                  console.log(t.responseText);
-                  console.log(t.responseText.path);
-                  let imgStr = `<img src="192.168.1.52:9010/${t.responseText.path}">`;
-                  let msg11 = {
-                    type: "private",
-                    uid: "潮品客服",
-                    content: imgStr,
-                    from_uid: "251525",
-                    chat_type: "text"
-                  };
-                  _this.socket.emit("message", msg11);
-                  if (status == 200) {
-                    wt.close();
-                  } else {
-                    wt.close();
-                  }
-                }
-              );
-              //task.addData('token', ORANGE.UserInfo.token());		//后台接口设定的参数
-              //task.addData('path', opt.path);						//后台接口设定的参数
-              task.addFile(event.target, { key: "file" });
-
-              task.start();
-              _this.sendMsg(msg, "img");
-            },
-            function(error) {
-              console.log("压缩失败");
-            }
-          );
-          let formdata = new FormData();
-          /* formdata.append(
-            "img",
-            this.fileList[0].file,
-            this.fileList[0].file.name
-          );
-          console.log(formdata.get("img")); */
-        },
-        function(err) {},
-        null
-      );
-    },
-    //垃圾UUID
-    getUuid() {
-      let myDate = new Date();
-      return myDate.getTime();
     },
     onSelect(item) {
       console.log(item);
@@ -993,22 +958,29 @@ export default {
     inputFoucs() {
       //console.log('test')
       let tmp = this.$refs.inputBox.focus();
+      if (this.isAndroid_ios()) {
+        console.log("ios");
+        let _this = this;
+      } else {
+        console.log("android");
+      }
       this.isFocus = true;
-      //console.log(tmp)
+      console.log("focus");
     },
     //让消息输入框失去焦点
     inputBlur() {
+      window.scroll(0, 0);
       if (this.textMsg) {
         return;
       }
       this.isFocus = false;
       this.showEmji = "";
+      console.log("bulr");
     },
     //滚动到底部
     scrollEnd() {
       console.log("滚动到底部");
-      let clientHeight = this.$refs.msgList.clientHeight;
-      this.$refs.scroll.scrollTo(0, -clientHeight, 1);
+      this.$refs.scroll.scrollEnd();
     },
     //点击输入框的表情触发回调函数
     chooseEmoji() {
@@ -1037,7 +1009,7 @@ export default {
     },
     //接受消息(筛选处理)
     screenMsg(msg) {
-      console.log(msg);
+      //console.log(msg);
       //处理 客户端
       switch (msg.type) {
         case "text":
@@ -1051,7 +1023,7 @@ export default {
           break;
       }
       //滚动到底部
-      this.$nextTick(function() {
+      this.$nextTick(() => {
         this.scrollEnd();
       });
     },
@@ -1067,7 +1039,7 @@ export default {
       let msg = { content: content };
       this.sendMsg(msg, "text");
       this.textMsg = "";
-      if (this.isFocus) {
+      if (this.isFocus && this.isAndroid_ios()) {
         this.inputFoucs();
       }
     },
@@ -1124,10 +1096,10 @@ export default {
           break;
       }
       var nowDate = new Date();
-      let lastid = this.msgList[this.msgList.length - 1].id;
-      lastid++;
+      /* let lastid = this.msgList[this.msgList.length - 1].id;
+      lastid++; */
       let msg = new ChatMsg({
-        id: lastid,
+        id: 1,
         uid: 0,
         username: "大黑哥",
         face: this.getUserInfo.avatar,
@@ -1154,154 +1126,6 @@ export default {
       this.msgImgList.push(msg.msg.url);
       this.msgList.push(msg);
     },
-    //获取聊天记录
-    getMsgList() {
-      let list = [
-        {
-          id: 0,
-          uid: 0,
-          username: "大黑哥",
-          face: "./logo.png",
-          time: "12:56",
-          type: "text",
-          msg: { content: "为什么bug这么多？" }
-        },
-        {
-          id: 4,
-          uid: 0,
-          username: "大黑哥",
-          face: "/static/img/face.jpg",
-          time: "13:05",
-          type: "img",
-          msg: { url: require("../../common/image/test1.png"), w: 200, h: 200 }
-        },
-        {
-          id: 4,
-          uid: 1,
-          username: "大黑哥",
-          face: "/static/img/face.jpg",
-          time: "13:05",
-          type: "img",
-          msg: { url: require("../../common/image/test1.png"), w: 200, h: 200 }
-        },
-        {
-          id: 1,
-          uid: 1,
-          username: "售后客服008",
-          face: "./logo.png",
-          time: "12:57",
-          type: "text",
-          msg: {
-            content: "这个bug呢，程序员写几个bug那是正常的"
-          }
-        },
-        {
-          id: 0,
-          uid: 0,
-          username: "大黑哥",
-          face: "./logo.png",
-          time: "12:56",
-          type: "text",
-          msg: { content: "影响我正常使用啊" }
-        },
-        {
-          id: 1,
-          uid: 1,
-          username: "售后客服008",
-          face: "./logo.png",
-          time: "12:57",
-          type: "text",
-          msg: {
-            content: "亲这个呢，你先别急，我杀个程序员祭天就好了"
-          }
-        },
-        {
-          id: 0,
-          uid: 0,
-          username: "大黑哥",
-          face: "./logo.png",
-          time: "12:56",
-          type: "text",
-          msg: { content: "要不要多杀两个？" }
-        },
-        {
-          id: 1,
-          uid: 1,
-          username: "售后客服008",
-          face: "./logo.png",
-          time: "12:57",
-          type: "text",
-          msg: {
-            content: "不可以前端就只有两个。。。"
-          }
-        },
-        {
-          id: 0,
-          uid: 0,
-          username: "大黑哥",
-          face: "./logo.png",
-          time: "12:56",
-          type: "text",
-          msg: { content: "这样" }
-        },
-        {
-          id: 1,
-          uid: 1,
-          username: "售后客服008",
-          face: "./logo.png",
-          time: "12:57",
-          type: "text",
-          msg: {
-            content: "好吧！我编不下去了"
-          }
-        },
-        {
-          id: 0,
-          uid: 0,
-          username: "大黑哥",
-          face: "./logo.png",
-          time: "12:56",
-          type: "text",
-          msg: { content: "占位！！！" }
-        },
-        {
-          id: 1,
-          uid: 1,
-          username: "售后客服008",
-          face: "./logo.png",
-          time: "12:57",
-          type: "text",
-          msg: {
-            content: "占位！！！"
-          }
-        }
-      ];
-      this.msgList = list;
-      //如果消息是图片消息 特别处理
-      for (let i = 0; i < list.length; i++) {
-        if (list[i].type == "img") {
-          list[i] = this.setPicSize(list[i]);
-          //console.log("list[i]: " + JSON.stringify(list[i]));
-          this.msgImgList.push(list[i].msg.url);
-        }
-      }
-      //如果 有来自商品详情的 客户 需要带上 他当前浏览的商品信息
-      if (this.goodsInfo) {
-        let goods = {
-          desc: this.goodsInfo.goodsName,
-          img: this.goodsInfo.sellPrice,
-          price: this.goodsInfo.sellPrice
-        };
-        let msg = {
-          id: 0,
-          uid: 3,
-          time: "12:56",
-          type: "goods",
-          msg: goods
-        };
-        this.msgList.push(msg);
-      }
-    },
     //获取更多的聊天记录
     loadMoreMsg(finishPullDown) {
       this.currentPage++;
@@ -1327,9 +1151,15 @@ export default {
     formatDate(time) {
       if (!time) {
         let date = new Date();
+        if (this.isAndroid_ios()) {
+          date.setHours(date.getHours() - 8);
+        }
         return moment(date).format("YYYY-MM-DD HH:mm:ss");
       }
       let date = new Date(time);
+      if (this.isAndroid_ios()) {
+        date.setHours(date.getHours() - 8);
+      }
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
     //根据服务器的消息类型判断是服务端数据还是自己的数据（恶心的代码都是我写 我很不服）
@@ -1342,7 +1172,7 @@ export default {
       return img[0].attributes.src.value;
     },
     //将服务器来的消息转化为我所需要的消息结构
-    formatMsg(msg) {
+    formatMsg(msg, inSending) {
       let chatmsg = null;
       if (msg.chat_type === "image") {
         chatmsg = new ChatMsg({
@@ -1356,7 +1186,8 @@ export default {
             url: msg.content,
             w: 175,
             h: 175
-          }
+          },
+          InSending: inSending
         });
         this.msgImgList.unshift(msg.content);
       } else {
@@ -1410,12 +1241,13 @@ export default {
       */
       //服务端连接 处理服务端过来的数据
       this.getSocket.on("message", msg => {
-        console.log(msg);
+        //console.log(msg);
         //msg 是老师传递过来的消息数据
         let msgServer = this.formatMsg(msg);
         console.log(msgServer);
         this.screenMsg(msgServer);
       });
+      /*  this.getSocket.on("message", getServeMsg(this)); */
     },
     _getChatMsgList(successCallBack) {
       let params = {
@@ -1423,16 +1255,24 @@ export default {
         page: this.currentPage,
         size: this.pageSize
       };
-      getChatMsgList(params).then(res => {
-        console.log(res);
-        let msglist = this.initMsg(res.data);
-        msglist.forEach(msg => {
-          this.msgList.unshift(msg);
+      let paramsStr = JSON.stringify(params);
+      console.log(paramsStr);
+      getChatMsgList(params)
+        .then(res => {
+          //console.log(res);
+          console.log("获取聊天记录结点");
+          let str = JSON.stringify(res);
+          let msglist = this.initMsg(res.data);
+          msglist.forEach(msg => {
+            this.msgList.unshift(msg);
+          });
+          this.$nextTick(() => {
+            successCallBack && successCallBack();
+          });
+        })
+        .catch(err => {
+          console.log("出错啦");
         });
-        this.$nextTick(() => {
-          successCallBack && successCallBack();
-        });
-      });
     },
     ...mapMutations({
       removeUnreadMessage: "REMOVE_UNREAD_MESSAGE"
@@ -1484,13 +1324,13 @@ export default {
   background: $color-background;
 
   .content {
-    position: absolute;
+    position: fixed;
     top: 46px;
     left: 0;
     right: 0;
     bottom: 50px;
     background: $color-background-w;
-    overflow: hidden;
+    overflow-y: scroll;
     padding: 0 8px;
 
     .msg-list {

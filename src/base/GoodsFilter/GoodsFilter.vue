@@ -61,7 +61,7 @@ export default {
       // 点击索引等于自身
       if (this.activeIndex == index) {
         //禁用升降序，则直接返回无需处理
-        if (filterType == 0) return;
+        
       }
 
       // 升降序

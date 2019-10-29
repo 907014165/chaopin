@@ -59,7 +59,7 @@
           <van-card
             :title="refundInfo.goodsName"
             :desc="``"
-            :thumb="refundInfo.goodsImage"
+            :thumb="refundInfo.full"
             :num="refundInfo.goodsNum"
           />
         </div>
@@ -96,6 +96,7 @@ import {
 } from "api/refund.js";
 import SkuGoods from "common/js/skuGoods.js";
 import moment from "moment";
+import { isAndroid_ios } from "common/js/util.js";
 import {
   Card,
   Button,
@@ -181,8 +182,9 @@ export default {
   methods: {
     back() {
       this.$router.replace({
-        path:'/user/aftersale'
+        path: "/user/aftersale"
       });
+      this.$router.isBack = true;
     },
     toggleShow() {
       this.show = !this.show;
@@ -219,7 +221,7 @@ export default {
           title: this.refundInfo.goodsName,
           desc: spec(this.refundInfo.spec),
           num: this.refundInfo.goodsNum,
-          thumb: this.refundInfo.goodsImage
+          thumb: this.refundInfo.full
         })
       });
       this.$router.push({
@@ -235,7 +237,11 @@ export default {
             refundId: this.refundInfo.refundId
           };
           console.log(params);
-          this._delRefund(params);
+          this._delRefund(params, () => {
+            this.$router.replace({
+              path: "/user/aftersale"
+            });
+          });
         })
         .catch(() => {
           // on cancel
@@ -274,10 +280,13 @@ export default {
         }
       });
     },
-    _delRefund(params) {
+    _delRefund(params, successCb) {
       delRefund(params).then(res => {
         if (res.data) {
           Toast.success("撤销成功");
+          successCb && successCb();
+        } else {
+          Toast.fail(res.message);
         }
       });
     },
@@ -303,8 +312,6 @@ export default {
               message: express.showapi_res_body.msg
             });
           }
-
-          
         } else {
           Toast.fail({
             message: express.showapi_res_body.msg
@@ -319,6 +326,9 @@ export default {
   filters: {
     formatDate(time) {
       let date = new Date(time);
+      if (isAndroid_ios()) {
+        date.setHours(date.getHours() - 8);
+      }
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     }
   },

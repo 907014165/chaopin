@@ -296,7 +296,10 @@ export default {
         });
       } else {
         console.log("取消全选");
-        this.result.splice(0);
+        //如果全选了 就全部清空
+        if(this.result.length === this.skuList.length){
+          this.result.splice(0);
+        }
         this.selectAllShow = false;
       }
     },

@@ -6,7 +6,10 @@ import store from './store/store'
 import 'amfe-flexible';
 import VueLazyload from 'vue-lazyload'
 import './common/css/iconfont.css'
+import VurResource from 'vue-resource'
 import moment from 'moment'
+
+Vue.use(VurResource)
 
 
 //定义全局 时间格式过滤器
