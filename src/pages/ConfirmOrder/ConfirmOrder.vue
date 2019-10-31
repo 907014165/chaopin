@@ -339,7 +339,7 @@ export default {
       }; */
       getDefaultAddr().then(res => {
         console.log(res);
-        if (res.code === 0) {
+        if (res.code === 0 && res.data) {
           this.defaultAddr = new AddressInfo({
             id: res.data.memberAddressId,
             name: res.data.consignee,

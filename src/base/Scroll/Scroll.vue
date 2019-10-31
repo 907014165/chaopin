@@ -118,6 +118,7 @@ export default {
       //初始化betterScroll
       this.scroll = new BScroll(this.$refs.wrapper, {
         probeType: this.probeType,
+        disableTouch: false,
         click: this.click,
         scrollY: true,
         observeDom: true,

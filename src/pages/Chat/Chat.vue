@@ -18,13 +18,14 @@
           <div class="row" v-for="(row,index) in msgList" :key="index" :id="'msg'+row.id">
             <div class="my" v-if="row.uid==myuid">
               <div class="left">
-                <div class="bubble" v-if="row.type=='text'">
-                  <div
-                    v-html="row.msg.content"
-                    @touchstart="gtouchstart($event)"
-                    @touchmove="gtouchmove"
-                    @touchend="gtouchend"
-                  ></div>
+                <div
+                  class="bubble"
+                  v-if="row.type=='text'"
+                  @touchstart="gtouchstart($event,index)"
+                  @touchmove="gtouchmove"
+                  @touchend="gtouchend"
+                >
+                  <div v-html="row.msg.content"></div>
                 </div>
                 <div class="bubble img" v-if="row.type=='img'">
                   <img
@@ -63,6 +64,9 @@
             </div>
             <div class="goods" v-if="row.uid===goodsuid">
               <goods-item-single :goods="row.msg"></goods-item-single>
+            </div>
+            <div class="recall" v-if="row.uid === recalluid">
+              <div v-html="row.msg"></div>
             </div>
           </div>
         </div>
@@ -103,13 +107,6 @@
           </van-swipe-item>
         </van-swipe>
       </div>
-      <!-- <van-action-sheet
-        v-model="show"
-        :actions="actions"
-        cancel-text="取消"
-        @select="onSelect"
-        @cancel="onCancel"
-      />-->
       <van-image-preview
         v-model="showPreview"
         :images="msgImgList"
@@ -117,9 +114,7 @@
         :start-position="startPosition"
       ></van-image-preview>
 
-      <div class="long-press-dom">
-
-      </div>
+      <div class="long-press-dom" ref="cehui" v-show="longPressDomShow" @click="recall">撤回消息</div>
     </div>
   </transition>
 </template>
@@ -173,6 +168,7 @@ export default {
     next(vm => {
       vm.msgList.splice(0);
       vm.msgImgList.splice(0);
+      vm.goodsInfo = vm.$route.query.goodsInfo;
       vm.currentPage = 1;
       vm.pageSize = 15;
       vm._getChatMsgList(() => {
@@ -812,10 +808,14 @@ export default {
       goodsInfo: this.$route.query.goodsInfo,
       goodsuid: 3,
       kefuuid: 1,
+      recalluid: 4,
       currentPage: 1,
       pageSize: 15,
       avatar: "",
-      longPressDomShow: false
+      longPressDomShow: false,
+      cehuiDomLeft: 0,
+      cehuiDomTop: 0,
+      recallIndex: 0
     };
   },
   beforeRouteLeave(to, from, next) {
@@ -837,11 +837,34 @@ export default {
     back() {
       this.$router.goBack();
     },
+    //消息撤回
+    recall() {
+      console.log("消息撤回");
+      console.log(this.msgList[this.recallIndex]);
+      this.longPressDomShow = false;
+      this.$refs.scroll.refresh();
+      let clientMsg = new ChatMsg({
+        id: this.msgList[this.recallIndex].id,
+        uid: this.recalluid,
+        msg: "你撤回了一条消息"
+      });
+      console.log(clientMsg);
+      let serverMsg = new ChatMsgServer({
+        id: this.msgList[this.recallIndex].id,
+        type: "private",
+        avatar: "",
+        uid: "潮品客服",
+        content: "",
+        from_uid: this.getUserInfo.mobile,
+        chat_type: "recall"
+      });
+      this.msgList.splice(this.recallIndex, 1, clientMsg);
+    },
     //开始触摸
-    gtouchstart(event) {
+    gtouchstart(event, index) {
       this.timeOutEvent = setTimeout(() => {
-        this.longPress(event);
-      }, 600);
+        this.longPress(event, index);
+      }, 500);
     },
     //手释放，如果在500毫秒内就释放，则取消长按事件，此时可以执行onclick应该执行的事件
     gtouchend(item) {
@@ -858,20 +881,49 @@ export default {
     },
 
     //真正长按后应该执行的内容
-    longPress(event) {
-      this.timeOutEvent = 0;
-      this.vibrate();
+    longPress(event, index) {
+      console.log("消息撤回的下标", index);
+      this.longPressDomShow = true;
+      this.$nextTick(() => {
+        this.recallIndex = index;
+        this.timeOutEvent = 0;
+        this.vibrate();
+        let offsetLeft = event.changedTouches[0].pageX;
+        let offsetTop = event.changedTouches[0].pageY;
+        let cehui = this.$refs.cehui;
+        let cehuiClientHeight = cehui.clientHeight;
+        let cehuiClientWidth = cehui.clientWidth;
+        console.log(cehuiClientHeight);
+        cehui.style.left = `${offsetLeft}px`;
+        cehui.style.top = `${offsetTop - cehuiClientHeight - 10}px`;
+      });
+
       console.log(event);
-      let element = event.target;
-      let offsetLeft = element.offsetLeft;
-      let offsetTop = element.offsetTop;
-      //let offTop = element
-      //执行长按要执行的内容，如弹出菜单
-      //$api.css($api.dom(".Popup"), "display:block");
+
+      /* let element = event.path.find(item => {
+        //if()
+        return item.className == "bubble";
+      }); */
+      //console.log(element);
+
+      //console.log(offsetLeft, "left");
+      //console.log(offsetTop, "top");
+
+      //let clientWidth = element.clientWidth;
+
+      //console.log(clientWidth);
+      //获取content dom 元素 取它Y轴的偏移量
+      /* let contentDom = this.$refs.scroll.$el.querySelector(".scroll-content-s");
+      let transformArr = contentDom.style.transform.split(" ");
+      let dirY = parseInt(transformArr[1].replace(/[^0-9]/gi, "")); */
+
+      //console.log(cehui);
+      /* cehui.style.left = `${offsetLeft}px`;
+      cehui.style.top = `${offsetTop - (dirY - 20)}px`; */
     },
     //设备震动
     vibrate() {
-      window.plus && plus.device.vibrate(500);
+      window.plus && plus.device.vibrate(100);
     },
     //判断 是什么系统
     isAndroid_ios() {
@@ -907,6 +959,8 @@ export default {
     //当屏幕滚动时的回调函数
     onScroll(pos) {
       this.showEmji = "";
+      //滚动时 消息撤回提示关闭
+      this.longPressDomShow = false;
       //console.log(pos)
       /* if (this.isFocus) {
         this.inputFoucs();
@@ -1032,14 +1086,20 @@ export default {
       if (!this.textMsg) {
         return;
       }
-
       //构造消息
-
       let content = this.replaceEmoji(this.textMsg);
       let msg = { content: content };
       this.sendMsg(msg, "text");
       this.textMsg = "";
-      if (this.isFocus && this.isAndroid_ios()) {
+      console.log("fds");
+      if (!this.isFocus && this.isAndroid_ios()) {
+        console.log("IOS");
+        this.inputFoucs();
+        return;
+      }
+      console.log(this.isAndroid_ios());
+      if (this.isFocus) {
+        console.log("Android");
         this.inputFoucs();
       }
     },
@@ -1074,7 +1134,7 @@ export default {
           console.log(content);
           let msgTxt = new ChatMsgServer({
             type: "private",
-            avatar: this.getUserInfo.avatar,
+            avatar: this.getUserInfo.fullAvatar,
             uid: "潮品客服",
             content: content.content,
             from_uid: this.getUserInfo.mobile,
@@ -1085,7 +1145,7 @@ export default {
         case "img":
           let msgImg = new ChatMsgServer({
             type: "private",
-            avatar: this.getUserInfo.avatar,
+            avatar: this.getUserInfo.fullAvatar,
             uid: "潮品客服",
             content: content.url,
             from_uid: this.getUserInfo.mobile,
@@ -1099,10 +1159,10 @@ export default {
       /* let lastid = this.msgList[this.msgList.length - 1].id;
       lastid++; */
       let msg = new ChatMsg({
-        id: 1,
+        id: new Date().getTime(),
         uid: 0,
         username: "大黑哥",
-        face: this.getUserInfo.avatar,
+        face: this.getUserInfo.fullAvatar,
         time:
           nowDate.getHours() + ":" + nowDate.getMinutes() + "".padStart(2, "0"),
         type: type,
@@ -1174,7 +1234,66 @@ export default {
     //将服务器来的消息转化为我所需要的消息结构
     formatMsg(msg, inSending) {
       let chatmsg = null;
-      if (msg.chat_type === "image") {
+      switch (msg.chat_type) {
+        case "image":
+          chatmsg = new ChatMsg({
+            id: msg.id,
+            uid: this.fromUid(msg.from_uid ? msg.from_uid : msg.uid),
+            username: msg.from_uid ? msg.from_uid : msg.uid,
+            face: msg.avatar,
+            time: this.formatDate(msg.time),
+            type: "img",
+            msg: {
+              url: msg.content,
+              w: 175,
+              h: 175
+            },
+            InSending: inSending
+          });
+          this.msgImgList.unshift(msg.content);
+          break;
+        case "text":
+          chatmsg = new ChatMsg({
+            id: msg.id,
+            uid: this.fromUid(msg.from_uid ? msg.from_uid : msg.uid),
+            username: msg.from_uid ? msg.from_uid : msg.uid,
+            face: msg.avatar,
+            time: this.formatDate(msg.time),
+            type: msg.chat_type,
+            msg: {
+              content: msg.content
+            }
+          });
+          break;
+        case "goods":
+          chatmsg = new ChatMsg({
+            id: msg.id,
+            uid: this.fromUid(msg.from_uid ? msg.from_uid : msg.uid),
+            username: msg.from_uid ? msg.from_uid : msg.uid,
+            face: msg.avatar,
+            time: this.formatDate(msg.time),
+            type: msg.chat_type,
+            msg: {
+              content: msg.content
+            }
+          });
+          break;
+        case "recall":
+          chatmsg = new ChatMsg({
+            id: msg.id,
+            uid: this.fromUid(msg.from_uid ? msg.from_uid : msg.uid),
+            username: msg.from_uid ? msg.from_uid : msg.uid,
+            face: msg.avatar,
+            time: this.formatDate(msg.time),
+            type: msg.chat_type,
+            msg:
+              this.fromUid(msg.from_uid ? msg.from_uid : msg.uid) === 1
+                ? "对方撤回了一条消息"
+                : "你撤回了一条消息"
+          });
+          break;
+      }
+      /* if (msg.chat_type === "image") {
         chatmsg = new ChatMsg({
           id: msg.id,
           uid: this.fromUid(msg.from_uid ? msg.from_uid : msg.uid),
@@ -1202,7 +1321,7 @@ export default {
             content: msg.content
           }
         });
-      }
+      } */
       return chatmsg;
     },
     //将dom字符串转dom结点
@@ -1266,6 +1385,20 @@ export default {
           msglist.forEach(msg => {
             this.msgList.unshift(msg);
           });
+          if (this.goodsInfo) {
+            this.msgList.push(
+              new ChatMsg({
+                id: new Date().getTime(),
+                uid: 3,
+                type: "goods",
+                msg: {
+                  desc: this.goodsInfo.goodsName,
+                  price: this.goodsInfo.sellPrice,
+                  img: this.goodsInfo.fullImage
+                }
+              })
+            );
+          }
           this.$nextTick(() => {
             successCallBack && successCallBack();
           });
@@ -1368,7 +1501,7 @@ export default {
 
             &.img {
               background-color: transparent;
-              padding: 0;
+              padding: 0px;
               overflow: hidden;
               object-fit: cover;
               max-width: 175px;
@@ -1406,11 +1539,25 @@ export default {
             .bubble {
               background-color: #12B7F5;
               color: #fff;
+              position: relative;
+
+              &:after {
+                content: '';
+                position: absolute;
+                left: 100%;
+                top: 10px;
+                width: 0;
+                height: 0;
+                border-style: solid dashed dashed;
+                border-color: transparent transparent transparent #12b7f5;
+                overflow: hidden;
+                border-width: 8px;
+              }
             }
           }
 
           .right {
-            margin-left: 8px;
+            margin-left: 12px;
           }
         }
 
@@ -1419,7 +1566,7 @@ export default {
           display: flex;
 
           .left {
-            margin-right: 8px;
+            margin-right: 12px;
           }
 
           .right {
@@ -1439,8 +1586,33 @@ export default {
             .bubble {
               background-color: #E5E5E5;
               color: #333;
+              position: relative;
+
+              &.img:after {
+                display: none;
+              }
+
+              &:after {
+                content: '';
+                position: absolute;
+                left: -19px;
+                top: 8px;
+                width: 0;
+                height: 0;
+                border-style: solid dashed dashed;
+                border-color: transparent #e5e5e5 transparent transparent;
+                overflow: hidden;
+                border-width: 10px;
+              }
             }
           }
+        }
+
+        .recall {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 12px;
         }
       }
     }
@@ -1565,6 +1737,32 @@ export default {
         border-radius: 3px;
         font-size: 12px;
       }
+    }
+  }
+
+  .long-press-dom {
+    position: absolute;
+    left: 0;
+    top: 46px;
+    padding: 5px;
+    font-size: 16px;
+    color: #fff;
+    border-radius: 3px;
+    transform: translate(-50%, 0);
+    background: black;
+
+    &:after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 0;
+      height: 0;
+      transform: translate(-50%, 0);
+      border-style: solid dashed dashed;
+      border-color: black transparent transparent;
+      overflow: hidden;
+      border-width: 10px;
     }
   }
 }

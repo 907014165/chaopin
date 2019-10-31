@@ -21,8 +21,10 @@ export default {
     };
   },
   created() {
-    listenBack();
     this.init();
+  },
+  mounted() {
+    //listenBack();
   },
   components: {
     TabBar
@@ -61,5 +63,10 @@ export default {
   }
 };
 </script>
-<style>
+<style lang="stylus">
+#app {
+  .van-checkbox__icon {
+    padding: 10px;
+  }
+}
 </style>

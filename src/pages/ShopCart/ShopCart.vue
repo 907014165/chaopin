@@ -21,6 +21,9 @@
       <!-- <no-result desc="暂无商品" size="middle">
           <img src="./cart-no-result.png" alt="">
       </no-result>-->
+      <div class="no-result-wrapper">
+        <no-result v-show="!shopCartList.length" :type="1">购物车是空的</no-result>
+      </div>
       <transition name="van-fade">
         <template v-show="shopCartList.length">
           <sku-group
@@ -236,7 +239,7 @@ export default {
   created() {
     console.log("111");
     this._getShopCartList();
-    listenBack();
+    //listenBack();
   },
   mounted() {
     /* this.$nextTick(() => {
@@ -562,6 +565,13 @@ export default {
 
     .van-pull-refresh__track {
       height: 100%;
+
+      .no-result-wrapper {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
     }
   }
 

@@ -136,7 +136,7 @@ export default {
       }; */
       getUserInfo().then(res => {
         this.userInfo = res.data;
-        this.msgImgList[0] = res.data.avatar;
+        this.msgImgList[0] = res.data.fullAvatar;
       });
     },
     //更改用户头像

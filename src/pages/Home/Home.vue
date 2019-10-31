@@ -18,9 +18,7 @@
         :data="goodsList"
         ref="scroll"
         @pull-down-handler="reFresh"
-        @load="loadMore"
         :has-more="hasMore"
-        :pull-up="true"
         :listen-scroll="true"
         @scroll="scroll"
       >
@@ -28,7 +26,7 @@
           <div class="slide-wrapper" v-if="slideImages.length">
             <slider ref="slide">
               <div v-for="(item,index) in slideImages" :key="index" @click="goToDetail(item)">
-                <img :src="item.full" @click="test" alt />
+                <img :src="item.full" alt />
               </div>
             </slider>
           </div>
@@ -41,7 +39,10 @@
               :to="{path:'/searchCategory',query:{goodsClassId:item.goodsClassId,title:item.className}}"
             />
           </van-grid>
-          <goods-list :goods-list="goodsList" @selected="selectGoods"></goods-list>
+          <banner v-for="(ad,index) in advertList" :key="index" @click="goToDetail(ad)">
+            <img v-lazy="ad.full" alt @load="refreshScroll" />
+          </banner>
+          <!-- <goods-list :goods-list="goodsList" @selected="selectGoods"></goods-list> -->
           <!-- <goods-list :goods-list="recommendList" @selected="selectGoods"></goods-list> -->
           <!-- <div class="pullup-wrapper">
           <div v-if="!isPullUpLoad" class="before-trigger">
@@ -62,6 +63,7 @@
 <script>
 import { ERR_OK } from "api/config";
 import Goods from "common/js/goods";
+import Banner from "base/Banner/Banner";
 import {
   getSlideImages,
   getRecommendList,
@@ -86,6 +88,7 @@ export default {
       recommendList: [],
       goodsList: [], //商品列表
       classList: [], //分类列表
+      advertList: [],
       value: "", //
       currentPage: 1, //查询的当前页数
       loading: false, //
@@ -143,6 +146,9 @@ export default {
         this.disabled = true;
       }
     },
+    refreshScroll() {
+      this.$refs.scroll.refresh();
+    },
     onRefresh() {
       this.currentPage = 1;
       this.hasMore = true;
@@ -158,22 +164,32 @@ export default {
     },
     //点击轮播图 去商品详情
     goToDetail(item) {
-      console.log(item);
-      if (item.type !== "goods") {
-        return;
+      console.log(item.type);
+      if (item.type == "goods") {
+        this.$router.push({
+          path: `/home/goodsDetail/${item.value}`,
+          query: {
+            ParentPath: "home"
+          }
+        });
       }
-      this.$router.push({
-        path: `/home/goodsDetail/${item.value}`,
-        query: {
-          ParentPath: "home"
-        }
-      });
+
+      if (item.type == "brand") {
+        this.$router.push({
+          path: "/searchCategory",
+          query: {
+            title: "品牌分类",
+            brandId: item.value
+          }
+        });
+      }
     },
     _getSlideImages() {
       getSlideImages().then(res => {
         //console.log(res);
         if (res.code === ERR_OK) {
           this.slideImages = res.data.carousel;
+          this.advertList = res.data.head;
           //console.log(res);
         }
       });
@@ -317,23 +333,6 @@ export default {
       });
     }
   },
-  watch: {
-    /* $route(to, from) {
-      console.log("1111");
-      console.log(from);
-      if (from.path.indexOf("login") != -1) {
-        console.log("来自 登录");
-        this.currentPage = 1;
-        this.goodsList = [];
-        let params = {
-          byDefault: 1,
-          current: this.currentPage
-        };
-        this._getGoodsList();
-        this._getClassList();
-      }
-    } */
-  },
   components: {
     [Search.name]: Search,
     [Grid.name]: Grid,
@@ -343,7 +342,8 @@ export default {
     [PullRefresh.name]: PullRefresh,
     Slider,
     GoodsList,
-    Scroll
+    Scroll,
+    Banner
   }
 };
 </script>

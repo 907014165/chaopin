@@ -30,7 +30,7 @@
               @selected="selectGoods"
               v-show="this.goodsList.length"
             ></goods-list>
-            <no-result v-show="!this.goodsList.length">抱歉,该品牌暂无商品</no-result>
+            <no-result v-show="!this.goodsList.length&&!showLoading">抱歉,该品牌暂无商品</no-result>
             <!-- <div class="pullup-wrapper">
             <div v-if="!isPullUpLoad" class="before-trigger">
               <span class="pullup-txt">{{ pullUpText }}</span>
@@ -72,6 +72,7 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(vm => {
       vm.title = vm.$route.query.title;
+      vm.goodsList = [];
       vm._getSearchGoodsList();
     });
   },

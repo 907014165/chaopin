@@ -14,7 +14,6 @@ export function getCategoryList(params) {
 
 export function getBrands(params) {
     const url = `${baseUrl}/member/brand/listByIds`
-
     let paramsStr = params.brands.join(',')
     
     console.log(paramsStr)

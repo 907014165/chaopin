@@ -25,7 +25,14 @@
           </van-cell-group>
         </van-radio-group>
       </div>
-      <van-button type="danger" size="large" @click="zhifu">支付</van-button>
+      <van-button
+        type="danger"
+        :loading="loading"
+        :disabled="disabled"
+        size="large"
+        :loading-text="payText"
+        @click="zhifu"
+      >{{ payText }}</van-button>
       <!-- <van-button type="danger" size="large" @click="test">返回</van-button> -->
     </div>
   </transition>
@@ -208,7 +215,10 @@ export default {
   data() {
     return {
       time: 30 * 60 * 1000,
-      payType: "1"
+      payType: "1",
+      payText: "支付",
+      disabled: false,
+      loading: false
     };
   },
   created() {
@@ -247,23 +257,37 @@ export default {
     },
     zhifu() {
       let params = this.getInPayMent.orderIds;
+      this.paying();
       console.log(params);
       if (this.payType === alipay) {
         pay("alipay", params, () => {
           this.finishCb();
+          this.PayAc();
         });
       }
       if (this.payType === wxpay) {
         console.log(params);
         pay("wxpay", params, () => {
           this.finishCb();
+          this.PayAc();
         });
       }
+    },
+    paying() {
+      this.payText = "支付中...";
+      this.disabled = true;
+      this.loading = true;
+    },
+    PayAc() {
+      this.payText = "支付成功";
+      this.disabled = false;
+      this.loading = false;
     },
     finishCb() {
       Dialog({
         message: "支付成功",
         beforeClose: (action, done) => {
+          this.PayAc();
           this.$router.replace({
             path: "/user/order/2"
           });

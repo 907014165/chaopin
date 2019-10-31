@@ -71,7 +71,7 @@ export default {
   },
   created() {
     this._getCategoryList();
-    listenBack();
+    //listenBack();
     //this._getBrands()
   },
   mounted() {

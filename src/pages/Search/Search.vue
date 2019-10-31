@@ -88,7 +88,7 @@
           </div>
         </Scroll>
       </transition>
-      <no-result v-show="noResult">抱歉，没找到你想要的商品</no-result>
+      <no-result v-show="noResult&&!isSearchIng">抱歉，没找到你想要的商品</no-result>
 
       <div class="loading-wrapper" v-show="isSearchIng">
         <van-loading size="24px" vertical>加载中...</van-loading>
@@ -116,6 +116,11 @@ import { mapGetters, mapMutations } from "vuex";
 import { Icon, Loading } from "vant";
 export default {
   name: "search",
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.init();
+    });
+  },
   data() {
     return {
       value: "", //搜素关键词
@@ -132,7 +137,6 @@ export default {
       currentPage: 1,
       deleteShow: true, //删除图标显示
       isSearchIng: false, //是否正在搜素
-      pullUpText: "上拉加载更多...",
       noResult: false
     };
   },
@@ -158,6 +162,13 @@ export default {
   methods: {
     back() {
       this.$router.goBack();
+    },
+    //初始化数据
+    init() {
+      this.value = "";
+      this.goodsList = [];
+      this.currentPage = 1;
+      //this._getGoodsListByKeyWords();
     },
     setQuery(key) {
       this.value = key;

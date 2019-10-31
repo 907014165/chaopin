@@ -135,9 +135,11 @@ export default {
           });
           this.setAddressList(this.addrList);
         }
-        this.$nextTick(() => {
-          this.setDefaultAddr();
-        });
+        if (this.addrList.length) {
+          this.$nextTick(() => {
+            this.setDefaultAddr();
+          });
+        }
       });
     },
     ...mapMutations({

@@ -3,11 +3,11 @@
     <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
       <div class="user-profile">
         <div class="background">
-          <img :src="getUserInfo && getUserInfo.avatar ? getUserInfo.avatar : defaultAvatar" alt />
+          <img :src="getUserInfo && getUserInfo.fullAvatar ? getUserInfo.fullAvatar : defaultAvatar" alt />
         </div>
         <div class="user-profile-avatar">
           <router-link to="/user/userinfo">
-            <img :src="getUserInfo && getUserInfo.avatar ? getUserInfo.avatar : defaultAvatar" />
+            <img :src="getUserInfo && getUserInfo.fullAvatar ? getUserInfo.fullAvatar : defaultAvatar" />
           </router-link>
         </div>
         <div class="user-profile-username">
@@ -154,7 +154,7 @@ export default {
   created() {
     this._getOrderCount();
     this._getUserInfo();
-    listenBack();
+    //listenBack();
   },
   computed: {
     ...mapGetters({

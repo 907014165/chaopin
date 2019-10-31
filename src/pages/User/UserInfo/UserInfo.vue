@@ -6,7 +6,7 @@
       <template slot="title">
         <div class="user">
           <img
-            :src="getUserInfo.avatar?getUserInfo.avatar:`http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100`"
+            :src="getUserInfo.fullAvatar?getUserInfo.fullAvatar:`http://static.iocoder.cn/1553652151601.jpg?imageView2/2/w/308/h/210/interlace/1/q/100`"
             class="user-avatar"
           />
           <span class="username">{{ getUserInfo.memberName }}</span>

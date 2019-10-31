@@ -64,24 +64,30 @@ export default {
           mobile: this.username,
           password: this.password
         };
-        login(params).then(res => {
-          console.log(res);
-          Toast.clear();
-          if (res.code === 0) {
-            let token = res.data;
-            console.log(token);
-            this.setToken(token);
-            console.log(this.$route);
-            let redirect = this.$route.query.redirect || "/home";
-            this.$router.replace({
-              path: redirect
-            });
-          } else {
+        login(params)
+          .then(res => {
+            console.log(res);
+            Toast.clear();
+            if (res.code === 0) {
+              let token = res.data;
+              console.log(token);
+              this.setToken(token);
+              console.log(this.$route);
+              let redirect = this.$route.query.redirect || "/home";
+              this.$router.replace({
+                path: redirect
+              });
+            } else {
+              Toast({
+                message: res.message
+              });
+            }
+          })
+          .catch(err => {
             Toast({
-              message: res.message
+              message: "登录超时"
             });
-          }
-        });
+          });
       } else {
         let params = {
           mobile: this.username,

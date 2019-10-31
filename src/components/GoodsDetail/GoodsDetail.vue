@@ -156,6 +156,28 @@ import data from "./data.js";
 import { listenBack } from "common/js/app.js";
 Vue.use(ImagePreview);
 export default {
+  name: "goodsDetail",
+  beforeRouteEnter(to, from, next) {
+    //console.log(to);
+    //特殊处理 处理用户从收藏点击商品 不能获取相应的用户信息
+
+    if (
+      from.path.indexOf("user") != -1 ||
+      from.path.indexOf("commentCentre") != -1
+    ) {
+      next(vm => {
+        vm.imgList = [];
+        if (to.params.spuid) {
+          vm._getSkuById();
+          vm._getGoodsById();
+        }
+      });
+    } else {
+      next(vm => {
+        vm.imgList = [];
+      });
+    }
+  },
   data() {
     return {
       current: 0,
@@ -163,9 +185,7 @@ export default {
       checkLoad: true,
       isFavorite: false,
       sku: {},
-      goods_info: {
-        
-      },
+      goods_info: {},
       goods: {
         goodsId: 946755,
         title: "美国伽力果（约680g/3个）",
@@ -426,6 +446,17 @@ export default {
           this.goods1 = res.data;
           res.data.bodyList.forEach(img => {
             this.imgList.push(this.getImgSrc(img));
+          });
+        } else {
+          Toast({
+            type: "fail",
+            message: res.message,
+            duration: 800,
+            onClose: () => {
+              this.$router.replace({
+                path: "/home"
+              });
+            }
           });
         }
       });

@@ -133,7 +133,7 @@ export default {
       result: [],
       isSelectAll: this.SelectAll,
       skuList: this.seller.skuList,
-      selectAllShow: false, //负责全选按钮的样式
+      selectAllShow: false //负责全选按钮的样式
     };
   },
   props: {
@@ -297,7 +297,7 @@ export default {
       } else {
         console.log("取消全选");
         //如果全选了 就全部清空
-        if(this.result.length === this.skuList.length){
+        if (this.result.length === this.skuList.length) {
           this.result.splice(0);
         }
         this.selectAllShow = false;

@@ -3,7 +3,7 @@
     <nav-bar :title="'商家入驻'" @back="back"></nav-bar>
     <van-cell-group title="联系方式">
       <van-field v-model="userName" label="姓名" placeholder="请输入您的姓名" required />
-      <van-field v-model="userMobile" label="电话号码" placeholder="请输入电话号码" required />
+      <van-field v-model="userMobile" label="电话号码" type="tel" placeholder="请输入电话号码" required />
       <van-field v-model="area" label="所在地区" placeholder="填写你所在的地区" required />
     </van-cell-group>
     <van-cell-group title="入驻信息">
@@ -48,10 +48,11 @@ export default {
       };
       console.log(params);
       shopEnter(params).then(res => {
+        console.log(res);
         if (res.code === 0 && res.data) {
           Toast({
             type: "success",
-            duration: 800,
+            duration: 1200,
             message: "已提交申请,日后平台管理员会与您联系",
             onClose: () => {
               this.$router.replace({
