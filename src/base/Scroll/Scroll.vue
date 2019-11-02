@@ -60,7 +60,7 @@ export default {
   props: {
     probeType: {
       type: Number,
-      default: 1
+      default: 3
     },
     //是否 开启点击事件
     click: {
@@ -118,7 +118,6 @@ export default {
       //初始化betterScroll
       this.scroll = new BScroll(this.$refs.wrapper, {
         probeType: this.probeType,
-        disableTouch: false,
         click: this.click,
         scrollY: true,
         observeDom: true,
@@ -128,6 +127,9 @@ export default {
           bottom: true,
           left: true,
           right: true
+        },
+        preventDefaultException:{
+          tagName: /^(INPUT|TEXTAREA|BUTTON|SELECT|AUDIO|DIV|IMG)$/
         },
         pullDownRefresh: {
           threshold: THRESHOLD,

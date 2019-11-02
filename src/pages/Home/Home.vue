@@ -39,6 +39,9 @@
               :to="{path:'/searchCategory',query:{goodsClassId:item.goodsClassId,title:item.className}}"
             />
           </van-grid>
+          <div class="lead-coupon" @click="toTakeCoupon">
+            <img src="./hongbao.jpg" alt />
+          </div>
           <banner v-for="(ad,index) in advertList" :key="index" @click="goToDetail(ad)">
             <img v-lazy="ad.full" alt @load="refreshScroll" />
           </banner>
@@ -133,6 +136,12 @@ export default {
       setTimeout(() => {
         finishPullDown();
       }, 300);
+    },
+    //
+    toTakeCoupon() {
+      this.$router.push({
+        name: "pendingTakeCoupon"
+      });
     },
     //监听 scroll的变化
     //因为和scroll组件和pullrefresh冲突 所以有了这么一个恶心的方法
@@ -378,6 +387,14 @@ export default {
             .after-trigger {
               height: 24px;
               text-align: center;
+            }
+          }
+
+          .lead-coupon {
+            font-size: 0;
+
+            img {
+              width: 100%;
             }
           }
         }

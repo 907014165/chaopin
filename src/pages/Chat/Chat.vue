@@ -25,7 +25,7 @@
                   @touchmove="gtouchmove"
                   @touchend="gtouchend"
                 >
-                  <div v-html="row.msg.content"></div>
+                  <div v-html="row.msg.content" class="textmsg"></div>
                 </div>
                 <div class="bubble img" v-if="row.type=='img'">
                   <img
@@ -862,7 +862,9 @@ export default {
     },
     //开始触摸
     gtouchstart(event, index) {
-      this.timeOutEvent = setTimeout(() => {
+      this.timeOutEvent = setTimeout((e) => {
+        console.log('touchstart')
+        event.preventDefault();
         this.longPress(event, index);
       }, 500);
     },

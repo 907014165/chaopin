@@ -115,6 +115,12 @@ const mutations = {
     [types.SET_USER_INFO](state, userinfo) {
         state.userInfo = userinfo
     },
+    [types.REMOVE_SOCKET](state) {
+        state.socket = null
+    },
+    [types.SET_RECONNECTION](state, params) {
+        state.reconnection = params
+    },
     //设置未读下次
     [types.SET_UNREAD_MESSAGE](state) {
         state.UnreadMessage++

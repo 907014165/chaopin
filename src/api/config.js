@@ -28,8 +28,7 @@ axios.interceptors.response.use(
             console.log(error)
             switch (error.response.status) {
                 case 401:
-                    store.commit('REMOVE_TOKEN')
-                    store.commit('REMOVE_THIRD_LOGIN_INFO')
+                    store.dispatch('LOGIN_OUT')
                     Toast('用户身份过期...')
                     router.currentRoute.path !== 'login' &&
                         router.replace({

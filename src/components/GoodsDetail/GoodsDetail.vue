@@ -174,7 +174,7 @@ export default {
       });
     } else {
       next(vm => {
-        vm.imgList = [];
+        //vm.imgList = [];
       });
     }
   },

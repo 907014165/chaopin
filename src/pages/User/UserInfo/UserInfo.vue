@@ -31,7 +31,7 @@
 <script>
 import NavBar from "base/NavBar/NavBar";
 import { Cell, CellGroup, Button } from "vant";
-import { mapMutations, mapGetters } from "vuex";
+import { mapMutations, mapGetters, mapActions } from "vuex";
 
 export default {
   data() {
@@ -49,7 +49,11 @@ export default {
     },
     //退出登录
     loginOut() {
-      this.removeToken();
+      /* this.removeToken();
+      this.removeSocket();
+      this.removeThirdLoginInfo(); */
+
+      this.userLoginOut();
       this.$router.replace({
         path: "/home"
       });
@@ -60,7 +64,12 @@ export default {
       });
     },
     ...mapMutations({
-      removeToken: "REMOVE_TOKEN"
+      removeToken: "REMOVE_TOKEN",
+      removeSocket: "REMOVE_SOCKET",
+      removeThirdLoginInfo: "REMOVE_THIRD_LOGIN_INFO"
+    }),
+    ...mapActions({
+      userLoginOut: "LOGIN_OUT"
     })
   },
   components: {

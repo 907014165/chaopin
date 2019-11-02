@@ -2,8 +2,8 @@ import axios from './config'
 //获得用户收藏列表
 import { URL } from './config'
 
-/* const baseUrl = 'http://192.168.1.53:9090'
-const baseUrl1 = 'http://192.168.1.66:21002' */
+//const baseUrl = 'http://192.168.1.53:9090'
+//const baseUrl1 = 'http://192.168.1.66:21002'
 
 const baseUrl = `${URL}:9090`
 const baseUrl1 = `${URL}:21002`

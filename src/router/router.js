@@ -42,6 +42,11 @@ let routes = [
             ]
           }
         ]
+      },
+      {
+        path: 'pendingTakeCoupon',
+        name: 'pendingTakeCoupon',
+        component: () => import('components/Coupon/CouponList.vue')
       }
     ]
   },
@@ -265,6 +270,11 @@ let routes = [
     path: '/testRefundItem',
     name: 'testRefundItem',
     component: () => import('pages/Refund/RefundItem.vue')
+  },
+  {
+    path: '/testCouponItem',
+    name: 'testCouponItem',
+    component: () => import('components/Coupon/CouponItem.vue')
   },
   {
     path: '/toPay',

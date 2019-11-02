@@ -33,16 +33,6 @@
       />
     </van-cell-group>
     <van-coupon-cell :coupons="coupons" :chosen-coupon="chosenCoupon" @click="showList = true" />
-    <!-- <van-radio-group v-model="radio">
-      <van-cell-group>
-        <van-cell title="支付宝支付" clickable @click="radio = '1'" icon="alipay">
-          <van-radio slot="right-icon" name="1" />
-        </van-cell>
-        <van-cell title="微信支付" clickable @click="radio = '2'" icon="wechat">
-          <van-radio slot="right-icon" name="2" />
-        </van-cell>
-      </van-cell-group>
-    </van-radio-group>-->
     <van-submit-bar
       class="comfir-submit"
       :price="totlePriceWithCoupon===0?totlePrice:totlePriceWithCoupon*100"
@@ -54,6 +44,7 @@
         :coupons="coupons"
         :chosen-coupon="chosenCoupon"
         :show-exchange-bar="false"
+        :disabled-coupons="disabledCoupons"
         @change="onChange"
         @exchange="onExchange"
       />
@@ -71,7 +62,7 @@ import {
   createOrderByShopCart,
   getOrderPrice
 } from "api/order.js";
-import { getUsefulCoupon } from "api/coupon.js";
+import { getUsefulCoupon, getUnUserfulCoupon } from "api/coupon.js";
 import { getDefaultAddr } from "api/user.js";
 import AddressInfo from "common/js/addressInfo.js";
 import {
@@ -87,7 +78,6 @@ import {
   Toast
 } from "vant";
 import { mapGetters, mapMutations } from "vuex";
-
 export default {
   data() {
     return {
@@ -100,6 +90,7 @@ export default {
       isSeller: false,
       showList: false,
       coupons: [],
+      disabledCoupons: [],
       currentCouponsId: -1,
       disabledCoupons: [],
       couponsDescPrice: 0,
@@ -114,6 +105,7 @@ export default {
   },
   mounted() {
     this._getUsefulCoupon();
+    this._getUnUserfulCoupon();
     this.errBack();
   },
   computed: {
@@ -236,6 +228,7 @@ export default {
     onSubmit() {
       console.log(this.order);
       console.log(this.$route);
+
       if (!this.addr.id) {
         Toast({
           type: "fail",
@@ -264,6 +257,8 @@ export default {
             this.$router.push({
               name: "toPay"
             });
+          } else {
+            Toast.fail(res.message);
           }
           console.log(res);
         });
@@ -301,6 +296,11 @@ export default {
               name: "toPay"
             });
             this.setIsBuyGoods(true);
+          } else {
+            //console.log("fdwaj");
+            //console.log(res.message);
+            //alert(res.message)
+            Toast.fail(res.message);
           }
         });
       }
@@ -313,13 +313,14 @@ export default {
       this.$router.push({
         path: "/user/address",
         query: {
-          isSelect: true
+          isSelect: true,
+          id: this.addr.id
         }
       });
     },
-    init(res) {
+    init(res, couponList) {
       res.data.forEach(item => {
-        this.coupons.push({
+        couponList.push({
           id: item.couponId,
           name: item.name,
           condition: item.condition,
@@ -358,10 +359,19 @@ export default {
     //获取有用的优惠券列表
     _getUsefulCoupon() {
       getUsefulCoupon(this.CouponParams).then(res => {
-        console.log(res);
+        //console.log(res);
         if (res.code === 0) {
-          this.init(res);
+          this.init(res, this.coupons);
         }
+      });
+    },
+    //获取不可用的优惠券列表
+    _getUnUserfulCoupon() {
+      getUnUserfulCoupon(this.CouponParams).then(res => {
+        if (res.code === 0) {
+          this.init(res, this.disabledCoupons);
+        }
+        console.log(res);
       });
     },
     //获取订单价格

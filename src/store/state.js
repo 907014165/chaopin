@@ -16,6 +16,7 @@ const state = {
         //merberId: '18065855907'
     },
     socket: null,
+    reconnection:false,
     UnreadMessage: 0,
     ThirdloginInfo: null
 }

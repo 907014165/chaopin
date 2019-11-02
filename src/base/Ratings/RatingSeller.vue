@@ -65,7 +65,7 @@ import { Rate, ImagePreview } from "vant";
 import NavBar from "base/NavBar/NavBar";
 import Scroll from "base/Scroll/Scroll";
 import moment from "moment";
-import { isAndroid_ios } from 'common/js/util.js'
+import { isAndroid_ios } from "common/js/util.js";
 import { getRatings } from "api/goods.js";
 import { getComments } from "api/comment.js";
 import GoodsComment from "common/js/goodsComment.js";
@@ -117,10 +117,7 @@ export default {
     //this._getRatings();
     this.ratings.splice(0);
     this._getComments(null, () => {
-      setTimeout(() => {
-        console.log("update");
-        this.ratings = this.ratings.slice(0);
-      }, 300);
+      
     });
   },
   mounted() {},
@@ -195,11 +192,7 @@ export default {
     },
     loadMore(finishPullup) {
       this.currentPage++;
-      this._getComments(finishPullup, () => {
-        setTimeout(() => {
-          this.ratings = this.ratings.slice(0);
-        }, 300);
-      });
+      this._getComments(finishPullup, () => {});
     },
     _getComments(finishPullup, scrollCallBack) {
       let params = {
@@ -249,7 +242,7 @@ export default {
       if (isAndroid_ios()) {
         date.setHours(date.getHours() - 8);
       }
-      return moment(date).format("YYYY-MM-DD HH:mm:ss");
+      return moment(date).format("YYYY-MM-DD");
     }
   },
   watch: {
@@ -265,12 +258,7 @@ export default {
       this.currentPage = 1;
       this.hasMore = true;
       this.ratings.splice(0);
-      this._getComments(null, () => {
-        setTimeout(() => {
-          console.log("dd");
-          this.ratings = this.ratings.slice(0);
-        }, 300);
-      });
+      this._getComments(null, () => {});
     }
   },
   components: {

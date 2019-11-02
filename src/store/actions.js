@@ -8,6 +8,7 @@ const actions = {
             //头像
             //id
         };
+        state.reconnection = false
         //客户端上线
         state.socket.on("connect", () => {
             state.socket.emit("login", msg);
@@ -17,6 +18,13 @@ const actions = {
             console.log(msg);
             commit('SET_UNREAD_MESSAGE');
         });
+    },
+    LOGIN_OUT: function ({ commit, state }, payload) {
+        commit('REMOVE_TOKEN')
+        commit('REMOVE_THIRD_LOGIN_INFO')
+        commit('REMOVE_SOCKET')
+        commit('REMOVE_THIRD_LOGIN_INFO')
+        commit('SET_RECONNECTION', true)
     }
 }
 export default actions

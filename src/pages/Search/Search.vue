@@ -21,6 +21,9 @@
               class="item"
               :key="index"
               @click="setQuery(item.keyword)"
+              @touchstart="gtouchstart($event,index)"
+              @touchmove="gtouchmove"
+              @touchend="gtouchend"
             >
               <span>{{ item.keyword }}</span>
             </li>
@@ -163,6 +166,25 @@ export default {
     back() {
       this.$router.goBack();
     },
+    gtouchstart(event, index) {
+      this.timeOutEvent = setTimeout(e => {
+        console.log("touchstart");
+      }, 500);
+    },
+    //手释放，如果在500毫秒内就释放，则取消长按事件，此时可以执行onclick应该执行的事件
+    gtouchend(item) {
+      console.log("touchend");
+      clearTimeout(this.timeOutEvent); //清除定时器
+      if (this.timeOutEvent != 0) {
+        //这里写要执行的内容（尤如onclick事件）
+      }
+      return false;
+    },
+    //如果手指有移动，则取消所有事件，此时说明用户只是要移动而不是长按
+    gtouchmove() {
+      clearTimeout(this.timeOutEvent); //清除定时器
+      this.timeOutEvent = 0;
+    },
     //初始化数据
     init() {
       this.value = "";
@@ -242,7 +264,9 @@ export default {
     },
     _getGoodsListByKeyWords() {
       console.log("search");
-      this.setSearchHistory(this.value);
+      if (this.value) {
+        this.setSearchHistory(this.value);
+      }
       this.isSearchIng = true;
       this.currentPage = 1;
       this.goodsList.splice(0);

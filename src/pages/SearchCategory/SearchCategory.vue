@@ -177,6 +177,7 @@ export default {
     },
     _getMoreGoodsList(callback) {
       let params = {
+        brandId: this.$route.query.brandId,
         goodsClassId: this.$route.query.goodsClassId,
         current: this.currentPage
       };

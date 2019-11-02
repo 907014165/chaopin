@@ -26,6 +26,8 @@ export const userInfo = state => state.userInfo
 
 export const socket = state => state.socket
 
+export const reconnection = state => state.reconnection
+
 export const UnreadMessage = state => state.UnreadMessage
 
 export const ThirdloginInfo = state => state.ThirdloginInfo

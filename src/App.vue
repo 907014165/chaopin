@@ -32,7 +32,8 @@ export default {
   computed: {
     ...mapGetters({
       getUserInfo: "userInfo",
-      getToken: "token"
+      getToken: "token",
+      reconnection: "reconnection"
     })
   },
   methods: {
@@ -58,6 +59,16 @@ export default {
         console.log("已经获取 用户信息");
         this.connectServer();
         this.connectOnece = false;
+      }
+      if (this.reconnection) {
+        console.log('重新连接')
+        this.connectServer();
+      }
+    },
+    $route(to, from) {
+      if (from.path.indexOf("login") != -1) {
+        console.log('登录过来')
+        this.init();
       }
     }
   }
