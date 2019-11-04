@@ -8,7 +8,7 @@
           </div>
           <van-swipe class="goods-swipe" :autoplay="3000" @change="onChange" v-if="goods1">
             <van-swipe-item v-for="(thumb,index) in goods1.album" :key="index">
-              <img :src="thumb" />
+              <img :src="thumb" @click="showImgPreview(goods1.album,index)"/>
             </van-swipe-item>
             <div class="custom-indicator" slot="indicator">{{ current + 1 }}/{{goods1.album.length}}</div>
           </van-swipe>
@@ -80,7 +80,7 @@
           <van-divider>商品详情展示</van-divider>
           <!-- 商品图片列表 -->
           <banner v-for="(imgSrc,index) in imgList" :key="index">
-            <img :src="imgSrc" alt @load="refreshScroll" @click="showImgPreview(index)" />
+            <img :src="imgSrc" alt @load="refreshScroll" @click="showImgPreview(imgList,index)" />
           </banner>
         </div>
       </scroll>
@@ -222,7 +222,7 @@ export default {
         for (let i = 0; i < this.sku.tree.length; i++) {
           //console.log(this.initialSku[`s${i + 1}`]);
           let s = `s${i + 1}`;
-          console.log(s);
+          //console.log(s);
           str += `${this.sku.tree[i].v[this.initialSku[s] - 1].name} `;
         }
         //return `已选  ${this.sku.tree[0].v[this.initialSku.s1 - 1].name},${this.sku.tree[1].v[this.initialSku.s2 - 1].name}`;
@@ -261,7 +261,7 @@ export default {
   },
   methods: {
     scrollRefresh() {
-      console.log("scroll refresh");
+      //console.log("scroll refresh");
       this.$refs.scroll.refresh();
     },
     refreshScroll() {
@@ -277,9 +277,9 @@ export default {
       let img = this.parseDom(arg);
       return img[0].attributes.src.value;
     },
-    showImgPreview(startIndex) {
+    showImgPreview(imgList,startIndex) {
       ImagePreview({
-        images: this.imgList,
+        images: imgList,
         startPosition: startIndex,
         onClose() {
           // do something
@@ -314,7 +314,7 @@ export default {
       });
     },
     sorry() {
-      Toast.success("暂无后续逻辑~");
+      //Toast.success("暂无后续逻辑~");
     },
     clickShopCart() {
       //Toast.success("加入购物车，暂无后续逻辑~");
@@ -381,7 +381,7 @@ export default {
       };
       console.log(params);
       addShopCart(params).then(res => {
-        console.log(res);
+        //console.log(res);
         if (res.code === 0) {
           //console.log(res.data)
           if (res.data) {
@@ -399,14 +399,14 @@ export default {
     },
     //当选择的规格发生改变时的回调函数
     currentSelect(data) {
-      console.log(data);
+      //console.log(data);
       this.initialSku.s1 = data.selectedSku.s1 /* ? data.selectedSku.s1 : 1 */;
       this.initialSku.s2 = data.selectedSku.s2 /* ? data.selectedSku.s2 : 1 */;
     },
     //切换喜欢收藏按钮
     _toggleFavorite() {
       this.isFavorite = !this.isFavorite;
-      console.log(this.isFavorite);
+      //console.log(this.isFavorite);
       //console.log(this.goods1)
       let params = {
         goodsCommonId: this.goods1.goodsCommonId
@@ -414,12 +414,12 @@ export default {
       if (this.isFavorite) {
         //this._
         toggleFavorite(params).then(res => {
-          console.log(res.data);
+          //console.log(res.data);
           Toast.success("收藏成功");
         });
       } else {
         toggleFavorite(params).then(res => {
-          console.log(res.data);
+          //console.log(res.data);
           Toast.success("取消收藏");
         });
       }
@@ -481,7 +481,7 @@ export default {
       if (from.name === "shopcart") {
         this._getGoodsById();
         this._getSkuById();
-        console.log("fsa");
+        //console.log("fsa");
       }
     }
   },

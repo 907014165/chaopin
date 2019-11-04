@@ -5,7 +5,7 @@
       <div class="header van-hairline--bottom">
         <div class="order-info">
           <div class="order-staus">{{ refundState }}</div>
-          <div class="order-desc"></div>
+          <div class="order-desc">{{ refundInfo.adminMessage }}</div>
         </div>
       </div>
     </template>
@@ -25,7 +25,8 @@
                 placeholder="请填写快递单号"
                 v-show="1<=expStep"
               >
-                <van-button slot="button" size="small" type="primary" @click="_getExpressCompany">确定</van-button>
+              <!-- <van-button slot="button" size="small" type="primary" @click="_getExpressCompany">确定</van-button> -->
+                <van-button slot="button" size="small" type="primary" @click="subExp">确定</van-button>
               </van-field>
               <van-field
                 v-model="expName"
@@ -46,7 +47,7 @@
           <div class="content-footer" v-else>
             <van-button plain hairline type="danger" size="small" @click="updataRefund">修改申请</van-button>
             <van-button plain hairline type="default" size="small" @click="deleteRefund">撤销申请</van-button>
-            <van-button plain hairline type="default" size="small">客服介入</van-button>
+            <van-button plain hairline type="default" size="small" @click="kefu">客服介入</van-button>
           </div>
         </div>
       </div>
@@ -58,7 +59,7 @@
         <div class="info-goods">
           <van-card
             :title="refundInfo.goodsName"
-            :desc="``"
+            :desc="spec(refundInfo.spec)"
             :thumb="refundInfo.full"
             :num="refundInfo.goodsNum"
           />
@@ -108,7 +109,7 @@ import {
 } from "vant";
 import { mapMutations } from "vuex";
 
-//将规格的json字符串转换为自己想要的 字符串
+//将规格的json字符串转换为自己想要的 字符串  后端不给写 给我骂后端
 function spec(treeStr) {
   let specStr = "";
   let specObj = JSON.parse(treeStr);
@@ -122,7 +123,7 @@ function spec(treeStr) {
     tmp = tmp.substring(0, tmp.length - 1);
     specStr += tmp + " ";
   }
-  console.log(specStr);
+  //console.log(specStr);
   return specStr;
 }
 
@@ -150,29 +151,49 @@ export default {
   },
   computed: {
     refundState() {
-      if (this.refundInfo.isPay) {
-        return "退款成功";
+      if (this.refundInfo.refundType === 1) {
+        if (this.refundInfo.isPay) {
+          return "退款成功";
+        } else {
+          return this.refundInfo.refundState === 1
+            ? "请等待商家处理"
+            : this.refundInfo.refundState === 2
+            ? "商家已同意申请"
+            : "商家已拒绝";
+        }
       } else {
-        return this.refundInfo.sellerState === 1
-          ? "请等待商家处理"
-          : this.refundInfo.sellerState === 2
-          ? "商家已同意申请"
-          : "商家已拒绝";
+        if (this.refundInfo.isPay) {
+          return "退款成功";
+        } else {
+          return this.refundInfo.sellerState === 1
+            ? "请等待商家处理"
+            : this.refundInfo.sellerState === 2
+            ? "商家已同意申请"
+            : "商家已拒绝";
+        }
       }
     },
     refundState1() {
       if (this.refundInfo.refundType === 1) {
-        return this.refundInfo.sellerState === 1
-          ? "请等待商家处理"
-          : this.refundInfo.sellerState === 2
-          ? "商家已同意，请耐心等待"
-          : "商家已拒绝";
+        if (this.refundInfo.isPay) {
+          return "退款成功";
+        } else {
+          return this.refundInfo.refundState === 1
+            ? "请等待商家处理"
+            : this.refundInfo.refundState === 2
+            ? "商家已同意申请"
+            : "商家已拒绝";
+        }
       } else {
-        return this.refundInfo.sellerState === 1
-          ? "请等待商家处理"
-          : this.refundInfo.sellerState === 2
-          ? "商家已同意退款申请,请填写快递单号"
-          : "商家已拒绝";
+        if (this.refundInfo.isPay) {
+          return "退款成功";
+        } else {
+          return this.refundInfo.sellerState === 1
+            ? "请等待商家处理"
+            : this.refundInfo.sellerState === 2
+            ? "商家已同意退款申请,请填写快递单号"
+            : "商家已拒绝";
+        }
       }
     }
   },
@@ -189,11 +210,27 @@ export default {
     toggleShow() {
       this.show = !this.show;
     },
+    spec(treeStr) {
+      let specStr = "";
+      let specObj = JSON.parse(treeStr);
+      //console.log(specObj)
+      for (let i = 0; i < specObj.length; i++) {
+        let tmp = "";
+        for (let key in specObj[i]) {
+          //console.log(1)
+          tmp += specObj[i][key] + ":";
+        }
+        tmp = tmp.substring(0, tmp.length - 1);
+        specStr += tmp + " ";
+      }
+      //console.log(specStr);
+      return specStr;
+    },
     subExp() {
       let params = {
         reExpressId: this.simpleName,
-        reExpressName: this.expName,
-        reInvoiceNo: this.expressNo,
+        reExpressName: '',
+        reInvoiceNo: 'auto',
         refundId: this.refundInfo.refundId
       };
       this._subRefundExpNo(params, () => {
@@ -204,6 +241,12 @@ export default {
         });
       });
       console.log(params);
+    },
+    kefu() {
+      console.log("聯繫客服");
+      this.$router.replace({
+        path: "/chat"
+      });
     },
     onSelect(item) {
       console.log(item);
@@ -255,14 +298,14 @@ export default {
           } else {
             Toast({
               type: "fail",
-              message: "提交失败",
+              message: res.message,
               duration: 800
             });
           }
         } else {
           Toast({
             type: "fail",
-            message: "提交失败",
+            message: res.message,
             duration: 800
           });
         }

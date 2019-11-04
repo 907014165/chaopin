@@ -7,7 +7,7 @@
         </div>
         <div class="user-profile-avatar">
           <router-link to="/user/userinfo">
-            <img :src="getUserInfo && getUserInfo.fullAvatar ? getUserInfo.fullAvatar : defaultAvatar" />
+            <img :src="getUserInfo && getUserInfo.fullAvatar ? getUserInfo.fullAvatar : defaultAvatar" style="object-fit: cover;"/>
           </router-link>
         </div>
         <div class="user-profile-username">
@@ -336,6 +336,7 @@ export default {
     &-avatar {
       padding-top: 30px;
       padding-bottom: 5px;
+      object-fit: cover;
 
       img {
         width: 65px;

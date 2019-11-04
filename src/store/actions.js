@@ -1,6 +1,6 @@
 const actions = {
     CONNECT_SERVER: function ({ commit, state }, payload) {
-        state.socket = require("socket.io-client")("http://218.193.110.247:9010", {
+        state.socket = require("socket.io-client")("http://218.193.110.247:9010?token=Bearer "+state.token, {
             transports: ["websocket", "polling"]
         });
         let msg = {

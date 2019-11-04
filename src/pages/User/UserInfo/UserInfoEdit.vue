@@ -121,7 +121,8 @@ export default {
     },
     //简单的图片上传检测
     beforeRead(file) {
-      if (file.type !== "image/jpeg") {
+      if (file.type !== "image/jpeg" && file.type !== "image/png") {
+        console.log(file.type)
         Toast("请上传 jpg 格式图片");
         return false;
       }
@@ -207,6 +208,7 @@ export default {
         height: 100px;
         width: 100px;
         border-radius: 50%;
+        object-fit: cover;
       }
 
       .edit-text {

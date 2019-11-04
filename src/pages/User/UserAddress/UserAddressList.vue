@@ -25,7 +25,7 @@ console.log(myAreaList);
 export default {
   data() {
     return {
-      chosenAddressId: this.$route.query.id,
+      chosenAddressId: this.$route.query.id+'',
       isSelect: this.$route.query.isSelect ? true : false,
       list: myAreaList,
       addrList: []

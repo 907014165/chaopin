@@ -29,9 +29,12 @@
                 </div>
                 <div class="bubble img" v-if="row.type=='img'">
                   <img
-                    :src="row.msg.url"
+                    v-lazy="row.msg.url"
                     @click="showPreviewImg(row.msg.url)"
                     @load="imgLoad(row.InSending)"
+                    @touchstart="gtouchstart($event,index)"
+                    @touchmove="gtouchmove"
+                    @touchend="gtouchend"
                     alt
                   />
                 </div>
@@ -54,7 +57,7 @@
                 </div>
                 <div class="bubble img" v-if="row.type=='img'">
                   <img
-                    :src="row.msg.url"
+                    v-lazy="row.msg.url"
                     @click="showPreviewImg(row.msg.url)"
                     @load="imgLoad(row.InSending)"
                     alt
@@ -859,11 +862,16 @@ export default {
         chat_type: "recall"
       });
       this.msgList.splice(this.recallIndex, 1, clientMsg);
+
+      //告诉服务器 客户端撤回消息
+      this.getSocket.emit("recall", {
+        id:this.msgList[this.recallIndex].id
+      });
     },
     //开始触摸
     gtouchstart(event, index) {
-      this.timeOutEvent = setTimeout((e) => {
-        console.log('touchstart')
+      this.timeOutEvent = setTimeout(e => {
+        console.log("touchstart");
         event.preventDefault();
         this.longPress(event, index);
       }, 500);
@@ -886,6 +894,8 @@ export default {
     longPress(event, index) {
       console.log("消息撤回的下标", index);
       this.longPressDomShow = true;
+      let currentTarget = event.currentTarget
+      console.log(currentTarget)
       this.$nextTick(() => {
         this.recallIndex = index;
         this.timeOutEvent = 0;
@@ -900,28 +910,10 @@ export default {
         cehui.style.top = `${offsetTop - cehuiClientHeight - 10}px`;
       });
 
+      /* 告訴客服客戶端撤回消息 */
+      
+
       console.log(event);
-
-      /* let element = event.path.find(item => {
-        //if()
-        return item.className == "bubble";
-      }); */
-      //console.log(element);
-
-      //console.log(offsetLeft, "left");
-      //console.log(offsetTop, "top");
-
-      //let clientWidth = element.clientWidth;
-
-      //console.log(clientWidth);
-      //获取content dom 元素 取它Y轴的偏移量
-      /* let contentDom = this.$refs.scroll.$el.querySelector(".scroll-content-s");
-      let transformArr = contentDom.style.transform.split(" ");
-      let dirY = parseInt(transformArr[1].replace(/[^0-9]/gi, "")); */
-
-      //console.log(cehui);
-      /* cehui.style.left = `${offsetLeft}px`;
-      cehui.style.top = `${offsetTop - (dirY - 20)}px`; */
     },
     //设备震动
     vibrate() {
@@ -1131,32 +1123,7 @@ export default {
     // 发送消息
     sendMsg(content, type) {
       //实际应用中，此处应该提交长连接，模板仅做本地处理。
-      switch (type) {
-        case "text":
-          console.log(content);
-          let msgTxt = new ChatMsgServer({
-            type: "private",
-            avatar: this.getUserInfo.fullAvatar,
-            uid: "潮品客服",
-            content: content.content,
-            from_uid: this.getUserInfo.mobile,
-            chat_type: "text"
-          });
-          this.getSocket.emit("message", msgTxt);
-          break;
-        case "img":
-          let msgImg = new ChatMsgServer({
-            type: "private",
-            avatar: this.getUserInfo.fullAvatar,
-            uid: "潮品客服",
-            content: content.url,
-            from_uid: this.getUserInfo.mobile,
-            chat_type: "image"
-          });
-          console.log(msgImg);
-          this.getSocket.emit("message", msgImg);
-          break;
-      }
+
       var nowDate = new Date();
       /* let lastid = this.msgList[this.msgList.length - 1].id;
       lastid++; */
@@ -1171,6 +1138,35 @@ export default {
         msg: content,
         InSending: true
       });
+      switch (type) {
+        case "text":
+          console.log(content);
+          let msgTxt = new ChatMsgServer({
+            id:msg.id,
+            type: "private",
+            avatar: this.getUserInfo.fullAvatar,
+            uid: "潮品客服",
+            content: content.content,
+            from_uid: this.getUserInfo.mobile,
+            chat_type: "text"
+          });
+          this.getSocket.emit("message", msgTxt);
+          break;
+        case "img":
+          let msgImg = new ChatMsgServer({
+            id:msg.id,
+            type: "private",
+            avatar: this.getUserInfo.fullAvatar,
+            uid: "潮品客服",
+            content: content.url,
+            from_uid: this.getUserInfo.mobile,
+            chat_type: "image"
+          });
+          console.log(msgImg);
+          this.getSocket.emit("message", msgImg);
+          break;
+      }
+      
       console.log(msg);
       this.screenMsg(msg);
     },
@@ -1372,12 +1368,12 @@ export default {
     },
     _getChatMsgList(successCallBack) {
       let params = {
-        uid: this.getUserInfo.mobile,
+        /* uid: this.getUserInfo.mobile, */
         page: this.currentPage,
         size: this.pageSize
       };
       let paramsStr = JSON.stringify(params);
-      console.log(paramsStr);
+      //console.log(paramsStr);
       getChatMsgList(params)
         .then(res => {
           //console.log(res);

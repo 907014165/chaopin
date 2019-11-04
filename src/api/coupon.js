@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { URL } from './config'
-const baseUrl = "http://192.168.1.53:9093"
-//const baseUrl = `${URL}:9093`
+//const baseUrl = "http://192.168.1.53:9093"
+const baseUrl = `${URL}:9093`
 export function getCouponList(params) {
     const url = `${baseUrl}/member/coupon/listByStatus`
     return axios.get(url, {
@@ -33,7 +33,7 @@ export function getUnUserfulCoupon(params) {
 }
 
 export function canReceiveCoupons() {
-    const url = `http://192.168.1.53:9093/member/coupon/canReceiveCoupons`
+    const url = `${baseUrl}/member/coupon/canReceiveCoupons`
     return axios.get(url, {
     }).then(res => {
         return Promise.resolve(res.data)
@@ -41,7 +41,7 @@ export function canReceiveCoupons() {
 }
 
 export function getCoupon(data) {
-    const url = 'http://192.168.1.53:9093/member/coupon/add'
+    const url = `${baseUrl}/member/coupon/add`
     return axios({
         url: url,
         method: 'post',

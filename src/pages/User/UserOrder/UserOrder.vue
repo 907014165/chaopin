@@ -36,7 +36,7 @@
               </div>
             </sku-group>
           </scroll>
-          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
+          <no-result :type="1" v-show="!orderList.length&&!isLoading">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -72,7 +72,7 @@
               </div>
             </sku-group>
           </scroll>
-          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
+          <no-result :type="1" v-show="!orderList.length&&!isLoading">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -108,7 +108,7 @@
               </div>
             </sku-group>
           </scroll>
-          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
+          <no-result :type="1" v-show="!orderList.length&&!isLoading">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -144,7 +144,7 @@
               </div>
             </sku-group>
           </scroll>
-          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
+          <no-result :type="1" v-show="!orderList.length&&!isLoading">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -180,7 +180,7 @@
               </div>
             </sku-group>
           </scroll>
-          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
+          <no-result :type="1" v-show="!orderList.length&&!isLoading">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -215,7 +215,7 @@
               </div>
             </sku-group>
           </scroll>
-          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
+          <no-result :type="1" v-show="!orderList.length&&!isLoading">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -251,7 +251,7 @@
               </div>
             </sku-group>
           </scroll>
-          <no-result :type="1" v-show="!orderList.length">暂无相关订单</no-result>
+          <no-result :type="1" v-show="!orderList.length&&!isLoading">暂无相关订单</no-result>
           <div class="loading-wrapper" v-show="isLoading">
             <van-loading size="24px" vertical>加载中...</van-loading>
           </div>
@@ -663,7 +663,7 @@ export default {
     //0全部 1待付款 2待发货 3待收货 4已完成 5已取消
     //0:已取消 1:全部 10:未付款 20:已付款 30:已发货 40:已完成 50:已评价
     active(newval, oldval) {
-      this.orderList.splice(0);
+      this.orderList = [];
       this.currentPage = 1;
       this.hasMore = true;
       this.isLoading = true;

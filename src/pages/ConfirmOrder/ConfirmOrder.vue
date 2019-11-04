@@ -85,13 +85,13 @@ export default {
       seller: this.$route.query.seller,
       defaultAddr: null,
       message: "",
-      chosenCoupon: -1,
+      chosenCoupon: null,
       hasFooter: false,
       isSeller: false,
       showList: false,
       coupons: [],
       disabledCoupons: [],
-      currentCouponsId: -1,
+      currentCouponsId: null,
       disabledCoupons: [],
       couponsDescPrice: 0,
       totlePriceWithCoupon: 0,
@@ -240,9 +240,8 @@ export default {
       //用户立即股买
       if (this.order) {
         let params = {
-          activityId: null,
           buyNum: this.order.num,
-          couponId: null,
+          couponId: this.currentCouponsId,
           freightType: "fast",
           goodsId: this.order.skuId,
           memberAddressId: this.addr.id,
@@ -277,9 +276,8 @@ export default {
           memberAddressId: this.addr.id,
           orderAddDTOs: [
             {
-              activityId: null,
               cartIds: cartIdArr[0],
-              couponId: null,
+              couponId: this.currentCouponsId,
               freightType: "fast",
               remark: this.message
             }
@@ -418,7 +416,7 @@ export default {
   background: $color-background;
 
   .van-submit-bar {
-    bottom: 0;
+    bottom: 0 !important;
   }
 
   .van-radio-group {

@@ -11,7 +11,7 @@
       <template>
         <refund-item
           :refund-type="refund.refundType"
-          :refund-status="refund.sellerState"
+          :refund-status="refund.refundType===1?refund.refundState:refund.sellerState"
           :is-pay="refund.isPay"
           v-for="(refund,index) in refundList"
           @seeDetail="seeDetail(index)"
